@@ -1,0 +1,1 @@
+ Define los objetos que se usan para enviar y recibir datos (sin exponer las entidades).

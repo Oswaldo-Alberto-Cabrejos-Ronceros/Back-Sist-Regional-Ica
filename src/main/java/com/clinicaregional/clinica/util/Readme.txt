@@ -1,0 +1,1 @@
+Aquí pruebas funciones auxiliares como validadores o conversores.

@@ -1,0 +1,1 @@
+Accede a la base de datos usando interfaces JpaRepository.

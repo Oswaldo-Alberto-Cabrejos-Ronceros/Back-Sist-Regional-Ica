@@ -1,0 +1,1 @@
+Aquí van integraciones externas (como APIs de terceros).

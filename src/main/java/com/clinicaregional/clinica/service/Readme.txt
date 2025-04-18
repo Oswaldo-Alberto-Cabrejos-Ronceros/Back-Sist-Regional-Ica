@@ -1,0 +1,1 @@
+Declara la lógica del negocio en interfaces.

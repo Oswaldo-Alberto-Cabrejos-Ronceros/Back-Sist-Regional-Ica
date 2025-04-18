@@ -1,0 +1,1 @@
+Configura aspectos técnicos como CORS, seguridad, Swagger, etc

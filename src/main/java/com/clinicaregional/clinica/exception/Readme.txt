@@ -1,0 +1,1 @@
+Maneja los errores personalizados y sus respuestas.

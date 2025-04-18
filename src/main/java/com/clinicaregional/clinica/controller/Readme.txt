@@ -1,0 +1,1 @@
+Aquí pruebas que tus endpoints devuelvan lo correcto y manejen bien los errores.

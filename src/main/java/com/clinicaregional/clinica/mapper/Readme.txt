@@ -1,0 +1,1 @@
+Convierte entre entidades y DTOs.

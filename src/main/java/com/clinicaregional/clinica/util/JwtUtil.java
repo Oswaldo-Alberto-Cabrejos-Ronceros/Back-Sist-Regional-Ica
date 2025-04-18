@@ -41,17 +41,16 @@ public class JwtUtil {
 
 
     //para validar token
-    public boolean validateToken(String token, Authentication authentication) {
+    public boolean validateToken(String token) {
         try {
             //para verificar, si falla el token es invalido
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             //para verificar si el token expiro
             boolean isExpired = claims.getExpiration().before(new Date());
             String emailToken = claims.getSubject();
-            //obtenemos el email de autentication
-            String emailAuth = authentication.getPrincipal().toString();
+
             //no tiene que estar espirado y el email debe ser valido
-            return !isExpired && emailToken != null && !emailToken.trim().isEmpty() && emailToken.equals(emailAuth);
+            return !isExpired && emailToken != null && !emailToken.trim().isEmpty();
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }

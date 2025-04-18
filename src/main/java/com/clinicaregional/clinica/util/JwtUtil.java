@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,22 +22,27 @@ public class JwtUtil {
     //obtenemos la clsve secrete de aplication properties
     @Value("${jwt.secret}")
     private String secretKey;
-
     //generamos la clave para firmar
-    private final Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    //declaramos key
+    private Key key;
+    //inicializamos key
 
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
 
     //para el token de acceso
     public String generateAccessToken(Authentication authentication) {
         String email = authentication.getPrincipal().toString();
         String authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
-        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).claim("authorities", authorities).setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 100)).signWith(key).compact();
+        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).claim("authorities", authorities).setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000)).signWith(key).compact();
     }
 
     //para generar el token de refresco
     public String generateRefreshToken(Authentication authentication) {
         String email = authentication.getPrincipal().toString();
-        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + 120 * 60 * 1000)).signWith(key).compact();
+        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + 120 * 60 * 60 * 1000)).signWith(key).compact();
     }
 
 
@@ -63,7 +69,7 @@ public class JwtUtil {
 
     //para obetener las autoridades del token
     public List<GrantedAuthority> getAuthoritiesFromJwt(String token) {
-        String authorities= getClaimsIfValid(token).get("authorities",String.class);
+        String authorities = getClaimsIfValid(token).get("authorities", String.class);
         return List.of(authorities.split(",")).stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 

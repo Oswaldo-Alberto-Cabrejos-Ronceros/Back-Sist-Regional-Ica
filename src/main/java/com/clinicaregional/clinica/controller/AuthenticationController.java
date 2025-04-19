@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.controller;
 
+import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.models.AuthenticationResponse;
 import com.clinicaregional.clinica.models.LoginRequest;
 import com.clinicaregional.clinica.service.AuthenticationService;
@@ -39,6 +40,7 @@ public class AuthenticationController {
         refreshToken.setAttribute("SameSite", "Lax");
         refreshToken.setSecure(false);
         refreshToken.setPath("/");
+        response.addCookie(refreshToken);
         AuthenticationResponse responseToSend = new AuthenticationResponse(authenticationResponse.getUsuarioId(), authenticationResponse.getName(), authenticationResponse.getRole());
         return ResponseEntity.ok(responseToSend);
     }
@@ -67,7 +69,26 @@ public class AuthenticationController {
         } catch (JwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
 
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody Usuario usuario, HttpServletResponse response) {
+        AuthenticationResponse authenticationResponse = authenticationService.registerUser(usuario);
+        //configuramos cookies httponly
+        Cookie accessToken = new Cookie("jwtToken", authenticationResponse.getJwtToken());
+        accessToken.setHttpOnly(true);
+        accessToken.setAttribute("SameSite", "Lax");
+        accessToken.setSecure(false); //en produccion ira en true al trabajar en https
+        accessToken.setPath("/");
+        response.addCookie(accessToken);
+        Cookie refreshToken = new Cookie("refreshToken", authenticationResponse.getRefreshToken());
+        refreshToken.setHttpOnly(true);
+        refreshToken.setAttribute("SameSite", "Lax");
+        refreshToken.setSecure(false);
+        refreshToken.setPath("/");
+        response.addCookie(refreshToken);
+        AuthenticationResponse responseToSend = new AuthenticationResponse(authenticationResponse.getUsuarioId(), authenticationResponse.getName(), authenticationResponse.getRole());
+        return ResponseEntity.ok(responseToSend);
     }
 
 }

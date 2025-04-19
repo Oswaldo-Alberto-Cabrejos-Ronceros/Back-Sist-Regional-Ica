@@ -45,6 +45,7 @@ public class SecurityConfig {
                         httpRequest -> {
                             httpRequest.requestMatchers("/auth/**").permitAll();
                             //aqui iran los roles requeridos para cada endpoint
+                            httpRequest.requestMatchers("/api/**").permitAll();
                             httpRequest.anyRequest().authenticated();
                         }
                 ).exceptionHandling(
@@ -59,7 +60,8 @@ public class SecurityConfig {
                             response.getWriter().write("{\"error\": \"FORBIDDEN\"}");
                         }
                         ))
-                ).addFilterBefore(new JwtAuthFilter(jwtUtil), BasicAuthenticationFilter.class).build();
+                ).addFilterBefore(new JwtAuthFilter(jwtUtil), BasicAuthenticationFilter.class)
+                .build();
     }
 
     @Bean

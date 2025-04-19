@@ -10,6 +10,8 @@ public interface UsuarioService {
 
     public Optional<Usuario> obtenerPorId(Long id);
 
+    public Optional<Usuario> obtenerPorCorreo(String correo);
+
     public List<Usuario> obtenerPorRol(Long rolId);
 
     public Usuario guardar(Usuario usuario);

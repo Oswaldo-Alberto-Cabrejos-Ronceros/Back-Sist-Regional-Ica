@@ -31,6 +31,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    public Optional<Usuario> obtenerPorCorreo(String correo){return usuarioRepository.findByCorreo(correo);}
+
+    @Override
     public List<Usuario> obtenerPorRol(Long rolId) {
         return usuarioRepository.findByRol_Id(rolId);
     }

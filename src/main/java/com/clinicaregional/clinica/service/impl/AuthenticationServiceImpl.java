@@ -6,7 +6,7 @@ import com.clinicaregional.clinica.models.AuthenticationResponse;
 import com.clinicaregional.clinica.models.LoginRequest;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.clinicaregional.clinica.service.UsuarioService;
-import com.clinicaregional.clinica.util.JwtUtil;
+import com.clinicaregional.clinica.security.JwtUtil;
 import io.jsonwebtoken.JwtException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.util;
+package com.clinicaregional.clinica.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

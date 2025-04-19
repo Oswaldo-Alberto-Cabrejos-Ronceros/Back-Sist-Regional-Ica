@@ -1,6 +1,5 @@
-package com.clinicaregional.clinica.config;
+package com.clinicaregional.clinica.security;
 
-import com.clinicaregional.clinica.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

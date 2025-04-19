@@ -1,8 +1,7 @@
-package com.clinicaregional.clinica.config;
+package com.clinicaregional.clinica.security;
 
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.clinicaregional.clinica.service.impl.UserDetailsServiceImpl;
-import com.clinicaregional.clinica.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

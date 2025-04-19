@@ -43,6 +43,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(responseToSend);
     }
 
+    @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {

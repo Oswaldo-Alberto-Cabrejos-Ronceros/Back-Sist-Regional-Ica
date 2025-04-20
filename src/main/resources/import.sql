@@ -10,10 +10,10 @@ INSERT INTO roles (nombre, descripcion) VALUES ('PACIENTE', 'Paciente registrado
 
 -- Usuarios
 
-INSERT INTO usuarios (nombre, correo, contrasena, estado, rol_id) VALUES ('Administrador General', 'admin@clinica.pe', 'admin123', true, 1);
-INSERT INTO usuarios (nombre, correo, contrasena, estado, rol_id) VALUES ('Recepcionista Uno', 'recepcion@clinica.pe', 'recep123', true, 2);
-INSERT INTO usuarios (nombre, correo, contrasena, estado, rol_id) VALUES ('Dr. Pedro Ruiz', 'medico@clinica.pe', 'medico123', true, 3);
-INSERT INTO usuarios (nombre, correo, contrasena, estado, rol_id) VALUES ('Paciente de Prueba', 'paciente@clinica.pe', 'paciente123', true, 4);
+INSERT INTO usuarios (nombre, correo, contrasena, estado, rol_id) VALUES ('Administrador General', 'admin@clinica.pe', '$2a$10$V6QgAPaZa/MZ46sEQbVe..0oMvvBytSg2NHXLQs83ALouPqfl/zsO', true, 1);
+INSERT INTO usuarios (nombre, correo, contrasena, estado, rol_id) VALUES ('Recepcionista Uno', 'recepcion@clinica.pe', '$2a$10$Sma0OI9vnJqmjZco49cHC.4f52N/zYGDEEhaoKmkknjAU80jrOHQ6', true, 2);
+INSERT INTO usuarios (nombre, correo, contrasena, estado, rol_id) VALUES ('Dr. Pedro Ruiz', 'medico@clinica.pe', '$2a$10$POlVoS2SToWxympcyGj78uGX/Augax45HXIXty5ZgQARIZY/56mRe', true, 3);
+INSERT INTO usuarios (nombre, correo, contrasena, estado, rol_id) VALUES ('Paciente de Prueba', 'paciente@clinica.pe', '$2a$10$mtQokwFr9p0VMji8X8bqRO1vOlHTxijWSbf9LqaXP/cXfyRaP5MQ2', true, 4);
 
 
 -- -- Tipos de documento

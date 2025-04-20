@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.service;
 
+import com.clinicaregional.clinica.dto.UsuarioRequest;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.models.AuthenticationResponse;
 import com.clinicaregional.clinica.models.LoginRequest;
@@ -14,5 +15,5 @@ public interface AuthenticationService {
     //para refrescar token
     public String refreshToken(String refreshToken);
 
-    public AuthenticationResponse registerUser(Usuario usuario);
+    public AuthenticationResponse registerUser(UsuarioRequest usuarioRequest);
 }

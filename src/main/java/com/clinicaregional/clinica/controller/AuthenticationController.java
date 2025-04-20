@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.controller;
 
+import com.clinicaregional.clinica.dto.UsuarioRequest;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.models.AuthenticationResponse;
 import com.clinicaregional.clinica.models.LoginRequest;
@@ -72,8 +73,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody Usuario usuario, HttpServletResponse response) {
-        AuthenticationResponse authenticationResponse = authenticationService.registerUser(usuario);
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody UsuarioRequest UsuarioRequest, HttpServletResponse response) {
+        AuthenticationResponse authenticationResponse = authenticationService.registerUser(UsuarioRequest);
         //configuramos cookies httponly
         Cookie accessToken = new Cookie("jwtToken", authenticationResponse.getJwtToken());
         accessToken.setHttpOnly(true);

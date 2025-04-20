@@ -2,6 +2,9 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.UsuarioRequest;
 import com.clinicaregional.clinica.models.AuthenticationResponse;
 import com.clinicaregional.clinica.models.LoginRequest;
 import com.clinicaregional.clinica.service.AuthenticationService;
@@ -25,31 +28,33 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
 
-
-    public AuthenticationServiceImpl(JwtUtil jwtUtil, UsuarioService usuarioService, UserDetailsServiceImpl userDetailsServiceImpl){
-        this.jwtUtil=jwtUtil;
-        this.usuarioService=usuarioService;
-        this.passwordEncoder= new BCryptPasswordEncoder();
+    public AuthenticationServiceImpl(JwtUtil jwtUtil, UsuarioService usuarioService,
+            UserDetailsServiceImpl userDetailsServiceImpl) {
+        this.jwtUtil = jwtUtil;
+        this.usuarioService = usuarioService;
+        this.passwordEncoder = new BCryptPasswordEncoder();
         this.userDetailsServiceImpl = userDetailsServiceImpl;
     }
 
-
     @Override
     public AuthenticationResponse authenticateUser(LoginRequest loginRequest) {
-        UserDetails userDetails=userDetailsServiceImpl.loadUserByUsername(loginRequest.getEmail());
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(loginRequest.getEmail());
         System.out.println(userDetails);
         System.out.println(userDetails.getPassword());
         System.out.println(loginRequest.getEmail());
         System.out.println(loginRequest.getPassword());
-        if(passwordEncoder.matches(loginRequest.getPassword(),userDetails.getPassword())){
-            //generamos token
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),null,userDetails.getAuthorities());
-            String jwtToken=jwtUtil.generateAccessToken(authentication);
-            //generamos refresh token
+        if (passwordEncoder.matches(loginRequest.getPassword(), userDetails.getPassword())) {
+            // generamos token
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
+                    userDetails.getAuthorities());
+            String jwtToken = jwtUtil.generateAccessToken(authentication);
+            // generamos refresh token
             String refreshToken = jwtUtil.generateRefreshToken(authentication);
-            //obtenemos al usuario
-            Usuario usuario=usuarioService.obtenerPorCorreo(userDetails.getUsername()).orElseThrow(()->new UsernameNotFoundException("Usuario no encontrado"));
-            return new AuthenticationResponse(usuario.getId(),usuario.getNombre(),usuario.getRol().getNombre(),jwtToken,refreshToken);
+            // obtenemos al usuario
+            Usuario usuario = usuarioService.obtenerPorCorreo(userDetails.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+            return new AuthenticationResponse(usuario.getId(), usuario.getNombre(), usuario.getRol().getNombre(),
+                    jwtToken, refreshToken);
         } else {
             throw new BadCredentialsException("Credenciales incorrectas");
         }
@@ -58,28 +63,41 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public String refreshToken(String refreshToken) {
         boolean isValid = jwtUtil.validateToken(refreshToken);
-        if(isValid){
+        if (isValid) {
             String email = jwtUtil.getEmailFromJwt(refreshToken);
-            UserDetails userDetails=userDetailsServiceImpl.loadUserByUsername(email);
-            Authentication authentication= new UsernamePasswordAuthenticationToken(userDetails.getUsername(),null,userDetails.getAuthorities());
+            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
+                    userDetails.getAuthorities());
             return jwtUtil.generateAccessToken(authentication);
-        }else {
+        } else {
             throw new JwtException("Error al validad token de refresco");
         }
     }
 
-    @Override
-    public AuthenticationResponse registerUser(Usuario usuario) {
-        //ponemos el rol de paciente
-        Rol rol = new Rol();
-        rol.setId(1L);
-        usuario.setRol(rol);
-        Usuario usuarioregister= usuarioService.guardar(usuario);
-        UserDetails userDetails=userDetailsServiceImpl.loadUserByUsername(usuarioregister.getCorreo());
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(),null,userDetails.getAuthorities());
-        String jwtToken=jwtUtil.generateAccessToken(authentication);
-        String refreshToken = jwtUtil.generateRefreshToken(authentication);
-        return new AuthenticationResponse(usuario.getId(),usuario.getNombre(),usuario.getRol().getNombre(),jwtToken,refreshToken);
-    }
+@Override
+public AuthenticationResponse registerUser(UsuarioRequest usuarioRequest) {
+    // Establecer el rol por defecto (Paciente)
+    usuarioRequest.setRol(new RolDTO(1L, "Paciente"));
+
+    UsuarioDTO usuarioGuardado = usuarioService.guardar(usuarioRequest);
+
+    UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());
+    Authentication authentication = new UsernamePasswordAuthenticationToken(
+        userDetails.getUsername(), null, userDetails.getAuthorities()
+    );
+
+    String jwtToken = jwtUtil.generateAccessToken(authentication);
+    String refreshToken = jwtUtil.generateRefreshToken(authentication);
+
+    return new AuthenticationResponse(
+        usuarioGuardado.getId(), 
+        usuarioGuardado.getNombre(), 
+        usuarioGuardado.getRol().getNombre(), 
+        jwtToken, 
+        refreshToken
+    );
+}
+
+    
 
 }

@@ -1,5 +1,8 @@
 package com.clinicaregional.clinica.service.impl;
 
+import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.UsuarioRequest;
+import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -25,58 +29,80 @@ public class UsuarioServiceImpl implements UsuarioService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public List<Usuario> listarUsuarios() {
-        return usuarioRepository.findAll();
+    public List<UsuarioDTO> listarUsuarios() {
+        return usuarioRepository.findAll().stream()
+                .map(this::convertirAUsuarioDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Usuario> obtenerPorId(Long id) {
-        return usuarioRepository.findById(id);
+    public Optional<UsuarioDTO> obtenerPorId(Long id) {
+        return usuarioRepository.findById(id).map(this::convertirAUsuarioDTO);
     }
 
     @Override
-    public Optional<Usuario> obtenerPorCorreo(String correo){return usuarioRepository.findByCorreo(correo);}
-
-    @Override
-    public List<Usuario> obtenerPorRol(Long rolId) {
-        return usuarioRepository.findByRol_Id(rolId);
+    public Optional<Usuario> obtenerPorCorreo(String correo) {
+        return usuarioRepository.findByCorreo(correo);
     }
 
     @Override
-    public Usuario guardar(Usuario usuario) {
-        if (usuario.getId() != null && usuarioRepository.existsById(usuario.getId())) {
-            throw new IllegalStateException("El usuario ya existe y no puede ser creado nuevamente.");
-        }
+    public List<UsuarioDTO> obtenerPorRol(Long rolId) {
+        return usuarioRepository.findByRol_Id(rolId).stream()
+                .map(this::convertirAUsuarioDTO)
+                .collect(Collectors.toList());
+    }
 
-        if(usuario.getCorreo()!=null && usuarioRepository.existsByCorreo(usuario.getCorreo())){
+    @Override
+    public UsuarioDTO guardar(UsuarioRequest request) {
+        if (usuarioRepository.existsByCorreo(request.getCorreo())) {
             throw new IllegalStateException("Ya existe un usuario con el correo ingresado");
         }
 
-        if (usuario.getRol() != null && usuario.getRol().getId() != null) {
-            rolRepository.findById(usuario.getRol().getId()).ifPresent(usuario::setRol);
-        }
-        //hasheamos la password
-        String passwordHash=passwordEncoder.encode(usuario.getContraseña());
-        usuario.setContraseña(passwordHash);
-        return usuarioRepository.save(usuario);
+        Usuario usuario = new Usuario();
+        usuario.setNombre(request.getNombre());
+        usuario.setCorreo(request.getCorreo());
+        usuario.setContraseña(passwordEncoder.encode(request.getContraseña()));
+        usuario.setEstado(request.isEstado());
+
+        rolRepository.findById(request.getRol().getId())
+                .ifPresentOrElse(usuario::setRol, () -> {
+                    throw new IllegalStateException("El rol especificado no existe");
+                });
+
+        return convertirAUsuarioDTO(usuarioRepository.save(usuario));
     }
 
     @Override
-    public Usuario actualizar(Long id, Usuario nuevoUsuario) {
+    public UsuarioDTO actualizar(Long id, UsuarioRequest request) {
         return usuarioRepository.findById(id).map(usuario -> {
-            usuario.setNombre(nuevoUsuario.getNombre());
-            usuario.setCorreo(nuevoUsuario.getCorreo());
-            usuario.setContraseña(nuevoUsuario.getContraseña());
-            usuario.setEstado(nuevoUsuario.isEstado());
-            if (nuevoUsuario.getRol() != null && nuevoUsuario.getRol().getId() != null) {
-                rolRepository.findById(nuevoUsuario.getRol().getId()).ifPresent(usuario::setRol);
-            }
-            return usuarioRepository.save(usuario);
+            usuario.setNombre(request.getNombre());
+            usuario.setCorreo(request.getCorreo());
+            usuario.setContraseña(passwordEncoder.encode(request.getContraseña()));
+            usuario.setEstado(request.isEstado());
+
+            rolRepository.findById(request.getRol().getId())
+                    .ifPresentOrElse(usuario::setRol, () -> {
+                        throw new IllegalStateException("El rol especificado no existe");
+                    });
+
+            return convertirAUsuarioDTO(usuarioRepository.save(usuario));
         }).orElseThrow(() -> new IllegalStateException("El usuario no existe."));
     }
 
     @Override
     public void eliminar(Long id) {
         usuarioRepository.deleteById(id);
+    }
+
+    // Conversión de entidad a DTO de salida
+    private UsuarioDTO convertirAUsuarioDTO(Usuario usuario) {
+        return new UsuarioDTO(
+            usuario.getId(),
+            usuario.getNombre(),
+            usuario.getCorreo(),
+            usuario.isEstado(),
+            usuario.getRol() != null ? new RolDTO(usuario.getRol().getId(), usuario.getRol().getNombre()) : null
+        );
+        
     }
 }

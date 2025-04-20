@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.models;
+package com.clinicaregional.clinica.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequest {
-    private String email;
-    private String password;
+public class LoginRequestDTO {
+    private String correo;
+    private String contrasena;
 }

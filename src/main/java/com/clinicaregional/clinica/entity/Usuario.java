@@ -11,7 +11,7 @@ import lombok.Setter;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "usuario")
+@Table(name = "usuarios")
 public class Usuario {
 
     @Id
@@ -20,6 +20,7 @@ public class Usuario {
 
     private String nombre;
     private String correo;
+    @Column(name = "contrasena") 
     private String contraseña;
     private boolean estado;
 

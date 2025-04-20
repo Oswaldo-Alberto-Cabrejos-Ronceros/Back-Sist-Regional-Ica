@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.security;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.clinicaregional.clinica.service.impl.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +30,7 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
-
+    @Autowired
     public SecurityConfig(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }

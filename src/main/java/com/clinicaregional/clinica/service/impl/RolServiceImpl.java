@@ -1,6 +1,8 @@
 package com.clinicaregional.clinica.service.impl;
 
+import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.entity.Rol;
+import com.clinicaregional.clinica.mapper.RolMapper;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.RolService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RolServiceImpl implements RolService {
@@ -15,28 +18,36 @@ public class RolServiceImpl implements RolService {
     @Autowired
     private RolRepository rolRepository;
 
+    @Autowired
+    private RolMapper rolMapper;
+
     @Override
-    public List<Rol> listarRoles() {
-        return rolRepository.findAll();
+    public List<RolDTO> listarRoles() {
+        return rolRepository.findAll().stream().map(rolMapper::mapToRolDTO).collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Rol> obtenerPorId(Long id) {
-        return rolRepository.findById(id);
+    public Optional<RolDTO> obtenerPorId(Long id) {
+    return rolRepository.findById(id).map(rolMapper::mapToRolDTO);
     }
 
     @Override
-    public Rol guardar(Rol rol) {
-        return rolRepository.save(rol);
+    public RolDTO guardar(RolDTO rolDTO) {
+        if(rolRepository.existsByNombre(rolDTO.getNombre())) {
+            throw new IllegalArgumentException("El nombre ya existe");
+        }
+        Rol rol = rolMapper.mapToRol(rolDTO);
+        Rol savedRol = rolRepository.save(rol);
+        return rolMapper.mapToRolDTO(savedRol);
     }
 
     @Override
-    public Rol actualizar(Long id, Rol nuevoRol) {
-        return rolRepository.findById(id).map(rol -> {
-            rol.setNombre(nuevoRol.getNombre());
-            rol.setDescripcion(nuevoRol.getDescripcion());
-            return rolRepository.save(rol);
-        }).orElse(null);
+    public RolDTO actualizar(Long id, RolDTO Rol) {
+        Rol rolExisting = rolRepository.findById(id).orElseThrow(()->new RuntimeException("No existe un rol con el id" + id));
+        rolExisting.setNombre(Rol.getNombre());
+        rolExisting.setDescripcion(Rol.getDescripcion());
+        Rol savedRol = rolRepository.save(rolExisting);
+        return rolMapper.mapToRolDTO(savedRol);
     }
 
     @Override

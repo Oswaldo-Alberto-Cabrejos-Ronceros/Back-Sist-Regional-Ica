@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UsuarioRequest {
+public class UsuarioRequestDTO {
     
     private String nombre;
     private String correo;
@@ -17,5 +17,4 @@ public class UsuarioRequest {
     private boolean estado;
     private RolDTO rol; 
 
-    
 }

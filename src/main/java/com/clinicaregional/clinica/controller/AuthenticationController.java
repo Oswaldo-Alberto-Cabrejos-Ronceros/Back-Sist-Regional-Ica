@@ -1,14 +1,14 @@
 package com.clinicaregional.clinica.controller;
 
-import com.clinicaregional.clinica.dto.UsuarioRequest;
-import com.clinicaregional.clinica.entity.Usuario;
-import com.clinicaregional.clinica.models.AuthenticationResponse;
-import com.clinicaregional.clinica.models.LoginRequest;
+import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.AuthenticationResponseDTO;
+import com.clinicaregional.clinica.dto.LoginRequestDTO;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,27 +22,28 @@ import java.util.Optional;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
+    @Autowired
     public AuthenticationController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        AuthenticationResponse authenticationResponse = authenticationService.authenticateUser(loginRequest);
+    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.authenticateUser(loginRequestDTO);
         //configuramos cookies httponly
-        Cookie accessToken = new Cookie("jwtToken", authenticationResponse.getJwtToken());
+        Cookie accessToken = new Cookie("jwtToken", authenticationResponseDTO.getJwtToken());
         accessToken.setHttpOnly(true);
         accessToken.setAttribute("SameSite", "Lax");
         accessToken.setSecure(false); //en produccion ira en true al trabajar en https
         accessToken.setPath("/");
         response.addCookie(accessToken);
-        Cookie refreshToken = new Cookie("refreshToken", authenticationResponse.getRefreshToken());
+        Cookie refreshToken = new Cookie("refreshToken", authenticationResponseDTO.getRefreshToken());
         refreshToken.setHttpOnly(true);
         refreshToken.setAttribute("SameSite", "Lax");
         refreshToken.setSecure(false);
         refreshToken.setPath("/");
         response.addCookie(refreshToken);
-        AuthenticationResponse responseToSend = new AuthenticationResponse(authenticationResponse.getUsuarioId(), authenticationResponse.getName(), authenticationResponse.getRole());
+        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getName(), authenticationResponseDTO.getRole());
         return ResponseEntity.ok(responseToSend);
     }
 
@@ -73,22 +74,22 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody UsuarioRequest UsuarioRequest, HttpServletResponse response) {
-        AuthenticationResponse authenticationResponse = authenticationService.registerUser(UsuarioRequest);
+    public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody UsuarioRequestDTO UsuarioRequestDTO, HttpServletResponse response) {
+        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerUser(UsuarioRequestDTO);
         //configuramos cookies httponly
-        Cookie accessToken = new Cookie("jwtToken", authenticationResponse.getJwtToken());
+        Cookie accessToken = new Cookie("jwtToken", authenticationResponseDTO.getJwtToken());
         accessToken.setHttpOnly(true);
         accessToken.setAttribute("SameSite", "Lax");
         accessToken.setSecure(false); //en produccion ira en true al trabajar en https
         accessToken.setPath("/");
         response.addCookie(accessToken);
-        Cookie refreshToken = new Cookie("refreshToken", authenticationResponse.getRefreshToken());
+        Cookie refreshToken = new Cookie("refreshToken", authenticationResponseDTO.getRefreshToken());
         refreshToken.setHttpOnly(true);
         refreshToken.setAttribute("SameSite", "Lax");
         refreshToken.setSecure(false);
         refreshToken.setPath("/");
         response.addCookie(refreshToken);
-        AuthenticationResponse responseToSend = new AuthenticationResponse(authenticationResponse.getUsuarioId(), authenticationResponse.getName(), authenticationResponse.getRole());
+        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getName(), authenticationResponseDTO.getRole());
         return ResponseEntity.ok(responseToSend);
     }
 

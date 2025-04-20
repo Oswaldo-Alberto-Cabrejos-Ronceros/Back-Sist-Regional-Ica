@@ -1,16 +1,17 @@
 package com.clinicaregional.clinica.service.impl;
 
-import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequest;
-import com.clinicaregional.clinica.models.AuthenticationResponse;
-import com.clinicaregional.clinica.models.LoginRequest;
+import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.AuthenticationResponseDTO;
+import com.clinicaregional.clinica.dto.LoginRequestDTO;
+import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.security.JwtUtil;
 import io.jsonwebtoken.JwtException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,34 +28,34 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
+    private final UsuarioMapper usuarioMapper;
 
-    public AuthenticationServiceImpl(JwtUtil jwtUtil, UsuarioService usuarioService,
-            UserDetailsServiceImpl userDetailsServiceImpl) {
+    @Autowired
+    public AuthenticationServiceImpl(JwtUtil jwtUtil, UsuarioService usuarioService, UserDetailsServiceImpl userDetailsServiceImpl,UsuarioMapper usuarioMapper) {
         this.jwtUtil = jwtUtil;
         this.usuarioService = usuarioService;
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.userDetailsServiceImpl = userDetailsServiceImpl;
+        this.usuarioMapper = usuarioMapper;
     }
 
     @Override
-    public AuthenticationResponse authenticateUser(LoginRequest loginRequest) {
-        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(loginRequest.getEmail());
+    public AuthenticationResponseDTO authenticateUser(LoginRequestDTO loginRequestDTO) {
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(loginRequestDTO.getEmail());
         System.out.println(userDetails);
         System.out.println(userDetails.getPassword());
-        System.out.println(loginRequest.getEmail());
-        System.out.println(loginRequest.getPassword());
-        if (passwordEncoder.matches(loginRequest.getPassword(), userDetails.getPassword())) {
+        System.out.println(loginRequestDTO.getEmail());
+        System.out.println(loginRequestDTO.getPassword());
+        if (passwordEncoder.matches(loginRequestDTO.getPassword(), userDetails.getPassword())) {
             // generamos token
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
-                    userDetails.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
             String jwtToken = jwtUtil.generateAccessToken(authentication);
             // generamos refresh token
             String refreshToken = jwtUtil.generateRefreshToken(authentication);
             // obtenemos al usuario
-            Usuario usuario = usuarioService.obtenerPorCorreo(userDetails.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-            return new AuthenticationResponse(usuario.getId(), usuario.getNombre(), usuario.getRol().getNombre(),
-                    jwtToken, refreshToken);
+            Usuario usuario = usuarioService.obtenerPorCorreo(userDetails.getUsername()).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+            UsuarioDTO usuarioDTO = usuarioMapper.mapToUsuarioDTO(usuario);
+            return usuarioMapper.mapToAuthenticationResponseDTO(usuarioDTO, jwtToken, refreshToken);
         } else {
             throw new BadCredentialsException("Credenciales incorrectas");
         }
@@ -66,38 +67,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (isValid) {
             String email = jwtUtil.getEmailFromJwt(refreshToken);
             UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
-                    userDetails.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
             return jwtUtil.generateAccessToken(authentication);
         } else {
             throw new JwtException("Error al validad token de refresco");
         }
     }
 
-@Override
-public AuthenticationResponse registerUser(UsuarioRequest usuarioRequest) {
-    // Establecer el rol por defecto (Paciente)
-    usuarioRequest.setRol(new RolDTO(1L, "Paciente"));
+    @Override
+    public AuthenticationResponseDTO registerUser(UsuarioRequestDTO usuarioRequestDTO) {
+        // Establecer el rol por defecto (Paciente)
+        usuarioRequestDTO.setRol(new RolDTO(1L, "Paciente"));
 
-    UsuarioDTO usuarioGuardado = usuarioService.guardar(usuarioRequest);
+        UsuarioDTO usuarioGuardado = usuarioService.guardar(usuarioRequestDTO);
 
-    UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());
-    Authentication authentication = new UsernamePasswordAuthenticationToken(
-        userDetails.getUsername(), null, userDetails.getAuthorities()
-    );
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
 
-    String jwtToken = jwtUtil.generateAccessToken(authentication);
-    String refreshToken = jwtUtil.generateRefreshToken(authentication);
+        String jwtToken = jwtUtil.generateAccessToken(authentication);
+        String refreshToken = jwtUtil.generateRefreshToken(authentication);
 
-    return new AuthenticationResponse(
-        usuarioGuardado.getId(), 
-        usuarioGuardado.getNombre(), 
-        usuarioGuardado.getRol().getNombre(), 
-        jwtToken, 
-        refreshToken
-    );
-}
+        return usuarioMapper.mapToAuthenticationResponseDTO(usuarioGuardado, jwtToken, refreshToken);
+    }
 
-    
 
 }

@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequest;
+import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
 import com.clinicaregional.clinica.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,9 +22,9 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody UsuarioRequest usuarioRequest) {
-        UsuarioDTO creado = usuarioService.guardar(usuarioRequest);
-        return ResponseEntity.status(201).body(creado);
+    public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody UsuarioRequestDTO usuarioRequestDTO) {
+        UsuarioDTO usuarioCreated = usuarioService.guardar(usuarioRequestDTO);
+        return ResponseEntity.status(201).body(usuarioCreated);
     }
 
     @GetMapping("/{id}")
@@ -44,7 +44,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequest usuarioActualizado) {
+    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO usuarioActualizado) {
         UsuarioDTO actualizado = usuarioService.actualizar(id, usuarioActualizado);
         return ResponseEntity.ok(actualizado);
     }

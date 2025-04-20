@@ -2,14 +2,13 @@ package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequest;
+import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioService {
-    public List<UsuarioDTO> listarUsuarios();
-
+    List<UsuarioDTO> listarUsuarios();
 
     Optional<UsuarioDTO> obtenerPorId(Long id);
 
@@ -17,9 +16,9 @@ public interface UsuarioService {
 
     List<UsuarioDTO> obtenerPorRol(Long rolId);
 
-    UsuarioDTO guardar(UsuarioRequest usuarioRequestDTO); // cambia DTO por RequestDTO
+    UsuarioDTO guardar(UsuarioRequestDTO usuarioRequestDTO); // cambia DTO por RequestDTO
 
-    UsuarioDTO actualizar(Long id, UsuarioRequest usuarioRequestDTO); // idem
+    UsuarioDTO actualizar(Long id, UsuarioRequestDTO usuarioRequestDTO); // idem
 
     void eliminar(Long id);
 }

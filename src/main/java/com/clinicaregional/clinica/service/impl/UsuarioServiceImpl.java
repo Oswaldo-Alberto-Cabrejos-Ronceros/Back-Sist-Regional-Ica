@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,26 +33,31 @@ public class UsuarioServiceImpl implements UsuarioService {
         this.usuarioMapper = usuarioMapper;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<UsuarioDTO> listarUsuarios() {
         return usuarioRepository.findAll().stream().map(usuarioMapper::mapToUsuarioDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<UsuarioDTO> obtenerPorId(Long id) {
         return usuarioRepository.findById(id).map(usuarioMapper::mapToUsuarioDTO);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<Usuario> obtenerPorCorreo(String correo) {
         return usuarioRepository.findByCorreo(correo);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<UsuarioDTO> obtenerPorRol(Long rolId) {
         return usuarioRepository.findByRol_Id(rolId).stream().map(usuarioMapper::mapToUsuarioDTO).collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public UsuarioDTO guardar(UsuarioRequestDTO request) {
         if (usuarioRepository.existsByCorreo(request.getCorreo())) {
@@ -71,13 +77,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioMapper.mapToUsuarioDTO(usuarioRepository.save(usuario));
     }
 
+    @Transactional
     @Override
     public UsuarioDTO actualizar(Long id, UsuarioRequestDTO request) {
         Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe un usuario con el id:" + id));
 
         //hasheamos la contraseña
 
-        usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
+        usuario.setContraseña(passwordEncoder.encode(request.getContraseña()));
 
         rolRepository.findById(request.getRol().getId()).ifPresentOrElse(usuario::setRol, () -> {
             throw new IllegalStateException("El rol especificado no existe");
@@ -86,6 +93,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);
     }
 
+
+    @Transactional
     @Override
     public void eliminar(Long id) {
         usuarioRepository.deleteById(id);

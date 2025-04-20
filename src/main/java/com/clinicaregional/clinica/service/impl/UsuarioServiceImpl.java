@@ -8,6 +8,7 @@ import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,23 +19,22 @@ import java.util.stream.Collectors;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UsuarioMapper usuarioMapper;
 
     @Autowired
-    private RolRepository rolRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UsuarioMapper usuarioMapper;
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository, PasswordEncoder passwordEncoder, UsuarioMapper usuarioMapper) {
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.usuarioMapper = usuarioMapper;
+    }
 
     @Override
     public List<UsuarioDTO> listarUsuarios() {
-        return usuarioRepository.findAll().stream()
-                .map(usuarioMapper::mapToUsuarioDTO)
-                .collect(Collectors.toList());
+        return usuarioRepository.findAll().stream().map(usuarioMapper::mapToUsuarioDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -49,9 +49,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public List<UsuarioDTO> obtenerPorRol(Long rolId) {
-        return usuarioRepository.findByRol_Id(rolId).stream()
-                .map(usuarioMapper::mapToUsuarioDTO)
-                .collect(Collectors.toList());
+        return usuarioRepository.findByRol_Id(rolId).stream().map(usuarioMapper::mapToUsuarioDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -66,26 +64,24 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
 
-        rolRepository.findById(request.getRol().getId())
-                .ifPresentOrElse(usuario::setRol, () -> {
-                    throw new IllegalStateException("El rol especificado no existe");
-                });
+        rolRepository.findById(request.getRol().getId()).ifPresentOrElse(usuario::setRol, () -> {
+            throw new IllegalStateException("El rol especificado no existe");
+        });
 
         return usuarioMapper.mapToUsuarioDTO(usuarioRepository.save(usuario));
     }
 
     @Override
     public UsuarioDTO actualizar(Long id, UsuarioRequestDTO request) {
-        Usuario usuario = usuarioRepository.findById(id).orElseThrow(()->new RuntimeException("No existe un usuario con el id:" + id));
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe un usuario con el id:" + id));
 
         //hasheamos la contraseña
 
         usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
 
-        rolRepository.findById(request.getRol().getId())
-                .ifPresentOrElse(usuario::setRol, () -> {
-                    throw new IllegalStateException("El rol especificado no existe");
-                });
+        rolRepository.findById(request.getRol().getId()).ifPresentOrElse(usuario::setRol, () -> {
+            throw new IllegalStateException("El rol especificado no existe");
+        });
         Usuario usuarioSaved = usuarioRepository.save(usuario);
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);
     }
@@ -95,5 +91,5 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    }
+}
 

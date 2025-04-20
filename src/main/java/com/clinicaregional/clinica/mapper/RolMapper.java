@@ -11,7 +11,7 @@ public class RolMapper {
     }
 
     public Rol mapToRol(RolDTO rolDTO) {
-        return new Rol(rolDTO.getId(),rolDTO.getNombre(),rolDTO.getDescripcion());
+        return new Rol(rolDTO.getId(), rolDTO.getNombre(), rolDTO.getDescripcion());
     }
 
 }

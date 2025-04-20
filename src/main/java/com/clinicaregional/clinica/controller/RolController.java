@@ -13,9 +13,12 @@ import java.util.List;
 @RequestMapping("/api/roles")
 public class RolController {
 
-    @Autowired
-    private RolService rolService;
+    private final RolService rolService;
 
+    @Autowired
+    public RolController(RolService rolService) {
+        this.rolService = rolService;
+    }
 
     @GetMapping
     public ResponseEntity<List<RolDTO>> listarRoles() {
@@ -25,7 +28,7 @@ public class RolController {
     @PostMapping
     public ResponseEntity<RolDTO> crearRol(@RequestBody RolDTO rol) {
         RolDTO creado = rolService.guardar(rol);
-        return ResponseEntity.status(201).body(creado); 
+        return ResponseEntity.status(201).body(creado);
     }
 
     @GetMapping("/{id}")
@@ -46,6 +49,6 @@ public class RolController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarRol(@PathVariable Long id) {
         rolService.eliminar(id);
-        return ResponseEntity.noContent().build(); 
+        return ResponseEntity.noContent().build();
     }
 }

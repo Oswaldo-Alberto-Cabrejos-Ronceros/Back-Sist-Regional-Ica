@@ -15,11 +15,14 @@ import java.util.stream.Collectors;
 @Service
 public class RolServiceImpl implements RolService {
 
-    @Autowired
-    private RolRepository rolRepository;
+    private final RolRepository rolRepository;
+    private final RolMapper rolMapper;
 
     @Autowired
-    private RolMapper rolMapper;
+    public RolServiceImpl(RolRepository rolRepository, RolMapper rolMapper) {
+        this.rolRepository = rolRepository;
+        this.rolMapper = rolMapper;
+    }
 
     @Override
     public List<RolDTO> listarRoles() {

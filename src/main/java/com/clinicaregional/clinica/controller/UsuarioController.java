@@ -13,8 +13,12 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
+    private final UsuarioService usuarioService;
+
     @Autowired
-    private UsuarioService usuarioService;
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {

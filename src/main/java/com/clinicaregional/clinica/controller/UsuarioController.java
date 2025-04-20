@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
-import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
 import com.clinicaregional.clinica.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,30 +13,34 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
+    private final UsuarioService usuarioService;
+
     @Autowired
-    private UsuarioService usuarioService;
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
     @GetMapping
-    public ResponseEntity<List<Usuario>> listarUsuarios() {
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
         return ResponseEntity.ok(usuarioService.listarUsuarios());
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> crearUsuario(@RequestBody Usuario usuario) {
-        Usuario creado = usuarioService.guardar(usuario);
-        return ResponseEntity.status(201).body(creado);
+    public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody UsuarioRequestDTO usuarioRequestDTO) {
+        UsuarioDTO usuarioCreated = usuarioService.guardar(usuarioRequestDTO);
+        return ResponseEntity.status(201).body(usuarioCreated);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable Long id) {
+    public ResponseEntity<UsuarioDTO> obtenerUsuarioPorId(@PathVariable Long id) {
         return usuarioService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/rol/{rolId}")
-    public ResponseEntity<List<Usuario>> obtenerPorRol(@PathVariable Long rolId) {
-        List<Usuario> usuarios = usuarioService.obtenerPorRol(rolId);
+    public ResponseEntity<List<UsuarioDTO>> obtenerPorRol(@PathVariable Long rolId) {
+        List<UsuarioDTO> usuarios = usuarioService.obtenerPorRol(rolId);
         if (usuarios.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -43,11 +48,9 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioActualizado) {
-        Usuario actualizado = usuarioService.actualizar(id, usuarioActualizado);
-        return (actualizado != null)
-                ? ResponseEntity.ok(actualizado)
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO usuarioActualizado) {
+        UsuarioDTO actualizado = usuarioService.actualizar(id, usuarioActualizado);
+        return ResponseEntity.ok(actualizado);
     }
 
     @DeleteMapping("/{id}")

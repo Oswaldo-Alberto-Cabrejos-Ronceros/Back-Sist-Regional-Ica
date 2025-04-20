@@ -1,22 +1,24 @@
 package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioService {
-    public List<Usuario> listarUsuarios();
+    List<UsuarioDTO> listarUsuarios();
 
-    public Optional<Usuario> obtenerPorId(Long id);
+    Optional<UsuarioDTO> obtenerPorId(Long id);
 
-    public Optional<Usuario> obtenerPorCorreo(String correo);
+    Optional<Usuario> obtenerPorCorreo(String correo); // para autenticación interna
 
-    public List<Usuario> obtenerPorRol(Long rolId);
+    List<UsuarioDTO> obtenerPorRol(Long rolId);
 
-    public Usuario guardar(Usuario usuario);
+    UsuarioDTO guardar(UsuarioRequestDTO usuarioRequestDTO); // cambia DTO por RequestDTO
 
-    public Usuario actualizar(Long id, Usuario nuevoUsuario);
+    UsuarioDTO actualizar(Long id, UsuarioRequestDTO usuarioRequestDTO); // idem
 
-    public void eliminar(Long id);
+    void eliminar(Long id);
 }

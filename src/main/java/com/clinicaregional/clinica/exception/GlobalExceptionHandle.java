@@ -1,4 +1,5 @@
 package com.clinicaregional.clinica.exception;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import lombok.AllArgsConstructor;
@@ -40,7 +41,7 @@ public class GlobalExceptionHandle {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class ErrorResponse{
+    public static class ErrorResponse {
         private String message;
     }
 }

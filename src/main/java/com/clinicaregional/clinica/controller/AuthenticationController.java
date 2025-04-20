@@ -27,22 +27,22 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
+    //funcion para agregar cookie a la respuesta
+    private void addCokkie(HttpServletResponse response,String name, String value){
+        Cookie cookie = new Cookie(name,value);
+        cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "Lax");
+        cookie.setSecure(false); //en produccion ira en true al trabajar en https
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         AuthenticationResponseDTO authenticationResponseDTO = authenticationService.authenticateUser(loginRequestDTO);
         //configuramos cookies httponly
-        Cookie accessToken = new Cookie("jwtToken", authenticationResponseDTO.getJwtToken());
-        accessToken.setHttpOnly(true);
-        accessToken.setAttribute("SameSite", "Lax");
-        accessToken.setSecure(false); //en produccion ira en true al trabajar en https
-        accessToken.setPath("/");
-        response.addCookie(accessToken);
-        Cookie refreshToken = new Cookie("refreshToken", authenticationResponseDTO.getRefreshToken());
-        refreshToken.setHttpOnly(true);
-        refreshToken.setAttribute("SameSite", "Lax");
-        refreshToken.setSecure(false);
-        refreshToken.setPath("/");
-        response.addCookie(refreshToken);
+        addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
+        addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
         AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getName(), authenticationResponseDTO.getRole());
         return ResponseEntity.ok(responseToSend);
     }
@@ -59,14 +59,9 @@ public class AuthenticationController {
         }
 
         try {
-            String newRefreshToken = authenticationService.refreshToken(refreshToken.get().getValue());
+            String newAccessToken = authenticationService.refreshToken(refreshToken.get().getValue());
             //creamos nueva cookie
-            Cookie refreshTokenCookie = new Cookie("refreshToken", newRefreshToken);
-            refreshTokenCookie.setHttpOnly(true);
-            refreshTokenCookie.setAttribute("SameSite", "Lax");
-            refreshTokenCookie.setSecure(false);
-            refreshTokenCookie.setPath("/");
-            response.addCookie(refreshTokenCookie);
+            addCokkie(response,"jwtToken",newAccessToken);
             return ResponseEntity.ok(Map.of("Message", "Token refrescado correctamente"));
         } catch (JwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -77,18 +72,8 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody UsuarioRequestDTO UsuarioRequestDTO, HttpServletResponse response) {
         AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerUser(UsuarioRequestDTO);
         //configuramos cookies httponly
-        Cookie accessToken = new Cookie("jwtToken", authenticationResponseDTO.getJwtToken());
-        accessToken.setHttpOnly(true);
-        accessToken.setAttribute("SameSite", "Lax");
-        accessToken.setSecure(false); //en produccion ira en true al trabajar en https
-        accessToken.setPath("/");
-        response.addCookie(accessToken);
-        Cookie refreshToken = new Cookie("refreshToken", authenticationResponseDTO.getRefreshToken());
-        refreshToken.setHttpOnly(true);
-        refreshToken.setAttribute("SameSite", "Lax");
-        refreshToken.setSecure(false);
-        refreshToken.setPath("/");
-        response.addCookie(refreshToken);
+        addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
+        addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
         AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getName(), authenticationResponseDTO.getRole());
         return ResponseEntity.ok(responseToSend);
     }

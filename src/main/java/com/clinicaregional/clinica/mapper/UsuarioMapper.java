@@ -27,7 +27,7 @@ public class UsuarioMapper {
     }
 
     public Usuario mapFromUsuarioRequestDTOToUsuario(UsuarioRequestDTO usuarioRequestDTO) {
-        return new Usuario(null,usuarioRequestDTO.getNombre(),usuarioRequestDTO.getCorreo(),usuarioRequestDTO.getContrasena(),usuarioRequestDTO.isEstado(),rolMapper.mapToRol(usuarioRequestDTO.getRol()));
+        return new Usuario(null,usuarioRequestDTO.getNombre(),usuarioRequestDTO.getCorreo(),usuarioRequestDTO.getPassword(),usuarioRequestDTO.isEstado(),rolMapper.mapToRol(usuarioRequestDTO.getRol()));
     }
 
 

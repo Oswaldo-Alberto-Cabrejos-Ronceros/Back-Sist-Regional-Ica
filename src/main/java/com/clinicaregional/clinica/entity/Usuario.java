@@ -20,8 +20,7 @@ public class Usuario {
 
     private String nombre;
     private String correo;
-    @Column(name = "contrasena") 
-    private String contrasena;
+    private String password;
     private boolean estado;
 
     @ManyToOne(fetch = FetchType.EAGER)

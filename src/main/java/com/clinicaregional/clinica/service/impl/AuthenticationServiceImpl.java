@@ -49,8 +49,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         System.out.println(userDetails);
         System.out.println(userDetails.getPassword());
         System.out.println(loginRequestDTO.getCorreo());
-        System.out.println(loginRequestDTO.getContrasena());
-        if (passwordEncoder.matches(loginRequestDTO.getContrasena(), userDetails.getPassword())) {
+        System.out.println(loginRequestDTO.getPassword());
+        if (passwordEncoder.matches(loginRequestDTO.getPassword(), userDetails.getPassword())) {
             // generamos token
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
                     userDetails.getAuthorities());

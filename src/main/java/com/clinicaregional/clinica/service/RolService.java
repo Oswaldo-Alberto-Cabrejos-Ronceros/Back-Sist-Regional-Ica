@@ -1,18 +1,19 @@
 package com.clinicaregional.clinica.service;
 
+import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.entity.Rol;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface RolService {
-    public List<Rol> listarRoles();
+    public List<RolDTO> listarRoles();
 
-    public Optional<Rol> obtenerPorId(Long id);
+    public Optional<RolDTO> obtenerPorId(Long id);
 
-    public Rol guardar(Rol rol);
+    public RolDTO guardar(RolDTO rolDTO);
 
-    public Rol actualizar(Long id, Rol nuevoRol);
+    public RolDTO actualizar(Long id, RolDTO nuevoRol);
 
     public void eliminar(Long id);
 }

@@ -5,6 +5,7 @@ import com.clinicaregional.clinica.dto.AuthenticationResponseDTO;
 import com.clinicaregional.clinica.dto.LoginRequestDTO;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import io.jsonwebtoken.JwtException;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Controller for Authentication")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
 

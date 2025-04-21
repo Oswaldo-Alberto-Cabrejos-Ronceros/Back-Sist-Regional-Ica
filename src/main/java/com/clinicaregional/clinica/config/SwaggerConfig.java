@@ -9,45 +9,42 @@ import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 
+@Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "API USUARIOS",
-                description = "Usuarios API Documentation",
-                termsOfService = "www.proyecto-prod.com/terminos_y_condiciones",
+                title = "API - Clínica Regional",
+                description = "Documentación de la API para el backend de Clínica Regional",
                 version = "1.0.0",
+                termsOfService = "https://clinicaregional.pe/terminos",
                 contact = @Contact(
                         name = "Diego Aguilar",
-                        url = "https://proyecto-prod.com",
+                        url = "https://clinicaregional.pe",
                         email = "diegoaguilar5461@gmail.com"
                 ),
                 license = @License(
-                        name = "Standard Software Use License for UnProgramadorNace",
-                        url = "www.proyecto-prod.com/licence"
+                        name = "Licencia de uso interno",
+                        url = "https://clinicaregional.pe/licencia"
                 )
         ),
         servers = {
-                @Server(
-                        description = "DEV SERVER",
-                        url = "http://localhost:8080"
-                ),
-                @Server(
-                        description = "PROD SERVER",
-                        url = "http://proyecto-prod:8080"
-                )
+                @Server(url = "http://localhost:8080", description = "Servidor Local"),
+                @Server(url = "https://clinicaregional.pe/api", description = "Servidor Producción")
         },
-        security = @SecurityRequirement(
-                name = "Security Token"
-        )
+        security = {
+                @SecurityRequirement(name = "Security Token")
+        }
 )
 @SecurityScheme(
         name = "Security Token",
-        description = "Access Token For My API",
-        type = SecuritySchemeType.HTTP,
-        paramName = HttpHeaders.AUTHORIZATION,
-        in = SecuritySchemeIn.HEADER,
+        description = "JWT token necesario para autenticación",
         scheme = "bearer",
-        bearerFormat = "JWT"
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        in = SecuritySchemeIn.HEADER,
+        paramName = HttpHeaders.AUTHORIZATION
 )
-public class SwaggerConfig {}
+public class SwaggerConfig {
+}

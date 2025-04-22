@@ -30,7 +30,7 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
-
+    
     @Autowired
     public SecurityConfig(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;

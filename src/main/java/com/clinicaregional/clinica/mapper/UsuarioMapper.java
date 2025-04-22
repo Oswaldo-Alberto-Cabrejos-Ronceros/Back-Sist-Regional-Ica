@@ -30,5 +30,4 @@ public class UsuarioMapper {
         return new Usuario(null,usuarioRequestDTO.getNombre(),usuarioRequestDTO.getCorreo(),usuarioRequestDTO.getPassword(),usuarioRequestDTO.isEstado(),rolMapper.mapToRol(usuarioRequestDTO.getRol()));
     }
 
-
 }

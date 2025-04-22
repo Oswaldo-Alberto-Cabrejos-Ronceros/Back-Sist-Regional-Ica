@@ -24,7 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Usuario usuario = usuarioService.obtenerPorCorreo(username).orElseThrow(()->new UsernameNotFoundException("Usuario no encontrado"));
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(usuario.getRol().getNombre()));
         return new org.springframework.security.core.userdetails.User(
-                usuario.getCorreo(), usuario.getContraseña(), authorities
+                usuario.getCorreo(), usuario.getPassword(), authorities
         );
     }
 }

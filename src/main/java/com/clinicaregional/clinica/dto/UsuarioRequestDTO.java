@@ -13,7 +13,7 @@ public class UsuarioRequestDTO {
     
     private String nombre;
     private String correo;
-    private String contraseña;
+    private String password;
     private boolean estado;
     private RolDTO rol; 
 

@@ -31,29 +31,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UsuarioMapper usuarioMapper;
 
     @Autowired
-    public AuthenticationServiceImpl(JwtUtil jwtUtil, UsuarioService usuarioService, UserDetailsServiceImpl userDetailsServiceImpl,UsuarioMapper usuarioMapper) {
+    public AuthenticationServiceImpl(JwtUtil jwtUtil,
+            UsuarioService usuarioService,
+            UserDetailsServiceImpl userDetailsServiceImpl,
+            UsuarioMapper usuarioMapper,
+            PasswordEncoder passwordEncoder) {
         this.jwtUtil = jwtUtil;
         this.usuarioService = usuarioService;
-        this.passwordEncoder = new BCryptPasswordEncoder();
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.usuarioMapper = usuarioMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public AuthenticationResponseDTO authenticateUser(LoginRequestDTO loginRequestDTO) {
-        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(loginRequestDTO.getEmail());
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(loginRequestDTO.getCorreo());
         System.out.println(userDetails);
         System.out.println(userDetails.getPassword());
-        System.out.println(loginRequestDTO.getEmail());
+        System.out.println(loginRequestDTO.getCorreo());
         System.out.println(loginRequestDTO.getPassword());
         if (passwordEncoder.matches(loginRequestDTO.getPassword(), userDetails.getPassword())) {
             // generamos token
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
+                    userDetails.getAuthorities());
             String jwtToken = jwtUtil.generateAccessToken(authentication);
             // generamos refresh token
             String refreshToken = jwtUtil.generateRefreshToken(authentication);
             // obtenemos al usuario
-            Usuario usuario = usuarioService.obtenerPorCorreo(userDetails.getUsername()).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+            Usuario usuario = usuarioService.obtenerPorCorreo(userDetails.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
             UsuarioDTO usuarioDTO = usuarioMapper.mapToUsuarioDTO(usuario);
             return usuarioMapper.mapToAuthenticationResponseDTO(usuarioDTO, jwtToken, refreshToken);
         } else {
@@ -67,7 +73,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (isValid) {
             String email = jwtUtil.getEmailFromJwt(refreshToken);
             UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
+                    userDetails.getAuthorities());
             return jwtUtil.generateAccessToken(authentication);
         } else {
             throw new JwtException("Error al validad token de refresco");
@@ -82,7 +89,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         UsuarioDTO usuarioGuardado = usuarioService.guardar(usuarioRequestDTO);
 
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
+                userDetails.getAuthorities());
 
         String jwtToken = jwtUtil.generateAccessToken(authentication);
         String refreshToken = jwtUtil.generateRefreshToken(authentication);

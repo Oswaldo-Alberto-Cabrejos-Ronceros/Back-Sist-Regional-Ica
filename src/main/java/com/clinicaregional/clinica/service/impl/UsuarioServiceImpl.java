@@ -68,7 +68,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         //hasheamos la contraseña
 
-        usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
         rolRepository.findById(request.getRol().getId()).ifPresentOrElse(usuario::setRol, () -> {
             throw new IllegalStateException("El rol especificado no existe");
@@ -84,7 +84,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         //hasheamos la contraseña
 
-        usuario.setContraseña(passwordEncoder.encode(request.getContraseña()));
+        usuario.setPassword(passwordEncoder.encode(request.getPassword()));
 
         rolRepository.findById(request.getRol().getId()).ifPresentOrElse(usuario::setRol, () -> {
             throw new IllegalStateException("El rol especificado no existe");

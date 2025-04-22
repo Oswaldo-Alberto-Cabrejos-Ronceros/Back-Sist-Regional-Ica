@@ -20,7 +20,7 @@ public class Usuario {
 
     private String nombre;
     private String correo;
-    private String contraseña;
+    private String password;
     private boolean estado;
 
     @ManyToOne(fetch = FetchType.EAGER)

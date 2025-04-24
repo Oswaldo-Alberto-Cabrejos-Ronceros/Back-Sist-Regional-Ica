@@ -3,10 +3,10 @@
 -- ===========================================
 
 -- Roles
+INSERT INTO roles (nombre, descripcion) VALUES ('PACIENTE', 'Paciente registrado');
 INSERT INTO roles (nombre, descripcion) VALUES ('ADMIN', 'Administrador del sistema');
 INSERT INTO roles (nombre, descripcion) VALUES ('RECEPCIONISTA', 'Recepcionista de la clínica');
 INSERT INTO roles (nombre, descripcion) VALUES ('MEDICO', 'Médico registrado');
-INSERT INTO roles (nombre, descripcion) VALUES ('PACIENTE', 'Paciente registrado');
 
 -- Usuarios
 

@@ -15,7 +15,7 @@ public class UsuarioMapper {
     }
 
     public UsuarioDTO mapToUsuarioDTO(Usuario usuario) {
-        return new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getRol().getNombre(), usuario.isEstado(), rolMapper.mapToRolDTO(usuario.getRol()));
+        return new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getCorreo(), usuario.isEstado(), rolMapper.mapToRolDTO(usuario.getRol()));
     }
 
     public Usuario mapToUsuario(UsuarioDTO usuarioDTO) {

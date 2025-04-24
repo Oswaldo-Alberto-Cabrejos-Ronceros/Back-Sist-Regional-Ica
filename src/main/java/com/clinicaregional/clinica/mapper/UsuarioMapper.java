@@ -15,7 +15,7 @@ public class UsuarioMapper {
     }
 
     public UsuarioDTO mapToUsuarioDTO(Usuario usuario) {
-        return new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getCorreo(), usuario.isEstado(), rolMapper.mapToRolDTO(usuario.getRol()));
+        return new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getRol().getNombre(), usuario.isEstado(), rolMapper.mapToRolDTO(usuario.getRol()));
     }
 
     public Usuario mapToUsuario(UsuarioDTO usuarioDTO) {
@@ -23,7 +23,7 @@ public class UsuarioMapper {
     }
 
     public AuthenticationResponseDTO mapToAuthenticationResponseDTO(UsuarioDTO usuarioDTO, String jwtToken, String refreshToken) {
-        return new AuthenticationResponseDTO(usuarioDTO.getId(), usuarioDTO.getNombre(), usuarioDTO.getCorreo(), jwtToken, refreshToken);
+        return new AuthenticationResponseDTO(usuarioDTO.getId(), usuarioDTO.getNombre(), usuarioDTO.getRol().getNombre(), jwtToken, refreshToken);
     }
 
     public Usuario mapFromUsuarioRequestDTOToUsuario(UsuarioRequestDTO usuarioRequestDTO) {

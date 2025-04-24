@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         AuthenticationResponseDTO authenticationResponseDTO = authenticationService.authenticateUser(loginRequestDTO);
         //configuramos cookies httponly
         addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
@@ -71,7 +72,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody UsuarioRequestDTO UsuarioRequestDTO, HttpServletResponse response) {
+    public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody @Valid UsuarioRequestDTO UsuarioRequestDTO, HttpServletResponse response) {
         AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerUser(UsuarioRequestDTO);
         //configuramos cookies httponly
         addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());

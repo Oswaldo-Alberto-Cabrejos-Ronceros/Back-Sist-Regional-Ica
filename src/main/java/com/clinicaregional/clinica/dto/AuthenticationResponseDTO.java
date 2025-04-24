@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL) //para que solo se incluyan en las respuestas los not null
 public class AuthenticationResponseDTO {
     private Long usuarioId;
     private String name;
@@ -20,6 +22,5 @@ public class AuthenticationResponseDTO {
         this.name=name;
         this.role=role;
     }
-
 }
 

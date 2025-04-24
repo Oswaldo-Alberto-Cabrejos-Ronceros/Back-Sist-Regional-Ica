@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.controller;
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.service.RolService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class RolController {
     }
 
     @PostMapping
-    public ResponseEntity<RolDTO> crearRol(@RequestBody RolDTO rol) {
+    public ResponseEntity<RolDTO> crearRol(@RequestBody @Valid RolDTO rol) {
         RolDTO creado = rolService.guardar(rol);
         return ResponseEntity.status(201).body(creado);
     }
@@ -39,7 +40,7 @@ public class RolController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RolDTO> actualizarRol(@PathVariable Long id, @RequestBody RolDTO rolActualizado) {
+    public ResponseEntity<RolDTO> actualizarRol(@PathVariable Long id, @RequestBody @Valid RolDTO rolActualizado) {
         RolDTO actualizado = rolService.actualizar(id, rolActualizado);
         return (actualizado != null)
                 ? ResponseEntity.ok(actualizado)

@@ -10,10 +10,10 @@ INSERT INTO roles (nombre, descripcion) VALUES ('MEDICO', 'Médico registrado');
 
 -- Usuarios
 
-INSERT INTO usuarios (nombre, correo, password, estado, rol_id) VALUES ('Administrador General', 'admin@clinica.pe', '$2a$10$A6moyBUedVAE8w.hbutoheY5vqZR2olstiqbPZ6sltfv6xpY6BL3K', true, 1);
-INSERT INTO usuarios (nombre, correo, password, estado, rol_id) VALUES ('Recepcionista Uno', 'recepcion@clinica.pe', '$2a$10$A..65yqIoatIs10tZt8Os.rqwdePrhZPYO1Am3DVIh2Hl13rrsxgu', true, 2);
-INSERT INTO usuarios (nombre, correo, password, estado, rol_id) VALUES ('Dr. Pedro Ruiz', 'medico@clinica.pe', '$2a$10$fM61eP/8ZNqGziY4N8u5OOQZgUseEOTJuFEPbWoxO.1dxIrg51QOi', true, 3);
-INSERT INTO usuarios (nombre, correo, password, estado, rol_id) VALUES ('Paciente de Prueba', 'paciente@clinica.pe', '$2a$10$iUYUC9lMWfmZUigR48h5SuChvbwf/q1f9DAq/uA7Wc9wJQEa22xiO', true, 4);
+INSERT INTO usuarios (correo, password, estado, rol_id) VALUES ('admin@clinica.pe', '$2a$10$A6moyBUedVAE8w.hbutoheY5vqZR2olstiqbPZ6sltfv6xpY6BL3K', true, 1);
+INSERT INTO usuarios (correo, password, estado, rol_id) VALUES ('recepcion@clinica.pe', '$2a$10$A..65yqIoatIs10tZt8Os.rqwdePrhZPYO1Am3DVIh2Hl13rrsxgu', true, 2);
+INSERT INTO usuarios (correo, password, estado, rol_id) VALUES ( 'medico@clinica.pe', '$2a$10$fM61eP/8ZNqGziY4N8u5OOQZgUseEOTJuFEPbWoxO.1dxIrg51QOi', true, 3);
+INSERT INTO usuarios (correo, password, estado, rol_id) VALUES ('paciente@clinica.pe', '$2a$10$iUYUC9lMWfmZUigR48h5SuChvbwf/q1f9DAq/uA7Wc9wJQEa22xiO', true, 4);
 
 
 -- -- Tipos de documento

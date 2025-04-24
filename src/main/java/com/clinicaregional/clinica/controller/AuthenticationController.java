@@ -46,7 +46,7 @@ public class AuthenticationController {
         //configuramos cookies httponly
         addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
         addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
-        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getName(), authenticationResponseDTO.getRole());
+        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
         return ResponseEntity.ok(responseToSend);
     }
 
@@ -77,7 +77,7 @@ public class AuthenticationController {
         //configuramos cookies httponly
         addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
         addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
-        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getName(), authenticationResponseDTO.getRole());
+        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
         return ResponseEntity.ok(responseToSend);
     }
 

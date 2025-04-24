@@ -15,7 +15,6 @@ import lombok.Setter;
 @Setter
 public class UsuarioRequestDTO {
     @NotBlank(message = "Nombre es obligatorio")
-    private String nombre;
     @Email(message = "correo debe ser un email valido")
     private String correo;
     @NotBlank(message = "La contraseña es obligatoria")

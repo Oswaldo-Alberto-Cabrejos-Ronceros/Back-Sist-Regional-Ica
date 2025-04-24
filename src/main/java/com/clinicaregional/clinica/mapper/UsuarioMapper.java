@@ -15,19 +15,19 @@ public class UsuarioMapper {
     }
 
     public UsuarioDTO mapToUsuarioDTO(Usuario usuario) {
-        return new UsuarioDTO(usuario.getId(), usuario.getNombre(), usuario.getCorreo(), usuario.isEstado(), rolMapper.mapToRolDTO(usuario.getRol()));
+        return new UsuarioDTO(usuario.getId(), usuario.getCorreo(), usuario.isEstado(), rolMapper.mapToRolDTO(usuario.getRol()));
     }
 
     public Usuario mapToUsuario(UsuarioDTO usuarioDTO) {
-        return new Usuario(usuarioDTO.getId(), usuarioDTO.getNombre(), usuarioDTO.getCorreo(), null, usuarioDTO.isEstado(), rolMapper.mapToRol(usuarioDTO.getRol()));
+        return new Usuario(usuarioDTO.getId(), usuarioDTO.getCorreo(), null, usuarioDTO.isEstado(), rolMapper.mapToRol(usuarioDTO.getRol()));
     }
 
     public AuthenticationResponseDTO mapToAuthenticationResponseDTO(UsuarioDTO usuarioDTO, String jwtToken, String refreshToken) {
-        return new AuthenticationResponseDTO(usuarioDTO.getId(), usuarioDTO.getNombre(), usuarioDTO.getRol().getNombre(), jwtToken, refreshToken);
+        return new AuthenticationResponseDTO(usuarioDTO.getId(), usuarioDTO.getRol().getNombre(), jwtToken, refreshToken);
     }
 
     public Usuario mapFromUsuarioRequestDTOToUsuario(UsuarioRequestDTO usuarioRequestDTO) {
-        return new Usuario(null,usuarioRequestDTO.getNombre(),usuarioRequestDTO.getCorreo(),usuarioRequestDTO.getPassword(),usuarioRequestDTO.isEstado(),rolMapper.mapToRol(usuarioRequestDTO.getRol()));
+        return new Usuario(null,usuarioRequestDTO.getCorreo(),usuarioRequestDTO.getPassword(),usuarioRequestDTO.isEstado(),rolMapper.mapToRol(usuarioRequestDTO.getRol()));
     }
 
 }

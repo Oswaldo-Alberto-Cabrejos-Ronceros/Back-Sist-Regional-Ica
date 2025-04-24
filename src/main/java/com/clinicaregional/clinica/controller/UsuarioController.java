@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.controller;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
 import com.clinicaregional.clinica.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody UsuarioRequestDTO usuarioRequestDTO) {
+    public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody @Valid UsuarioRequestDTO usuarioRequestDTO) {
         UsuarioDTO usuarioCreated = usuarioService.guardar(usuarioRequestDTO);
         return ResponseEntity.status(201).body(usuarioCreated);
     }
@@ -48,7 +49,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO usuarioActualizado) {
+    public ResponseEntity<UsuarioDTO> actualizarUsuario(@PathVariable Long id, @RequestBody @Valid UsuarioRequestDTO usuarioActualizado) {
         UsuarioDTO actualizado = usuarioService.actualizar(id, usuarioActualizado);
         return ResponseEntity.ok(actualizado);
     }

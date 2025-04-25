@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Filter;
 
 @Getter
 @Setter
@@ -12,7 +14,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "usuarios")
-public class Usuario {
+@SuperBuilder
+//para filtro
+@Filter(name = "estadoActivo", condition = "estado = :estado")
+public class Usuario extends EntidadConEstado{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +25,6 @@ public class Usuario {
 
     private String correo;
     private String password;
-    private boolean estado;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", nullable = false)

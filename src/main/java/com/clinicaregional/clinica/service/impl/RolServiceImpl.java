@@ -6,6 +6,7 @@ import com.clinicaregional.clinica.mapper.RolMapper;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.RolService;
 
+import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class RolServiceImpl implements RolService {
+public class RolServiceImpl extends FiltroEstado implements RolService {
 
     private final RolRepository rolRepository;
     private final RolMapper rolMapper;
@@ -29,18 +30,21 @@ public class RolServiceImpl implements RolService {
     @Transactional(readOnly = true)
     @Override
     public List<RolDTO> listarRoles() {
+        activarFiltroEstado(true);
         return rolRepository.findAll().stream().map(rolMapper::mapToRolDTO).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<RolDTO> obtenerPorId(Long id) {
-        return rolRepository.findById(id).map(rolMapper::mapToRolDTO);
+        activarFiltroEstado(true);
+        return rolRepository.findByIdAndEstadoIsTrue(id).map(rolMapper::mapToRolDTO);
     }
 
     @Transactional
     @Override
     public RolDTO guardar(RolDTO rolDTO) {
+        activarFiltroEstado(true);
         if (rolRepository.existsByNombre(rolDTO.getNombre())) {
             throw new IllegalArgumentException("El nombre ya existe");
         }
@@ -52,6 +56,7 @@ public class RolServiceImpl implements RolService {
     @Transactional
     @Override
     public RolDTO actualizar(Long id, RolDTO Rol) {
+        activarFiltroEstado(true);
         Rol rolExisting = rolRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe un rol con el id" + id));
         rolExisting.setNombre(Rol.getNombre());
         rolExisting.setDescripcion(Rol.getDescripcion());
@@ -62,6 +67,9 @@ public class RolServiceImpl implements RolService {
     @Transactional
     @Override
     public void eliminar(Long id) {
-        rolRepository.deleteById(id);
+        activarFiltroEstado(true);
+        Rol rol = rolRepository.findById(id).orElseThrow(()->new RuntimeException("No existe un rol con el id" + id));
+        rol.setEstado(false); //borrado lógico
+        rolRepository.save(rol);
     }
 }

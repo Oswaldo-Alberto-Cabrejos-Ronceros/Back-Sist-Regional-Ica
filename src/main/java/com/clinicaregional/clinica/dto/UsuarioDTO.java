@@ -13,7 +13,6 @@ public class UsuarioDTO {
 
     private Long id;
     private String correo;
-    private boolean estado;
     private RolDTO rol;
     
 }

@@ -45,7 +45,7 @@ public class RolServiceImpl extends FiltroEstado implements RolService {
     @Override
     public RolDTO guardar(RolDTO rolDTO) {
         activarFiltroEstado(true);
-        if (rolRepository.existsByNombre(rolDTO.getNombre())) {
+        if (rolRepository.existsByNombreAndEstadoIsTrue(rolDTO.getNombre())) {
             throw new IllegalArgumentException("El nombre ya existe");
         }
         Rol rol = rolMapper.mapToRol(rolDTO);
@@ -57,7 +57,10 @@ public class RolServiceImpl extends FiltroEstado implements RolService {
     @Override
     public RolDTO actualizar(Long id, RolDTO Rol) {
         activarFiltroEstado(true);
-        Rol rolExisting = rolRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe un rol con el id" + id));
+        Rol rolExisting = rolRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un rol con el id" + id));
+        if (rolRepository.existsByNombreAndEstadoIsTrue(Rol.getNombre())) {
+            throw new IllegalArgumentException("El nombre ya existe");
+        }
         rolExisting.setNombre(Rol.getNombre());
         rolExisting.setDescripcion(Rol.getDescripcion());
         Rol savedRol = rolRepository.save(rolExisting);
@@ -68,7 +71,7 @@ public class RolServiceImpl extends FiltroEstado implements RolService {
     @Override
     public void eliminar(Long id) {
         activarFiltroEstado(true);
-        Rol rol = rolRepository.findById(id).orElseThrow(()->new RuntimeException("No existe un rol con el id" + id));
+        Rol rol = rolRepository.findByIdAndEstadoIsTrue(id).orElseThrow(()->new RuntimeException("No existe un rol con el id" + id));
         rol.setEstado(false); //borrado lógico
         rolRepository.save(rol);
     }

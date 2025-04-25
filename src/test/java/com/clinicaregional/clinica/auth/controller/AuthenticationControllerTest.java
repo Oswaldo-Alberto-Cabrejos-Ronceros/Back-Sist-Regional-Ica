@@ -90,5 +90,16 @@ class AuthenticationControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    
+    @Test
+    void refreshToken_fallido_conTokenInvalido_devuelve401() throws Exception {
+        Cookie refreshCookie = new Cookie("refreshToken", "invalidToken");
+
+        when(authenticationService.refreshToken("invalidToken"))
+                .thenThrow(new RuntimeException("Token inválido"));
+
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(refreshCookie))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Token inválido"));
+    }
 }

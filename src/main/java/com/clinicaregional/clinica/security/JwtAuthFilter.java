@@ -30,7 +30,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     //sobreescribimos el metodo que se encarga de decir en que casos no se aplica el filterInternal
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    public boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         return path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register") || path.startsWith("/api/auth/refresh");
     }

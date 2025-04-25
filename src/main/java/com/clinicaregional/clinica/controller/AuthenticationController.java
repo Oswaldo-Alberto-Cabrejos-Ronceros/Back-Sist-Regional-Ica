@@ -41,13 +41,16 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
-        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.authenticateUser(loginRequestDTO);
-        //configuramos cookies httponly
-        addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
-        addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
-        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
-        return ResponseEntity.ok(responseToSend);
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+        try {
+            AuthenticationResponseDTO authenticationResponseDTO = authenticationService.authenticateUser(loginRequestDTO);
+            addCokkie(response, "jwtToken", authenticationResponseDTO.getJwtToken());
+            addCokkie(response, "refreshToken", authenticationResponseDTO.getRefreshToken());
+            AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
+            return ResponseEntity.ok(responseToSend);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/refresh")

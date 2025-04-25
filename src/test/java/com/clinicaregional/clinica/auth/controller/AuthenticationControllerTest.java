@@ -55,4 +55,19 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.usuarioId").value(1L))
                 .andExpect(jsonPath("$.role").value("PACIENTE"));
     }
+
+    
+    @Test
+    void loginFallido_conCredencialesInvalidas_devuelve401() throws Exception {
+        LoginRequestDTO request = new LoginRequestDTO("testerDiego@gmail.com", "123456");
+
+        when(authenticationService.authenticateUser(any()))
+                .thenThrow(new RuntimeException("Credenciales incorrectas"));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Credenciales incorrectas"));
+    }
 }

@@ -102,4 +102,21 @@ class AuthenticationControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("Token inválido"));
     }
+    
+    @Test
+    void registroUsuario_nuevoUsuario_devuelveJWTYCookies() throws Exception {
+        UsuarioRequestDTO request = new UsuarioRequestDTO("nuevo@correo.com", "Password1", true, null);
+        AuthenticationResponseDTO response = new AuthenticationResponseDTO(10L, "PACIENTE", "jwt123", "refresh123");
+
+        when(authenticationService.registerUser(any())).thenReturn(response);
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists("jwtToken"))
+                .andExpect(cookie().exists("refreshToken"))
+                .andExpect(jsonPath("$.usuarioId").value(10L))
+                .andExpect(jsonPath("$.role").value("PACIENTE"));
+    }
 }

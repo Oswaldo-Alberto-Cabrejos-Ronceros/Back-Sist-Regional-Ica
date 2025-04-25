@@ -22,101 +22,121 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = AuthenticationController.class, excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
+                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+                org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
 })
 class AuthenticationControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockitoBean
-    private AuthenticationService authenticationService;
+        @MockitoBean
+        private AuthenticationService authenticationService;
 
-    @MockitoBean
-    private JwtUtil jwtUtil;
+        @MockitoBean
+        private JwtUtil jwtUtil;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @Test
-    void loginExitoso_conCredencialesValidas_devuelveJwt() throws Exception {
-        LoginRequestDTO request = new LoginRequestDTO("testerDiego@gmail.com", "123456");
-        AuthenticationResponseDTO response = new AuthenticationResponseDTO(1L, "PACIENTE", "accessToken", "refreshToken");
+        @Test
+        void loginExitoso_conCredencialesValidas_devuelveJwt() throws Exception {
+                LoginRequestDTO request = new LoginRequestDTO("testerDiego@gmail.com", "123456");
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO(1L, "PACIENTE", "accessToken",
+                                "refreshToken");
 
-        when(authenticationService.authenticateUser(any())).thenReturn(response);
+                when(authenticationService.authenticateUser(any())).thenReturn(response);
 
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(cookie().exists("jwtToken"))
-                .andExpect(cookie().exists("refreshToken"))
-                .andExpect(jsonPath("$.usuarioId").value(1L))
-                .andExpect(jsonPath("$.role").value("PACIENTE"));
-    }
+                mockMvc.perform(post("/api/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(cookie().exists("jwtToken"))
+                                .andExpect(cookie().exists("refreshToken"))
+                                .andExpect(jsonPath("$.usuarioId").value(1L))
+                                .andExpect(jsonPath("$.role").value("PACIENTE"));
+        }
 
-    
-    @Test
-    void loginFallido_conCredencialesInvalidas_devuelve401() throws Exception {
-        LoginRequestDTO request = new LoginRequestDTO("testerDiego@gmail.com", "123456");
+        @Test
+        void loginFallido_conCredencialesInvalidas_devuelve401() throws Exception {
+                LoginRequestDTO request = new LoginRequestDTO("testerDiego@gmail.com", "123456");
 
-        when(authenticationService.authenticateUser(any()))
-                .thenThrow(new RuntimeException("Credenciales incorrectas"));
+                when(authenticationService.authenticateUser(any()))
+                                .thenThrow(new RuntimeException("Credenciales incorrectas"));
 
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Credenciales incorrectas"));
-    }
+                mockMvc.perform(post("/api/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.error").value("Credenciales incorrectas"));
+        }
 
-    @Test
-    void refreshToken_exitoso_conCookieValida() throws Exception {
-        Cookie refreshCookie = new Cookie("refreshToken", "validRefreshToken");
-        when(authenticationService.refreshToken("validRefreshToken"))
-                .thenReturn("nuevoAccessToken");
+        @Test
+        void refreshToken_exitoso_conCookieValida() throws Exception {
+                Cookie refreshCookie = new Cookie("refreshToken", "validRefreshToken");
+                when(authenticationService.refreshToken("validRefreshToken"))
+                                .thenReturn("nuevoAccessToken");
 
-        mockMvc.perform(post("/api/auth/refresh")
-                        .cookie(refreshCookie))
-                .andExpect(status().isOk())
-                .andExpect(cookie().exists("jwtToken"))
-                .andExpect(jsonPath("$.Message").value("Token refrescado correctamente"));
-    }
+                mockMvc.perform(post("/api/auth/refresh")
+                                .cookie(refreshCookie))
+                                .andExpect(status().isOk())
+                                .andExpect(cookie().exists("jwtToken"))
+                                .andExpect(jsonPath("$.Message").value("Token refrescado correctamente"));
+        }
 
-    @Test
-    void refreshToken_fallido_sinCookies_devuelve401() throws Exception {
-        mockMvc.perform(post("/api/auth/refresh"))
-                .andExpect(status().isUnauthorized());
-    }
+        @Test
+        void refreshToken_fallido_sinCookies_devuelve401() throws Exception {
+                mockMvc.perform(post("/api/auth/refresh"))
+                                .andExpect(status().isUnauthorized());
+        }
 
-    @Test
-    void refreshToken_fallido_conTokenInvalido_devuelve401() throws Exception {
-        Cookie refreshCookie = new Cookie("refreshToken", "invalidToken");
+        @Test
+        void refreshToken_fallido_conTokenInvalido_devuelve401() throws Exception {
+                Cookie refreshCookie = new Cookie("refreshToken", "invalidToken");
 
-        when(authenticationService.refreshToken("invalidToken"))
-                .thenThrow(new RuntimeException("Token inválido"));
+                when(authenticationService.refreshToken("invalidToken"))
+                                .thenThrow(new RuntimeException("Token inválido"));
 
-        mockMvc.perform(post("/api/auth/refresh")
-                        .cookie(refreshCookie))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Token inválido"));
-    }
-    
-    @Test
-    void registroUsuario_nuevoUsuario_devuelveJWTYCookies() throws Exception {
-        UsuarioRequestDTO request = new UsuarioRequestDTO("nuevo@correo.com", "Password1", true, null);
-        AuthenticationResponseDTO response = new AuthenticationResponseDTO(10L, "PACIENTE", "jwt123", "refresh123");
+                mockMvc.perform(post("/api/auth/refresh")
+                                .cookie(refreshCookie))
+                                .andExpect(status().isUnauthorized())
+                                .andExpect(jsonPath("$.error").value("Token inválido"));
+        }
 
-        when(authenticationService.registerUser(any())).thenReturn(response);
+        @Test
+        void registroUsuario_nuevoUsuario_devuelveJWTYCookies() throws Exception {
+                UsuarioRequestDTO request = new UsuarioRequestDTO("diegoTester@gmail.com", "Tester5461", true, null);
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO(10L, "PACIENTE", "jwt123",
+                                "refresh123");
 
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(cookie().exists("jwtToken"))
-                .andExpect(cookie().exists("refreshToken"))
-                .andExpect(jsonPath("$.usuarioId").value(10L))
-                .andExpect(jsonPath("$.role").value("PACIENTE"));
-    }
+                when(authenticationService.registerUser(any())).thenReturn(response);
+
+                mockMvc.perform(post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(cookie().exists("jwtToken"))
+                                .andExpect(cookie().exists("refreshToken"))
+                                .andExpect(jsonPath("$.usuarioId").value(10L))
+                                .andExpect(jsonPath("$.role").value("PACIENTE"));
+        }
+
+        @Test
+        void loginFallido_conBodyVacio_devuelve400() throws Exception {
+                mockMvc.perform(post("/api/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}")) // body vacío
+                                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void registroFallido_conDatosInvalidos_devuelve400() throws Exception {
+                UsuarioRequestDTO requestInvalido = new UsuarioRequestDTO("", "", true, null);
+
+                mockMvc.perform(post("/api/auth/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(requestInvalido)))
+                                .andExpect(status().isBadRequest());
+        }
+
 }

@@ -93,12 +93,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);
     }
 
-
     @Transactional
     @Override
     public void eliminar(Long id) {
-        usuarioRepository.deleteById(id);
+        usuarioRepository.findById(id).ifPresentOrElse(
+            u -> usuarioRepository.deleteById(id),
+            () -> { throw new RuntimeException("Usuario no encontrado"); }
+        );
     }
-
+    
 }
 

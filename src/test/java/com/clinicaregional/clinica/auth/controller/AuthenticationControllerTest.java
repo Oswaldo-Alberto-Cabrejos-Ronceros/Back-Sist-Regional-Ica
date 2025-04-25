@@ -70,4 +70,17 @@ class AuthenticationControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("Credenciales incorrectas"));
     }
+
+    @Test
+    void refreshToken_exitoso_conCookieValida() throws Exception {
+        Cookie refreshCookie = new Cookie("refreshToken", "validRefreshToken");
+        when(authenticationService.refreshToken("validRefreshToken"))
+                .thenReturn("nuevoAccessToken");
+
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(refreshCookie))
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists("jwtToken"))
+                .andExpect(jsonPath("$.Message").value("Token refrescado correctamente"));
+    }
 }

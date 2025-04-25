@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.security;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.clinicaregional.clinica.service.impl.UserDetailsServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,47 +30,54 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
-
+    
+    @Autowired
     public SecurityConfig(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,AuthenticationProvider authenticationProvider) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider)
+            throws Exception {
         http.authenticationProvider(authenticationProvider);
-        return http.csrf(crsf -> crsf.disable()) //habilitar crsf en produccion
+        return http.csrf(csrf -> csrf.disable()) // corregido: era crsf
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(
-                        httpRequest -> {
-                            httpRequest.requestMatchers("/auth/**").permitAll();
-                            //aqui iran los roles requeridos para cada endpoint
-                            httpRequest.requestMatchers("/api/**").permitAll();
-                            httpRequest.anyRequest().authenticated();
-                        }
-                ).exceptionHandling(
-                        exception -> exception.authenticationEntryPoint(((request, response, authException) -> {
-                            response.setContentType("aplication/json");
+                .authorizeHttpRequests(httpRequest -> {
+                    httpRequest.requestMatchers(
+                            "/auth/**",
+                            "/api/**",
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**",
+                            "/api-docs/**",
+                            "/swagger-resources/**",
+                            "/webjars/**").permitAll();
+                    httpRequest.anyRequest().authenticated(); // importante si quieres proteger el resto
+                })
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json"); // corregido: era aplication/json
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.getWriter().write("{\"error\": \"UNAUTHORIZED\"}");
-                        })).accessDeniedHandler(((request, response, accessDeniedException) ->
-                        {
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setContentType("application/json");
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.getWriter().write("{\"error\": \"FORBIDDEN\"}");
-                        }
-                        ))
-                ).addFilterBefore(new JwtAuthFilter(jwtUtil), BasicAuthenticationFilter.class)
+                        }))
+                .addFilterBefore(new JwtAuthFilter(jwtUtil), BasicAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(AuthenticationService authenticationService, UserDetailsServiceImpl userDetailsServiceImpl) {
+    public AuthenticationProvider authenticationProvider(AuthenticationService authenticationService,
+            UserDetailsServiceImpl userDetailsServiceImpl) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder());
         provider.setUserDetailsService(userDetailsServiceImpl::loadUserByUsername);
@@ -86,7 +94,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type","X-Requested-With", "Accept"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

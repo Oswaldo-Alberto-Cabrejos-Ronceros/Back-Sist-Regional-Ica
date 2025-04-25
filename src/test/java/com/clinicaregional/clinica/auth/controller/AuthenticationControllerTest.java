@@ -83,4 +83,12 @@ class AuthenticationControllerTest {
                 .andExpect(cookie().exists("jwtToken"))
                 .andExpect(jsonPath("$.Message").value("Token refrescado correctamente"));
     }
+
+    @Test
+    void refreshToken_fallido_sinCookies_devuelve401() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    
 }

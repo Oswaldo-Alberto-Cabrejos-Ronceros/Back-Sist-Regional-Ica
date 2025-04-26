@@ -47,7 +47,7 @@ public class MedicoRequestDTO {
 
     private String imagen; //despues poner imagen predeterminada
 
-    @NotNull(message = "Fecha de contratacion es obligati")
+    @NotNull(message = "Fecha de contratacion es obligatorio")
     @PastOrPresent(message = "La fecha de contratación debe ser antes o hoy")
     private LocalDateTime fechaContratacion;
 

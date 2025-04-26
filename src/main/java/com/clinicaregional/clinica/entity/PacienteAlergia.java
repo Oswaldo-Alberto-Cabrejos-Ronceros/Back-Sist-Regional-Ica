@@ -14,13 +14,7 @@ import org.hibernate.annotations.Filter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "paciente_alergias",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        columnNames = {"paciente_id","alergia_id"}
-                )
-        }
-)
+@Table(name = "paciente_alergias")
 @SuperBuilder
 //para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")

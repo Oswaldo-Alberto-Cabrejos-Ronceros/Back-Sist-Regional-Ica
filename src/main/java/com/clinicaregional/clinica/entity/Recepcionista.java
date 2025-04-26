@@ -1,0 +1,35 @@
+package com.clinicaregional.clinica.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Filter;
+
+@Getter
+@Setter
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@Table(name = "recepcionistas")
+@Filter(name = "estadoActivo", condition = "estado = :estado")
+public class Recepcionista extends EntidadConEstado{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nombres;
+    private String apellidos;
+    private String numeroDocumento;
+
+    @ManyToOne
+    @JoinColumn(name = "tipo_documento_id")
+    private TipoDocumento tipoDocumento;
+
+    private String telefono;
+    private String direccion;
+
+    @OneToOne
+    @JoinColumn(name = "usuario_id", unique = true)
+    private Usuario usuario;
+}

@@ -29,7 +29,7 @@ public class MedicoServiceImpl implements MedicoService {
         this.medicoMapper = medicoMapper;
     }
 
-     @Override
+    @Override
     public List<MedicoResponseDTO> obtenerMedicos() {
         return medicoRepository.findAll()
                 .stream()

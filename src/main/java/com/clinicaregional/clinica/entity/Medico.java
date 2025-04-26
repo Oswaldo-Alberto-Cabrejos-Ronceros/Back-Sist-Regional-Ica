@@ -25,7 +25,7 @@ public class Medico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "dentista_id")
+    @Column(name = "medico_id")
     private Long id;
 
     private String nombres;

@@ -12,6 +12,7 @@ public class MedicoMapper {
     
     public MedicoResponseDTO mapToMedicoResponseDTO(Medico medico) {
         return new MedicoResponseDTO(
+            medico.getId(),
             medico.getNombres(),
             medico.getApellidos(),
             medico.getNumeroColegiatura(),

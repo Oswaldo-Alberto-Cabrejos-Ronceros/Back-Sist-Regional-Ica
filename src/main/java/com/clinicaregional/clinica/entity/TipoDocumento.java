@@ -22,7 +22,7 @@ public class TipoDocumento extends EntidadConEstado{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false) //para evitar duplicados
+    @Column(nullable = false) //para evitar duplicados
     private String nombre;
 
     private String descripcion;

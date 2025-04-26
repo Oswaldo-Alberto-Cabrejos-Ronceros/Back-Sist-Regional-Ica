@@ -47,6 +47,11 @@ public class UsuarioServiceImpl extends FiltroEstado implements UsuarioService {
         activarFiltroEstado(true);
         return usuarioRepository.findByIdAndEstadoIsTrue(id).map(usuarioMapper::mapToUsuarioDTO);
     }
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<Usuario> obtenerPorIdContenxt(Long id) {
+        return usuarioRepository.findById(id);
+    }
 
     @Transactional(readOnly = true)
     @Override

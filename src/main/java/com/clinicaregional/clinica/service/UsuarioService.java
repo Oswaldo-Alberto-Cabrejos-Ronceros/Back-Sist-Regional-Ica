@@ -12,6 +12,10 @@ public interface UsuarioService {
 
     Optional<UsuarioDTO> obtenerPorId(Long id);
 
+    //para mantener contexto
+
+    Optional<Usuario> obtenerPorIdContenxt(Long id);
+
     Optional<Usuario> obtenerPorCorreo(String correo); // para autenticación interna
 
     List<UsuarioDTO> obtenerPorRol(Long rolId);

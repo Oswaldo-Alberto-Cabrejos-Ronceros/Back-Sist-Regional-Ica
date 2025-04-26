@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Filter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Entity
@@ -28,6 +30,10 @@ public class Recepcionista extends EntidadConEstado{
 
     private String telefono;
     private String direccion;
+
+    private String turnoTrabajo;
+
+    private LocalDate fechaContratacion;
 
     @OneToOne
     @JoinColumn(name = "usuario_id", unique = true)

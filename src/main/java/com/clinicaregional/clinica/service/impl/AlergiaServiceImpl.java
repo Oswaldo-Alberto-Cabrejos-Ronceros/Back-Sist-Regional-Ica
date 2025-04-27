@@ -62,7 +62,7 @@ public class AlergiaServiceImpl implements AlergiaService {
     public AlergiaDTO crearAlergia(AlergiaDTO alergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
         if (alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())) {
-            throw new RuntimeException("El nombre ya existe");
+            throw new IllegalArgumentException("El nombre ya existe");
         }
         Alergia alergia = alergiaMapper.mapToAlergia(alergiaDTO);
         Alergia alergiaSaved = alergiaRepository.save(alergia);

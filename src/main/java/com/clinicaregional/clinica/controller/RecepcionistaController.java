@@ -4,6 +4,7 @@ import com.clinicaregional.clinica.entity.Recepcionista;
 import com.clinicaregional.clinica.service.RecepcionistaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -26,7 +27,7 @@ public class RecepcionistaController {
 
     @PostMapping
     public ResponseEntity<Recepcionista> registrar(@RequestBody Recepcionista recepcionista) {
-        return ResponseEntity.ok(recepcionistaService.guardar(recepcionista));
+        return ResponseEntity.status(HttpStatus.CREATED).body(recepcionistaService.guardar(recepcionista));
     }
 
     @PutMapping("/{id}")

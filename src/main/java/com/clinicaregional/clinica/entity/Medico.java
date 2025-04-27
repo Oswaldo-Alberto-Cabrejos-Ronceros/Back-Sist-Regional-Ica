@@ -16,15 +16,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Filter;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-
 @Table(name = "medicos")
-public class Medico {
+@SuperBuilder
+//para filtro
+@Filter(name = "estadoActivo", condition = "estado = :estado")
+public class Medico extends EntidadConEstado{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

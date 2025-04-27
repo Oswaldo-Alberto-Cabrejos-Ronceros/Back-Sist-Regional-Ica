@@ -2,8 +2,8 @@ package com.clinicaregional.clinica.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.clinicaregional.clinica.dto.MedicoRequestDTO;
-import com.clinicaregional.clinica.dto.MedicoResponseDTO;
+import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
+import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
 import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.entity.Usuario;
 

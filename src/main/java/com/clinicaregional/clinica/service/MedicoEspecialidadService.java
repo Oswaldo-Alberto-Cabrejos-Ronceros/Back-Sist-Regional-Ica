@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.service;
 
-import com.clinicaregional.clinica.dto.MedicoEspecialidadRequest;
-import com.clinicaregional.clinica.dto.MedicoEspecialidadResponse;
+import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
+import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
 import java.util.List;
 
 public interface MedicoEspecialidadService {

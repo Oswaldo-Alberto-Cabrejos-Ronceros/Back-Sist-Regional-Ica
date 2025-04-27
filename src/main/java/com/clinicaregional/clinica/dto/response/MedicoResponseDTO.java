@@ -1,9 +1,9 @@
-package com.clinicaregional.clinica.dto;
+package com.clinicaregional.clinica.dto.response;
 
 import java.time.LocalDateTime;
 
-import com.clinicaregional.clinica.entity.TipoContrato;
-import com.clinicaregional.clinica.entity.TipoMedico;
+import com.clinicaregional.clinica.enums.TipoContrato;
+import com.clinicaregional.clinica.enums.TipoMedico;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,8 +14,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MedicoRequestDTO {
+public class MedicoResponseDTO {
     
+    private Long id;
     private String nombres;
     private String apellidos;
     private String numeroColegiatura;
@@ -27,6 +28,6 @@ public class MedicoRequestDTO {
     private LocalDateTime fechaContratacion;
     private TipoContrato tipoContrato;
     private TipoMedico tipoMedico;
-    private Long usuarioId;
+    
 
 }

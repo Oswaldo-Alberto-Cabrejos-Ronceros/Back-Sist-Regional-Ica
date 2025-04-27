@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
-import com.clinicaregional.clinica.dto.MedicoEspecialidadRequest;
-import com.clinicaregional.clinica.dto.MedicoEspecialidadResponse;
+import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
+import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
 import com.clinicaregional.clinica.service.MedicoEspecialidadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

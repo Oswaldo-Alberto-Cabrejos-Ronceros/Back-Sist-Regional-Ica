@@ -2,8 +2,8 @@ package com.clinicaregional.clinica.service;
 
 import java.util.List;
 
-import com.clinicaregional.clinica.dto.MedicoRequestDTO;
-import com.clinicaregional.clinica.dto.MedicoResponseDTO;
+import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
+import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
 
 public interface MedicoService {
 

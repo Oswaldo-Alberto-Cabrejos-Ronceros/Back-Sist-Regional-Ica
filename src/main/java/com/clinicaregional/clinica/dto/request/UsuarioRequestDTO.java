@@ -1,5 +1,6 @@
-package com.clinicaregional.clinica.dto;
+package com.clinicaregional.clinica.dto.request;
 
+import com.clinicaregional.clinica.dto.RolDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

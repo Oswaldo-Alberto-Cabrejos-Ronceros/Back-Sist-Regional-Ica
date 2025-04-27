@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.dto.response;
 
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.enums.TurnoTrabajo;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDate;
@@ -16,7 +17,7 @@ public class RecepcionistaResponse {
     private TipoDocumento tipoDocumento;
     private String telefono;
     private String direccion;
-    private String turnoTrabajo;
+    private TurnoTrabajo turnoTrabajo;
     private LocalDate fechaContratacion;
     private Usuario usuario;
 }

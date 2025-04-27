@@ -1,6 +1,9 @@
 package com.clinicaregional.clinica.entity;
 
 import java.time.LocalDateTime;
+
+import com.clinicaregional.clinica.enums.TipoContrato;
+import com.clinicaregional.clinica.enums.TipoMedico;
 import jakarta.persistence.*;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

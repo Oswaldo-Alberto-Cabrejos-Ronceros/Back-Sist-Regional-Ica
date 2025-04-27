@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;

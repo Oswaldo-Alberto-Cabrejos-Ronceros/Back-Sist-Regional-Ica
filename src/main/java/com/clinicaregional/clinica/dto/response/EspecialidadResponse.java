@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.dto;
+package com.clinicaregional.clinica.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

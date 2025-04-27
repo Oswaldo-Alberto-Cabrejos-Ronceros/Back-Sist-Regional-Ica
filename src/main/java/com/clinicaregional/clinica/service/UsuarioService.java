@@ -2,7 +2,7 @@ package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 
 import java.util.List;
 import java.util.Optional;

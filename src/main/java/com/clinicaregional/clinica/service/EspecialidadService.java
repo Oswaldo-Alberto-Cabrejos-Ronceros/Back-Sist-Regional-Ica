@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.service;
 
-import com.clinicaregional.clinica.dto.EspecialidadRequest;
-import com.clinicaregional.clinica.dto.EspecialidadResponse;
+import com.clinicaregional.clinica.dto.request.EspecialidadRequest;
+import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 
 public interface EspecialidadService {
     

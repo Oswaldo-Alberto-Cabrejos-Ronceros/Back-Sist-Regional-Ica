@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
-import com.clinicaregional.clinica.dto.EspecialidadRequest;
-import com.clinicaregional.clinica.dto.EspecialidadResponse;
+import com.clinicaregional.clinica.dto.request.EspecialidadRequest;
+import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 import com.clinicaregional.clinica.service.EspecialidadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

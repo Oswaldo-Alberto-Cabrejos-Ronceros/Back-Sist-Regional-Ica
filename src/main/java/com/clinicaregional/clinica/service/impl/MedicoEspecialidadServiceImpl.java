@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.service.impl;
 
-import com.clinicaregional.clinica.dto.MedicoEspecialidadRequest;
-import com.clinicaregional.clinica.dto.MedicoEspecialidadResponse;
+import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
+import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
 import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.entity.Especialidad;
 import com.clinicaregional.clinica.entity.MedicoEspecialidad;

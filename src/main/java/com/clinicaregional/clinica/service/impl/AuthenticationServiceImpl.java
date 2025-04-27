@@ -3,9 +3,9 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
-import com.clinicaregional.clinica.dto.AuthenticationResponseDTO;
-import com.clinicaregional.clinica.dto.LoginRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
+import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.clinicaregional.clinica.service.UsuarioService;
@@ -17,7 +17,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

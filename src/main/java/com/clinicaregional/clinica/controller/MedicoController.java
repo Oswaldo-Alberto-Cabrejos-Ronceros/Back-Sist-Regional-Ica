@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
-import com.clinicaregional.clinica.dto.MedicoRequestDTO;
-import com.clinicaregional.clinica.dto.MedicoResponseDTO;
+import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
+import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
 import com.clinicaregional.clinica.service.MedicoService;
 
 import org.springframework.beans.factory.annotation.Autowired;

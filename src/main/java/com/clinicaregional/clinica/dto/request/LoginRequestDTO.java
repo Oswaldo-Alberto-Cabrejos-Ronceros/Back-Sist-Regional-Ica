@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.dto;
+package com.clinicaregional.clinica.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

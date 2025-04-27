@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.clinicaregional.clinica.repository.MedicoRepository;
-import com.clinicaregional.clinica.dto.MedicoRequestDTO;
-import com.clinicaregional.clinica.dto.MedicoResponseDTO;
+import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
+import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
 import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.MedicoMapper;

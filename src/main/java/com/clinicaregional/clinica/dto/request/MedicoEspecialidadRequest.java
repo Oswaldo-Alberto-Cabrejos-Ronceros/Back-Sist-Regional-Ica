@@ -1,8 +1,7 @@
-package com.clinicaregional.clinica.dto;
+package com.clinicaregional.clinica.dto.request;
 
 import java.time.LocalDate;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

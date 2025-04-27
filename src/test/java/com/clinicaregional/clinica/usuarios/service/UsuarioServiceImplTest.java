@@ -226,4 +226,13 @@ class UsuarioServiceImplTest {
                 assertThat(usuarios).isNotEmpty();
                 assertThat(usuarios.get(0).getCorreo()).isEqualTo("correo@correo.com");
         }
+
+        @Test
+        void listarUsuarios_vacio() {
+                when(usuarioRepository.findAll()).thenReturn(List.of());
+
+                List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
+
+                assertThat(usuarios).isEmpty();
+        }
 }

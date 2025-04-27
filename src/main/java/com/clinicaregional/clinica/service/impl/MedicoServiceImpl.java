@@ -42,8 +42,17 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
     @Override
     public MedicoResponseDTO guardarMedico(MedicoRequestDTO dto) {
         activarFiltroEstado(true);
+        if(medicoRepository.existsByNumeroColegiatura(dto.getNumeroColegiatura())) {
+            throw new RuntimeException("Ya existe un medico con el numero de colegiatura ingresado");
+        }
+        if(medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
+            throw new RuntimeException("Ya existe un medico con el rne ingresado");
+        }
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(dto.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
+        if(medicoRepository.existsByUsuario(usuario)){
+            throw new RuntimeException("Ya existe un medico con el usuario ingresado");
+        }
         Medico medico = medicoMapper.mapToMedico(dto, usuario);
         Medico guardado = medicoRepository.save(medico);
         return medicoMapper.mapToMedicoResponseDTO(guardado);
@@ -57,6 +66,16 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
 
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(dto.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
+
+        if(medicoRepository.existsByNumeroColegiatura(dto.getNumeroColegiatura())) {
+            throw new RuntimeException("Ya existe un medico con el numero de colegiatura ingresado");
+        }
+        if(medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
+            throw new RuntimeException("Ya existe un medico con el rne ingresado");
+        }
+        if(medicoRepository.existsByUsuario(usuario)){
+            throw new RuntimeException("Ya existe un medico con el usuario ingresado");
+        }
 
         // Actualizar campos
         medico.setNombres(dto.getNombres());

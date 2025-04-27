@@ -9,7 +9,6 @@ import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
 import com.clinicaregional.clinica.util.FiltroEstado;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,7 +41,11 @@ class UsuarioServiceImplTest {
                 rolRepository,
                 passwordEncoder,
                 usuarioMapper,
-                filtroEstado);
+                filtroEstado
+        );
+
+        lenient().doNothing().when(filtroEstado).activarFiltroEstado(true);
+        lenient().when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
     }
 
     @Test
@@ -52,15 +55,14 @@ class UsuarioServiceImplTest {
                 "password",
                 true,
                 new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"));
+
         Usuario usuario = new Usuario();
         usuario.setCorreo(request.getCorreo());
         usuario.setPassword("encodedPassword");
 
-        when(usuarioRepository.existsByCorreo(request.getCorreo())).thenReturn(false);
+        when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(false);
         when(usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request)).thenReturn(usuario);
-        when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
-        when(rolRepository.findById(1L))
-                .thenReturn(Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
+        when(rolRepository.findById(1L)).thenReturn(Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
         when(usuarioRepository.save(usuario)).thenReturn(usuario);
         when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
                 new UsuarioDTO(1L, request.getCorreo(), new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")));
@@ -79,7 +81,7 @@ class UsuarioServiceImplTest {
                 true,
                 new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"));
 
-        when(usuarioRepository.existsByCorreo(request.getCorreo())).thenReturn(true);
+        when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(true);
 
         assertThatThrownBy(() -> usuarioService.guardar(request))
                 .isInstanceOf(IllegalStateException.class)
@@ -92,7 +94,7 @@ class UsuarioServiceImplTest {
         usuario.setId(1L);
         usuario.setCorreo("tester5461@gmail.com");
 
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
         when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
                 new UsuarioDTO(1L, "tester5461@gmail.com", new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")));
 
@@ -104,10 +106,14 @@ class UsuarioServiceImplTest {
 
     @Test
     void eliminar_usuario_existente() {
-        Long id = 1L;
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setCorreo("tester5461@gmail.com");
 
-        usuarioService.eliminar(id);
+        when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
 
-        verify(usuarioRepository).deleteById(id);
+        usuarioService.eliminar(1L);
+
+        verify(usuarioRepository).save(usuario);
     }
 }

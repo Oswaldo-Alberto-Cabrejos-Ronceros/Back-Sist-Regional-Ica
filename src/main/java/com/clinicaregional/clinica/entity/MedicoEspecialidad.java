@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.persistence.EmbeddedId;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Filter;
 
 @Entity
 @Getter
@@ -20,7 +22,10 @@ import jakarta.persistence.EmbeddedId;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "medico_especialidad")
-public class MedicoEspecialidad {
+@SuperBuilder
+//para filtro
+@Filter(name = "estadoActivo", condition = "estado = :estado")
+public class MedicoEspecialidad extends EntidadConEstado {
 
     @EmbeddedId
     private MedicoEspecialidadId id;

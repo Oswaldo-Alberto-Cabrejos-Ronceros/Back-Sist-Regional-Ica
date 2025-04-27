@@ -200,4 +200,13 @@ class UsuarioServiceImplTest {
                 assertThat(usuarioExistente.getEstado()).isFalse();
                 verify(usuarioRepository, times(1)).save(usuarioExistente);
         }
+
+        @Test
+        void eliminar_usuarioNoExistente_lanzaExcepcion() {
+                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.empty());
+
+                assertThatThrownBy(() -> usuarioService.eliminar(1L))
+                                .isInstanceOf(RuntimeException.class)
+                                .hasMessageContaining("No existe un usuario con el id:");
+        }
 }

@@ -44,12 +44,12 @@ public class RecepcionistaMapper {
                 .nombres(entity.getNombres())
                 .apellidos(entity.getApellidos())
                 .numeroDocumento(entity.getNumeroDocumento())
-                .tipoDocumento(entity.getTipoDocumento())
+                .tipoDocumentoId(entity.getTipoDocumento().getId())
                 .telefono(entity.getTelefono())
                 .direccion(entity.getDireccion())
                 .turnoTrabajo(entity.getTurnoTrabajo())
                 .fechaContratacion(entity.getFechaContratacion())
-                .usuario(entity.getUsuario())
+                .usuarioId(entity.getUsuario().getId())
                 .build();
     }
 }

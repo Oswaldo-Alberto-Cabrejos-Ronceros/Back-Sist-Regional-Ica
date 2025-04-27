@@ -28,6 +28,5 @@ public class MedicoResponseDTO {
     private LocalDateTime fechaContratacion;
     private TipoContrato tipoContrato;
     private TipoMedico tipoMedico;
-    
-
+    private Long usuarioId;
 }

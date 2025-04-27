@@ -9,22 +9,15 @@ import com.clinicaregional.clinica.entity.Usuario;
 
 @Component
 public class MedicoMapper {
-    
+
     public MedicoResponseDTO mapToMedicoResponseDTO(Medico medico) {
-        return new MedicoResponseDTO(
-            medico.getId(),
-            medico.getNombres(),
-            medico.getApellidos(),
-            medico.getNumeroColegiatura(),
-            medico.getNumeroRNE(),
-            medico.getTelefono(),
-            medico.getDireccion(),
-            medico.getDescripcion(),
-            medico.getImagen(),
-            medico.getFechaContratacion(),
-            medico.getTipoContrato(),
-            medico.getTipoMedico()
-        );
+        return new MedicoResponseDTO(medico.getId(),
+                medico.getNombres(), medico.getApellidos(),
+                medico.getNumeroColegiatura(), medico.getNumeroRNE(),
+                medico.getTelefono(), medico.getDireccion(),
+                medico.getDescripcion(), medico.getImagen(),
+                medico.getFechaContratacion(), medico.getTipoContrato(),
+                medico.getTipoMedico(), medico.getUsuario().getId());
     }
 
     public Medico mapToMedico(MedicoRequestDTO dto, Usuario usuario) {
@@ -43,5 +36,5 @@ public class MedicoMapper {
         medico.setUsuario(usuario);
         return medico;
     }
-    
+
 }

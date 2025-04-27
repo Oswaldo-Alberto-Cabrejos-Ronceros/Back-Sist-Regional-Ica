@@ -1,5 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
+import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.entity.Recepcionista;
 import com.clinicaregional.clinica.service.RecepcionistaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,22 +18,22 @@ import java.util.List;
 public class RecepcionistaController {
     private final RecepcionistaService recepcionistaService;
     @GetMapping
-    public ResponseEntity<List<Recepcionista>> listarTodos() {
+    public ResponseEntity<List<RecepcionistaResponse>> listarTodos() {
         return ResponseEntity.ok(recepcionistaService.listar());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Recepcionista> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(recepcionistaService.obtenerPorId(id));
+    public ResponseEntity<RecepcionistaResponse> obtenerPorId(@PathVariable Long id) {
+        return recepcionistaService.obtenerPorId(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Recepcionista> registrar(@RequestBody Recepcionista recepcionista) {
+    public ResponseEntity<RecepcionistaResponse> registrar(@RequestBody RecepcionistaRequest recepcionista) {
         return ResponseEntity.status(HttpStatus.CREATED).body(recepcionistaService.guardar(recepcionista));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Recepcionista> actualizar(@PathVariable Long id, @RequestBody Recepcionista recepcionista) {
+    public ResponseEntity<RecepcionistaResponse> actualizar(@PathVariable Long id, @RequestBody RecepcionistaRequest recepcionista) {
         return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionista));
     }
 

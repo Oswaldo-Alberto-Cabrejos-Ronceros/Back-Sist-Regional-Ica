@@ -2,8 +2,8 @@ package com.clinicaregional.clinica.dto.response;
 
 import java.time.LocalDateTime;
 
-import com.clinicaregional.clinica.entity.TipoContrato;
-import com.clinicaregional.clinica.entity.TipoMedico;
+import com.clinicaregional.clinica.enums.TipoContrato;
+import com.clinicaregional.clinica.enums.TipoMedico;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

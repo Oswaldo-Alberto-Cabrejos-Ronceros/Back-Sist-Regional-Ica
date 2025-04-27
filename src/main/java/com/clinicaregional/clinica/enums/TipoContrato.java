@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.entity;
+package com.clinicaregional.clinica.enums;
 
 public enum TipoContrato {
     FIJO,

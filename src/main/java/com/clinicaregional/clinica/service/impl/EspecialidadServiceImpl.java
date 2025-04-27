@@ -22,6 +22,9 @@ public class EspecialidadServiceImpl extends FiltroEstado implements Especialida
     @Transactional
     public EspecialidadResponse guardarEspecialidad(EspecialidadRequest especialidadRequest) {
         activarFiltroEstado(true);
+        if(especialidadRepository.existsByNombre(especialidadRequest.getNombre())){
+            throw new RuntimeException("Ya existe una especialidad con el nombre ingresado");
+        }
         Especialidad especialidad = EspecialidadMapper.toEntity(especialidadRequest);
         Especialidad savedEspecialidad = especialidadRepository.save(especialidad);
         return EspecialidadMapper.toResponse(savedEspecialidad);
@@ -33,7 +36,9 @@ public class EspecialidadServiceImpl extends FiltroEstado implements Especialida
         activarFiltroEstado(true);
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("Especialidad no encontrada con ID: " + id));
-        
+        if(especialidadRepository.existsByNombre(especialidadRequest.getNombre())){
+            throw new RuntimeException("Ya existe una especialidad con el nombre ingresado");
+        }
         // Actualizamos los campos manualmente
         especialidad.setNombre(especialidadRequest.getNombre());
         especialidad.setDescripcion(especialidadRequest.getDescripcion());

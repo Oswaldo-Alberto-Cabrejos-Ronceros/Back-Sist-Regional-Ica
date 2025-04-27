@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface EspecialidadRepository extends JpaRepository<Especialidad, Long> {
     // Aquí puedes agregar métodos personalizados si es necesario
     Optional<Especialidad> findByIdAndEstadoIsTrue(Long id);
+    boolean existsByNombre(String nombre);
 }

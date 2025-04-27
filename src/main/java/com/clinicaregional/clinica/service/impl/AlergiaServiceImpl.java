@@ -53,8 +53,9 @@ public class AlergiaServiceImpl implements AlergiaService {
     @Override
     public Optional<AlergiaDTO> getAlergiaPorId(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        return alergiaRepository.findByIdAndEstadoIsTrue(id)
-                .map(alergiaMapper::mapToAlergiaDTO);
+        Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("No existe una alergia con el id " + id));
+        return Optional.of(alergiaMapper.mapToAlergiaDTO(alergia));
     }
 
     @Transactional
@@ -62,7 +63,7 @@ public class AlergiaServiceImpl implements AlergiaService {
     public AlergiaDTO crearAlergia(AlergiaDTO alergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
         if (alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())) {
-            throw new IllegalArgumentException("El nombre ya existe");
+            throw new RuntimeException("El nombre ya existe");
         }
         Alergia alergia = alergiaMapper.mapToAlergia(alergiaDTO);
         Alergia alergiaSaved = alergiaRepository.save(alergia);
@@ -74,7 +75,7 @@ public class AlergiaServiceImpl implements AlergiaService {
     public AlergiaDTO updateAlergia(Long id, AlergiaDTO alergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
         Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No se encontró el id"));
+                .orElseThrow(() -> new RuntimeException("No existe una alergia con el id " + id));
         if (alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())) {
             throw new RuntimeException("El nombre ya existe");
         }
@@ -89,8 +90,8 @@ public class AlergiaServiceImpl implements AlergiaService {
     public void eliminarAlergia(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No se encontró el id"));
-        alergia.setEstado(false); // borrado lógico
+                .orElseThrow(() -> new RuntimeException("No existe una alergia con el id " + id));
+        alergia.setEstado(false); // Borrado lógico
         alergiaRepository.save(alergia);
     }
 }

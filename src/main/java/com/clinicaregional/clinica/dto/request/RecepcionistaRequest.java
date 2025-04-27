@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.dto.request;
 
+import com.clinicaregional.clinica.enums.TurnoTrabajo;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -30,7 +31,7 @@ public class RecepcionistaRequest {
     private String direccion;
 
 
-    private String turnoTrabajo;
+    private TurnoTrabajo turnoTrabajo;
 
     @NotNull(message = "Fecha de contratacion es obligatorio")
     @PastOrPresent(message = "La fecha de contratación debe ser antes o hoy")

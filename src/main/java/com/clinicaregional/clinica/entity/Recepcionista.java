@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.entity;
 
+import com.clinicaregional.clinica.enums.TurnoTrabajo;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 @SuperBuilder
 @Table(name = "recepcionistas")
 @Filter(name = "estadoActivo", condition = "estado = :estado")
-public class Recepcionista extends EntidadConEstado{
+public class Recepcionista extends EntidadConEstado {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,9 +30,11 @@ public class Recepcionista extends EntidadConEstado{
     private TipoDocumento tipoDocumento;
 
     private String telefono;
+
     private String direccion;
 
-    private String turnoTrabajo;
+    @Enumerated(EnumType.STRING)
+    private TurnoTrabajo turnoTrabajo;
 
     private LocalDate fechaContratacion;
 

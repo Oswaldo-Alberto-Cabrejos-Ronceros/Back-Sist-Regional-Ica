@@ -37,6 +37,5 @@ public class RecepcionistaRequest {
     @PastOrPresent(message = "La fecha de contratación debe ser antes o hoy")
     private LocalDate fechaContratacion;
 
-    @Null
     private Long usuarioId;
 }

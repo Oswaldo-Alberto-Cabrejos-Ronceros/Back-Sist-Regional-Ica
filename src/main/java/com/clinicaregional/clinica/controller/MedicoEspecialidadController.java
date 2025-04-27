@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.controller;
 import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
 import com.clinicaregional.clinica.service.MedicoEspecialidadService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class MedicoEspecialidadController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MedicoEspecialidadResponse registrarRelacionME(@RequestBody MedicoEspecialidadRequest request) {
+    public MedicoEspecialidadResponse registrarRelacionME(@RequestBody @Valid MedicoEspecialidadRequest request) {
         return medicoEspecialidadService.registrarRelacionME(request);
     }
 

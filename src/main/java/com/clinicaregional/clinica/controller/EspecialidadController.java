@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.controller;
 import com.clinicaregional.clinica.dto.request.EspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 import com.clinicaregional.clinica.service.EspecialidadService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,13 +32,13 @@ public class EspecialidadController {
     }
 
     @PostMapping
-    public ResponseEntity<EspecialidadResponse> guardarEspecialidad(@RequestBody EspecialidadRequest especialidadRequest) {
+    public ResponseEntity<EspecialidadResponse> guardarEspecialidad(@RequestBody @Valid EspecialidadRequest especialidadRequest) {
         EspecialidadResponse response = especialidadService.guardarEspecialidad(especialidadRequest);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EspecialidadResponse> actualizarEspecialidad(@PathVariable Long id, @RequestBody EspecialidadRequest especialidadRequest) {
+    public ResponseEntity<EspecialidadResponse> actualizarEspecialidad(@PathVariable Long id, @RequestBody @Valid EspecialidadRequest especialidadRequest) {
         EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest);
         return ResponseEntity.ok(response);
     }

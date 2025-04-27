@@ -1,8 +1,8 @@
 package com.clinicaregional.clinica.service;
 
-import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
-import com.clinicaregional.clinica.dto.AuthenticationResponseDTO;
-import com.clinicaregional.clinica.dto.LoginRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
+import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
 
 
 public interface AuthenticationService {

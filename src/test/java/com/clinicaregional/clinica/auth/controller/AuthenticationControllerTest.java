@@ -2,9 +2,9 @@
 package com.clinicaregional.clinica.auth.controller;
 
 import com.clinicaregional.clinica.controller.AuthenticationController;
-import com.clinicaregional.clinica.dto.AuthenticationResponseDTO;
-import com.clinicaregional.clinica.dto.LoginRequestDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
 import com.clinicaregional.clinica.security.JwtUtil;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;

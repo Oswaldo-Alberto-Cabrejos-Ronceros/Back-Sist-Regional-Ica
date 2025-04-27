@@ -2,19 +2,21 @@ package com.clinicaregional.clinica.usuarios.service;
 
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
+import com.clinicaregional.clinica.util.FiltroEstado;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +29,9 @@ import static org.mockito.Mockito.*;
 class UsuarioServiceTest {
 
     @Mock
+    private FiltroEstado filtroEstado;
+
+    @Mock
     private UsuarioRepository usuarioRepository;
 
     @Mock
@@ -34,6 +39,9 @@ class UsuarioServiceTest {
 
     @Mock
     private UsuarioMapper usuarioMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UsuarioServiceImpl usuarioService;
@@ -46,16 +54,20 @@ class UsuarioServiceTest {
     @BeforeEach
     void setUp() {
         rol = new Rol(1L, "PACIENTE", "Paciente del sistema");
-        usuario = new Usuario(1L, "tester5461@gmail.com", "Tester5461", true, rol);
+        usuario = new Usuario(1L, "tester5461@gmail.com", "Tester5461", rol);
         RolDTO rolDTO = new RolDTO(1L, "PACIENTE", "Paciente del sistema");
-        usuarioDTO = new UsuarioDTO(1L, "tester5461@gmail.com", true, rolDTO);
+        usuarioDTO = new UsuarioDTO(1L, "tester5461@gmail.com", rolDTO);
         usuarioRequestDTO = new UsuarioRequestDTO("tester5461@gmail.com", "Tester5461", true, rolDTO);
+
+        lenient().doNothing().when(filtroEstado).activarFiltroEstado(true);
+        lenient().when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
     }
 
     @Test
     void guardarUsuario_exitoso() {
-        when(rolRepository.findById(1L)).thenReturn(Optional.of(rol));
+        when(usuarioRepository.existsByCorreoAndEstadoIsTrue(usuarioRequestDTO.getCorreo())).thenReturn(false);
         when(usuarioMapper.mapFromUsuarioRequestDTOToUsuario(usuarioRequestDTO)).thenReturn(usuario);
+        when(rolRepository.findById(1L)).thenReturn(Optional.of(rol));
         when(usuarioRepository.save(usuario)).thenReturn(usuario);
         when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(usuarioDTO);
 
@@ -79,7 +91,7 @@ class UsuarioServiceTest {
 
     @Test
     void obtenerPorId_existente() {
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
         when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(usuarioDTO);
 
         Optional<UsuarioDTO> result = usuarioService.obtenerPorId(1L);
@@ -90,7 +102,7 @@ class UsuarioServiceTest {
 
     @Test
     void obtenerPorId_noExistente() {
-        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
         Optional<UsuarioDTO> result = usuarioService.obtenerPorId(99L);
 
@@ -129,7 +141,7 @@ class UsuarioServiceTest {
 
     @Test
     void actualizarUsuario_exitoso() {
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
         when(rolRepository.findById(1L)).thenReturn(Optional.of(rol));
         when(usuarioRepository.save(usuario)).thenReturn(usuario);
         when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(usuarioDTO);
@@ -141,26 +153,28 @@ class UsuarioServiceTest {
 
     @Test
     void actualizarUsuario_noExistente_deberiaLanzarExcepcion() {
-        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> usuarioService.actualizar(99L, usuarioRequestDTO))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No existe un usuario con el id:");
     }
 
     @Test
     void eliminarUsuario_exitoso() {
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
 
         usuarioService.eliminar(1L);
 
-        verify(usuarioRepository, times(1)).deleteById(1L);
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
     }
 
     @Test
     void eliminarUsuario_noExistente_deberiaLanzarExcepcion() {
-        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> usuarioService.eliminar(99L))
-                .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No existe un usuario con el id:");
     }
 }

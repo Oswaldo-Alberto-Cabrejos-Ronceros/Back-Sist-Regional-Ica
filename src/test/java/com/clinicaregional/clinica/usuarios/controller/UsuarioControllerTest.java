@@ -2,7 +2,7 @@ package com.clinicaregional.clinica.usuarios.controller;
 
 import com.clinicaregional.clinica.controller.UsuarioController;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.security.JwtAuthFilter;
 import com.clinicaregional.clinica.security.JwtUtil;
 import com.clinicaregional.clinica.dto.RolDTO;
@@ -54,7 +54,7 @@ class UsuarioControllerTest {
     @BeforeEach
     void setUp() {
         RolDTO rolDTO = new RolDTO(1L, "PACIENTE", "Paciente del sistema");
-        usuarioDTO = new UsuarioDTO(1L, "tester5461@gmail.com", true, rolDTO);
+        usuarioDTO = new UsuarioDTO(1L, "tester5461@gmail.com", rolDTO);
         usuarioRequestDTO = new UsuarioRequestDTO("tester5461@gmail.com", "Tester5461", true, rolDTO);
     }
 

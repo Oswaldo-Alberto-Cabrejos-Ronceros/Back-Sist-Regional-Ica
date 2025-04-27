@@ -1,13 +1,15 @@
 package com.clinicaregional.clinica.usuarios.service;
 
 import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
+import com.clinicaregional.clinica.util.FiltroEstado;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +27,7 @@ class UsuarioServiceImplTest {
     private RolRepository rolRepository;
     private PasswordEncoder passwordEncoder;
     private UsuarioMapper usuarioMapper;
+    private FiltroEstado filtroEstado;
 
     @BeforeEach
     void setUp() {
@@ -32,18 +35,23 @@ class UsuarioServiceImplTest {
         rolRepository = mock(RolRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
         usuarioMapper = mock(UsuarioMapper.class);
+        filtroEstado = mock(FiltroEstado.class);
 
-        usuarioService = new UsuarioServiceImpl(usuarioRepository, rolRepository, passwordEncoder, usuarioMapper);
+        usuarioService = new UsuarioServiceImpl(
+                usuarioRepository,
+                rolRepository,
+                passwordEncoder,
+                usuarioMapper,
+                filtroEstado);
     }
 
     @Test
     void guardar_usuarioNuevo_exitoso() {
         UsuarioRequestDTO request = new UsuarioRequestDTO(
-                "tester5461@gmail.com", 
-                "password", 
-                true, 
-                new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")
-        );
+                "tester5461@gmail.com",
+                "password",
+                true,
+                new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"));
         Usuario usuario = new Usuario();
         usuario.setCorreo(request.getCorreo());
         usuario.setPassword("encodedPassword");
@@ -51,11 +59,11 @@ class UsuarioServiceImplTest {
         when(usuarioRepository.existsByCorreo(request.getCorreo())).thenReturn(false);
         when(usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request)).thenReturn(usuario);
         when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
-        when(rolRepository.findById(1L)).thenReturn(Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
+        when(rolRepository.findById(1L))
+                .thenReturn(Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
         when(usuarioRepository.save(usuario)).thenReturn(usuario);
         when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
-                new UsuarioDTO(1L, request.getCorreo(), true, new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"))
-        );
+                new UsuarioDTO(1L, request.getCorreo(), new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")));
 
         UsuarioDTO result = usuarioService.guardar(request);
 
@@ -66,11 +74,10 @@ class UsuarioServiceImplTest {
     @Test
     void guardar_usuarioExistente_lanzaExcepcion() {
         UsuarioRequestDTO request = new UsuarioRequestDTO(
-                "tester5461@gmail.com", 
-                "password", 
-                true, 
-                new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")
-        );
+                "tester5461@gmail.com",
+                "password",
+                true,
+                new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"));
 
         when(usuarioRepository.existsByCorreo(request.getCorreo())).thenReturn(true);
 
@@ -87,8 +94,7 @@ class UsuarioServiceImplTest {
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
-                new UsuarioDTO(1L, "tester5461@gmail.com", true, new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"))
-        );
+                new UsuarioDTO(1L, "tester5461@gmail.com", new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")));
 
         Optional<UsuarioDTO> result = usuarioService.obtenerPorId(1L);
 

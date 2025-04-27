@@ -1,8 +1,8 @@
 package com.clinicaregional.clinica.auth.service;
 
-import com.clinicaregional.clinica.dto.AuthenticationResponseDTO;
-import com.clinicaregional.clinica.dto.LoginRequestDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
+import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.security.JwtUtil;
@@ -64,7 +64,7 @@ class AuthenticationServiceImplTest {
         usuario.setCorreo("tester5461@gmail.com");
         usuario.setPassword("encodedPassword");
 
-        UsuarioDTO usuarioDTO = new UsuarioDTO(1L, "tester5461@gmail.com", true, null);
+        UsuarioDTO usuarioDTO = new UsuarioDTO(1L, "tester5461@gmail.com", null);
 
         when(userDetailsServiceImpl.loadUserByUsername("tester5461@gmail.com")).thenReturn(userDetails);
         when(passwordEncoder.matches("Tester5461", "encodedPassword")).thenReturn(true);

@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import java.util.stream.Collectors;
 import java.util.List;
 
+import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.MedicoService;
 
 @Service
-public class MedicoServiceImpl implements MedicoService {
+public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
 
     private final MedicoRepository medicoRepository;
     private final MedicoMapper medicoMapper;
@@ -31,6 +32,7 @@ public class MedicoServiceImpl implements MedicoService {
 
     @Override
     public List<MedicoResponseDTO> obtenerMedicos() {
+        activarFiltroEstado(true);
         return medicoRepository.findAll()
                 .stream()
                 .map(medicoMapper::mapToMedicoResponseDTO)
@@ -39,7 +41,8 @@ public class MedicoServiceImpl implements MedicoService {
 
     @Override
     public MedicoResponseDTO guardarMedico(MedicoRequestDTO dto) {
-        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+        activarFiltroEstado(true);
+        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(dto.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
         Medico medico = medicoMapper.mapToMedico(dto, usuario);
         Medico guardado = medicoRepository.save(medico);
@@ -48,10 +51,11 @@ public class MedicoServiceImpl implements MedicoService {
 
     @Override
     public MedicoResponseDTO actualizarMedico(Long id, MedicoRequestDTO dto) {
-        Medico medico = medicoRepository.findById(id)
+        activarFiltroEstado(true);
+        Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new RuntimeException("Médico no encontrado con ID: " + id));
 
-        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(dto.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
 
         // Actualizar campos
@@ -74,9 +78,9 @@ public class MedicoServiceImpl implements MedicoService {
 
     @Override
     public void eliminarMedico(Long id) {
-        if (!medicoRepository.existsById(id)) {
-            throw new RuntimeException("Médico no encontrado con ID: " + id);
-        }
-        medicoRepository.deleteById(id);
+        activarFiltroEstado(true);
+        Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Medico no encontrado con ID: " + id));
+        medico.setEstado(false); //borrado logico
+        medicoRepository.save(medico);
     }
 }

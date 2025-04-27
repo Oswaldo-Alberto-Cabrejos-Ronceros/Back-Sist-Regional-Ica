@@ -31,7 +31,7 @@ class RolServiceTest {
     private RolMapper rolMapper;
 
     @Mock
-    private FiltroEstado filtroEstado;
+    private FiltroEstado filtroEstado; // 👈 agregado
 
     @InjectMocks
     private RolServiceImpl rolService;

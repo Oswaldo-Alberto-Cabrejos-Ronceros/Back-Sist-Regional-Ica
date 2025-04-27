@@ -157,4 +157,16 @@ class UsuarioServiceImplTest {
                 assertThat(result).isNotNull();
                 assertThat(result.getCorreo()).isEqualTo("existente@correo.com");
         }
+
+        @Test
+        void actualizar_usuarioNoExistente_lanzaExcepcion() {
+                UsuarioRequestDTO request = new UsuarioRequestDTO(
+                                "correo@correo.com", "password", true, new RolDTO(1L, "PACIENTE", "Paciente"));
+
+                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.empty());
+
+                assertThatThrownBy(() -> usuarioService.actualizar(1L, request))
+                                .isInstanceOf(RuntimeException.class)
+                                .hasMessageContaining("No existe un usuario con el id:");
+        }
 }

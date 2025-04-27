@@ -12,6 +12,7 @@ import com.clinicaregional.clinica.repository.MedicoRepository;
 import com.clinicaregional.clinica.repository.EspecialidadRepository;
 import com.clinicaregional.clinica.service.MedicoEspecialidadService;
 import com.clinicaregional.clinica.util.FiltroEstado;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,9 @@ public class MedicoEspecialidadServiceImpl extends FiltroEstado implements Medic
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(request.getEspecialidadId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Especialidad no encontrada con ID: " + request.getEspecialidadId()));
-
+        if(medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)){
+            throw new EntityExistsException("Ya existe esta relacion");
+        }
         // Mapear y guardar
         MedicoEspecialidad entity = MedicoEspecialidadMapper.toEntity(request, medico, especialidad);
         MedicoEspecialidad saved = medicoEspecialidadRepository.save(entity);

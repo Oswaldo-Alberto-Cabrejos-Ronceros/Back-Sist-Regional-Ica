@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -208,5 +209,21 @@ class UsuarioServiceImplTest {
                 assertThatThrownBy(() -> usuarioService.eliminar(1L))
                                 .isInstanceOf(RuntimeException.class)
                                 .hasMessageContaining("No existe un usuario con el id:");
+        }
+
+        @Test
+        void listarUsuarios_exitoso() {
+                Usuario usuario = new Usuario();
+                usuario.setId(1L);
+                usuario.setCorreo("correo@correo.com");
+
+                when(usuarioRepository.findAll()).thenReturn(List.of(usuario));
+                when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
+                                new UsuarioDTO(1L, "correo@correo.com", new RolDTO(1L, "PACIENTE", "Paciente")));
+
+                List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
+
+                assertThat(usuarios).isNotEmpty();
+                assertThat(usuarios.get(0).getCorreo()).isEqualTo("correo@correo.com");
         }
 }

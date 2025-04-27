@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/especialidades")
 public class EspecialidadController {
@@ -16,6 +18,16 @@ public class EspecialidadController {
     @Autowired
     public EspecialidadController(EspecialidadService especialidadService) {
         this.especialidadService = especialidadService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<EspecialidadResponse>> listarEspecialidades() {
+        return ResponseEntity.ok(especialidadService.listarEspecialidades());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EspecialidadResponse> getEspecialidad(@PathVariable Long id) {
+        return especialidadService.getEspecialidadById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

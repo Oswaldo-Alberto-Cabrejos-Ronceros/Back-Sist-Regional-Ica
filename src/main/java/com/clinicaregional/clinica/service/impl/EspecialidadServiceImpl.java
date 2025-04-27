@@ -12,11 +12,29 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class EspecialidadServiceImpl extends FiltroEstado implements EspecialidadService {
 
     private final EspecialidadRepository especialidadRepository;
+    private final EspecialidadMapper especialidadMapper;
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<EspecialidadResponse> listarEspecialidades() {
+        activarFiltroEstado(true);
+        return especialidadRepository.findAll().stream().map(EspecialidadMapper::toResponse).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<EspecialidadResponse> getEspecialidadById(Long id) {
+        return especialidadRepository.findByIdAndEstadoIsTrue(id).map(EspecialidadMapper::toResponse);
+    }
 
     @Override
     @Transactional

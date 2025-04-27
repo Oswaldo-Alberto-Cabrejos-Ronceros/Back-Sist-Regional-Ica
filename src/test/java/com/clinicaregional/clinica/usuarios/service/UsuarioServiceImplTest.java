@@ -186,4 +186,18 @@ class UsuarioServiceImplTest {
                                 .isInstanceOf(IllegalStateException.class)
                                 .hasMessage("El rol especificado no existe");
         }
+
+        @Test
+        void eliminar_usuarioExistente_exitoso() {
+                Usuario usuarioExistente = new Usuario();
+                usuarioExistente.setId(1L);
+                usuarioExistente.setEstado(true);
+
+                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
+
+                usuarioService.eliminar(1L);
+
+                assertThat(usuarioExistente.getEstado()).isFalse();
+                verify(usuarioRepository, times(1)).save(usuarioExistente);
+        }
 }

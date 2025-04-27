@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -132,5 +133,28 @@ class UsuarioServiceImplTest {
                 assertThatThrownBy(() -> usuarioService.guardar(request))
                                 .isInstanceOf(IllegalStateException.class)
                                 .hasMessage("El rol especificado no existe");
+        }
+
+        @Test
+        void actualizar_usuarioExistente_exitoso() {
+                UsuarioRequestDTO request = new UsuarioRequestDTO(
+                                "nuevo@correo.com", "nuevaPassword", true, new RolDTO(1L, "PACIENTE", "Paciente"));
+
+                Usuario usuarioExistente = new Usuario();
+                usuarioExistente.setId(1L);
+                usuarioExistente.setCorreo("existente@correo.com");
+
+                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
+                when(passwordEncoder.encode(request.getPassword())).thenReturn("passwordCodificada");
+                when(rolRepository.findById(1L)).thenReturn(
+                                Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
+                when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioExistente);
+                when(usuarioMapper.mapToUsuarioDTO(usuarioExistente)).thenReturn(
+                                new UsuarioDTO(1L, "existente@correo.com", new RolDTO(1L, "PACIENTE", "Paciente")));
+
+                UsuarioDTO result = usuarioService.actualizar(1L, request);
+
+                assertThat(result).isNotNull();
+                assertThat(result.getCorreo()).isEqualTo("existente@correo.com");
         }
 }

@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.dto.request;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class MedicoEspecialidadRequest {
     private Long especialidadId;
 
     @NotNull(message = "DesdeFecha es obligatorio")
+    @PastOrPresent(message = "La fecha debe ser antes o hoy")
     private LocalDate desdeFecha;
 
 }

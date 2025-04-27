@@ -12,29 +12,32 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class RecepcionistaServiceImpl extends FiltroEstado implements RecepcionistaService {
+public class RecepcionistaServiceImpl implements RecepcionistaService {
+
     private final RecepcionistaRepository recepcionistaRepository;
+    private final FiltroEstado filtroEstado;
 
     @Transactional(readOnly = true)
     @Override
     public List<Recepcionista> listar() {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         return recepcionistaRepository.findAll();
     }
 
     @Transactional(readOnly = true)
     @Override
     public Recepcionista obtenerPorId(Long id) {
-        activarFiltroEstado(true);
-        return recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Recepcionista no encontrado"));
+        filtroEstado.activarFiltroEstado(true);
+        return recepcionistaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Recepcionista no encontrado"));
     }
 
     @Transactional
     @Override
     public Recepcionista guardar(Recepcionista recepcionista) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         if (recepcionistaRepository.existsByNumeroDocumento(recepcionista.getNumeroDocumento())) {
-            throw new RuntimeException("Recepcionista ya existe con el dni ingresado");
+            throw new RuntimeException("Recepcionista ya existe con el DNI ingresado");
         }
         return recepcionistaRepository.save(recepcionista);
     }
@@ -42,11 +45,11 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     @Transactional
     @Override
     public Recepcionista actualizar(Long id, Recepcionista recepcionista) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         Recepcionista recepcionistaExistente = obtenerPorId(id);
 
         if (recepcionistaRepository.existsByNumeroDocumento(recepcionista.getNumeroDocumento())) {
-            throw new RuntimeException("Recepcionista ya existe con el dni ingresado");
+            throw new RuntimeException("Recepcionista ya existe con el DNI ingresado");
         }
 
         recepcionistaExistente.setNombres(recepcionista.getNombres());
@@ -65,9 +68,9 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     @Transactional
     @Override
     public void eliminar(Long id) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         Recepcionista recepcionista = obtenerPorId(id);
-        recepcionista.setEstado(false);
+        recepcionista.setEstado(false); // Borrado lógico
         recepcionistaRepository.save(recepcionista);
     }
 }

@@ -11,6 +11,7 @@ import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -64,6 +65,7 @@ class UsuarioServiceTest {
     }
 
     @Test
+    @DisplayName("Test para guardar un usuario exitosamente")
     void guardarUsuario_exitoso() {
         when(usuarioRepository.existsByCorreoAndEstadoIsTrue(usuarioRequestDTO.getCorreo())).thenReturn(false);
         when(usuarioMapper.mapFromUsuarioRequestDTOToUsuario(usuarioRequestDTO)).thenReturn(usuario);

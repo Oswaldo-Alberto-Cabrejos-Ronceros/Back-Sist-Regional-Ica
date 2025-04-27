@@ -16,70 +16,81 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class AlergiaServiceImpl extends FiltroEstado implements AlergiaService {
+public class AlergiaServiceImpl implements AlergiaService {
 
     private final AlergiaRepository alergiaRepository;
     private final AlergiaMapper alergiaMapper;
+    private final FiltroEstado filtroEstado;
 
     @Autowired
-    public AlergiaServiceImpl(AlergiaRepository alergiaRepository, AlergiaMapper alergiaMapper) {
+    public AlergiaServiceImpl(AlergiaRepository alergiaRepository,
+            AlergiaMapper alergiaMapper,
+            FiltroEstado filtroEstado) {
         this.alergiaRepository = alergiaRepository;
         this.alergiaMapper = alergiaMapper;
+        this.filtroEstado = filtroEstado;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<AlergiaDTO> listarAlergias() {
-        activarFiltroEstado(true);
-        return alergiaRepository.findAll().stream().map(alergiaMapper::mapToAlergiaDTO).collect(Collectors.toList());
+        filtroEstado.activarFiltroEstado(true);
+        return alergiaRepository.findAll().stream()
+                .map(alergiaMapper::mapToAlergiaDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<AlergiaDTO> listarAlergiasPorTipo(TipoAlergia tipoAlergia) {
-        activarFiltroEstado(true);
-        return alergiaRepository.findByTipoAlergia(tipoAlergia).stream().map(alergiaMapper::mapToAlergiaDTO).collect(Collectors.toList());
+        filtroEstado.activarFiltroEstado(true);
+        return alergiaRepository.findByTipoAlergia(tipoAlergia).stream()
+                .map(alergiaMapper::mapToAlergiaDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<AlergiaDTO> getAlergiaPorId(Long id) {
-        activarFiltroEstado(true);
-        return alergiaRepository.findByIdAndEstadoIsTrue(id).map(alergiaMapper::mapToAlergiaDTO);
+        filtroEstado.activarFiltroEstado(true);
+        return alergiaRepository.findByIdAndEstadoIsTrue(id)
+                .map(alergiaMapper::mapToAlergiaDTO);
     }
 
     @Transactional
     @Override
     public AlergiaDTO crearAlergia(AlergiaDTO alergiaDTO) {
-        activarFiltroEstado(true);
-        if(alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())){
+        filtroEstado.activarFiltroEstado(true);
+        if (alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())) {
             throw new RuntimeException("El nombre ya existe");
         }
-        Alergia alergia=alergiaMapper.mapToAlergia(alergiaDTO);
-        Alergia alergiaSaved=alergiaRepository.save(alergia);
+        Alergia alergia = alergiaMapper.mapToAlergia(alergiaDTO);
+        Alergia alergiaSaved = alergiaRepository.save(alergia);
         return alergiaMapper.mapToAlergiaDTO(alergiaSaved);
     }
 
     @Transactional
     @Override
-    public AlergiaDTO updateAlergia(Long id,AlergiaDTO alergiaDTO) {
-        activarFiltroEstado(true);
-        Alergia alergia=alergiaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(()->new RuntimeException("No se encontro el id"));
-        if(alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())){
+    public AlergiaDTO updateAlergia(Long id, AlergiaDTO alergiaDTO) {
+        filtroEstado.activarFiltroEstado(true);
+        Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró el id"));
+        if (alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())) {
             throw new RuntimeException("El nombre ya existe");
         }
         alergia.setNombre(alergiaDTO.getNombre());
         alergia.setTipoAlergia(alergiaDTO.getTipoAlergia());
-        Alergia updatedAlergia=alergiaRepository.save(alergia);
+        Alergia updatedAlergia = alergiaRepository.save(alergia);
         return alergiaMapper.mapToAlergiaDTO(updatedAlergia);
     }
 
     @Transactional
     @Override
     public void eliminarAlergia(Long id) {
-        activarFiltroEstado(true);
-        Alergia alergia=alergiaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(()->new RuntimeException("No se encontro el id"));
-        alergia.setEstado(false); //borrado logico
+        filtroEstado.activarFiltroEstado(true);
+        Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró el id"));
+        alergia.setEstado(false); // borrado lógico
         alergiaRepository.save(alergia);
     }
 }

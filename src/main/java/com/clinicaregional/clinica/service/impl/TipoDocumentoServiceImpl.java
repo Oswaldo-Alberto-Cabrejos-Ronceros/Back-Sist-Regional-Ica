@@ -15,68 +15,80 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class TipoDocumentoServiceImpl extends FiltroEstado implements TipoDocumentoService {
+public class TipoDocumentoServiceImpl implements TipoDocumentoService {
 
     private final TipoDocumentoRepository tipoDocumentoRepository;
     private final TipoDocumentoMapper tipoDocumentoMapper;
+    private final FiltroEstado filtroEstado;
 
     @Autowired
-    public TipoDocumentoServiceImpl(TipoDocumentoRepository tipoDocumentoRepository, TipoDocumentoMapper tipoDocumentoMapper) {
+    public TipoDocumentoServiceImpl(TipoDocumentoRepository tipoDocumentoRepository, TipoDocumentoMapper tipoDocumentoMapper, FiltroEstado filtroEstado) {
         this.tipoDocumentoRepository = tipoDocumentoRepository;
         this.tipoDocumentoMapper = tipoDocumentoMapper;
+        this.filtroEstado = filtroEstado;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<TipoDocumentoDTO> listarTipoDocumento() {
-        activarFiltroEstado(true);
-        return tipoDocumentoRepository.findAll().stream().map(tipoDocumentoMapper::mapToTipoDocumentoDTO).collect(Collectors.toList());
+        filtroEstado.activarFiltroEstado(true);
+        return tipoDocumentoRepository.findAll()
+                .stream()
+                .map(tipoDocumentoMapper::mapToTipoDocumentoDTO)
+                .collect(Collectors.toList());
     }
+
     @Transactional(readOnly = true)
     @Override
     public Optional<TipoDocumentoDTO> getTipoDocumentoById(Long id) {
-        activarFiltroEstado(true);
-        return tipoDocumentoRepository.findByIdAndEstadoIsTrue(id).map(tipoDocumentoMapper::mapToTipoDocumentoDTO);
+        filtroEstado.activarFiltroEstado(true);
+        return tipoDocumentoRepository.findByIdAndEstadoIsTrue(id)
+                .map(tipoDocumentoMapper::mapToTipoDocumentoDTO);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<TipoDocumento> getTipoDocumentoByIdContext(Long id) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         return tipoDocumentoRepository.findByIdAndEstadoIsTrue(id);
     }
 
     @Transactional
     @Override
     public TipoDocumentoDTO createTipoDocumento(TipoDocumentoDTO tipoDocumento) {
-        activarFiltroEstado(true);
-        if(tipoDocumentoRepository.existsByNombreAndEstadoIsTrue(tipoDocumento.getNombre())){
+        filtroEstado.activarFiltroEstado(true);
+        if (tipoDocumentoRepository.existsByNombreAndEstadoIsTrue(tipoDocumento.getNombre())) {
             throw new IllegalStateException("Tipo de documento ya existe en el sistema");
         }
-        TipoDocumento tipoDocumentoMaped = tipoDocumentoMapper.mapToTipoDocumento(tipoDocumento);
-        TipoDocumento savedTipoDocuemento = tipoDocumentoRepository.save(tipoDocumentoMaped);
-        return tipoDocumentoMapper.mapToTipoDocumentoDTO(savedTipoDocuemento);
+        TipoDocumento tipoDocumentoMapped = tipoDocumentoMapper.mapToTipoDocumento(tipoDocumento);
+        TipoDocumento savedTipoDocumento = tipoDocumentoRepository.save(tipoDocumentoMapped);
+        return tipoDocumentoMapper.mapToTipoDocumentoDTO(savedTipoDocumento);
     }
 
     @Transactional
     @Override
     public TipoDocumentoDTO updateTipoDocumento(Long id, TipoDocumentoDTO tipoDocumento) {
-        activarFiltroEstado(true);
-        TipoDocumento tipoDocumentoExist = tipoDocumentoRepository.findByIdAndEstadoIsTrue(id).orElseThrow(()->new RuntimeException("Tipo de documento no encontrado"));
-        if(tipoDocumentoRepository.existsByNombreAndEstadoIsTrue(tipoDocumento.getNombre())){
+        filtroEstado.activarFiltroEstado(true);
+        TipoDocumento tipoDocumentoExist = tipoDocumentoRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado"));
+
+        if (tipoDocumentoRepository.existsByNombreAndEstadoIsTrue(tipoDocumento.getNombre())) {
             throw new IllegalStateException("Tipo de documento ya existe en el sistema");
         }
+
         tipoDocumentoExist.setNombre(tipoDocumento.getNombre());
         tipoDocumentoExist.setDescripcion(tipoDocumento.getDescripcion());
         TipoDocumento savedTipoDocumento = tipoDocumentoRepository.save(tipoDocumentoExist);
         return tipoDocumentoMapper.mapToTipoDocumentoDTO(savedTipoDocumento);
     }
 
+    @Transactional
     @Override
     public void deleteTipoDocumento(Long id) {
-        activarFiltroEstado(true);
-        TipoDocumento tipoDocumentoExist = tipoDocumentoRepository.findByIdAndEstadoIsTrue(id).orElseThrow(()->new RuntimeException("Tipo de documento no encontrado"));
-        tipoDocumentoExist.setEstado(false); // borrado logico
+        filtroEstado.activarFiltroEstado(true);
+        TipoDocumento tipoDocumentoExist = tipoDocumentoRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado"));
+        tipoDocumentoExist.setEstado(false); // Borrado lógico
         tipoDocumentoRepository.save(tipoDocumentoExist);
     }
 }

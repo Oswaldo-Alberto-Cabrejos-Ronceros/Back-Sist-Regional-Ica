@@ -169,4 +169,21 @@ class UsuarioServiceImplTest {
                                 .isInstanceOf(RuntimeException.class)
                                 .hasMessageContaining("No existe un usuario con el id:");
         }
+
+        @Test
+        void actualizar_usuarioSinRolNuevo_lanzaExcepcion() {
+                UsuarioRequestDTO request = new UsuarioRequestDTO(
+                                "correo@correo.com", "password", true, new RolDTO(99L, "NO_EXISTE", "Rol no existe"));
+
+                Usuario usuarioExistente = new Usuario();
+                usuarioExistente.setId(1L);
+
+                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
+                when(passwordEncoder.encode(request.getPassword())).thenReturn("passwordCodificada");
+                when(rolRepository.findById(99L)).thenReturn(Optional.empty());
+
+                assertThatThrownBy(() -> usuarioService.actualizar(1L, request))
+                                .isInstanceOf(IllegalStateException.class)
+                                .hasMessage("El rol especificado no existe");
+        }
 }

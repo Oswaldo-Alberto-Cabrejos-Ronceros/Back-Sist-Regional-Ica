@@ -6,6 +6,7 @@ import com.clinicaregional.clinica.service.RecepcionistaService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -22,13 +23,15 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     @Override
     public Recepcionista obtenerPorId(Long id) {
         activarFiltroEstado(true);
-        return recepcionistaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Recepcionista no encontrado"));
+        return recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Recepcionista no encontrado"));
     }
 
     @Override
     public Recepcionista guardar(Recepcionista recepcionista) {
         activarFiltroEstado(true);
+        if (recepcionistaRepository.existsByNumeroDocumento(recepcionista.getNumeroDocumento())) {
+            throw new RuntimeException("Recepcionista ya existe con el dni ingresado");
+        }
         return recepcionistaRepository.save(recepcionista);
     }
 
@@ -36,6 +39,10 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     public Recepcionista actualizar(Long id, Recepcionista recepcionista) {
         activarFiltroEstado(true);
         Recepcionista recepcionistaExistente = obtenerPorId(id);
+
+        if (recepcionistaRepository.existsByNumeroDocumento(recepcionista.getNumeroDocumento())) {
+            throw new RuntimeException("Recepcionista ya existe con el dni ingresado");
+        }
 
         recepcionistaExistente.setNombres(recepcionista.getNombres());
         recepcionistaExistente.setApellidos(recepcionista.getApellidos());

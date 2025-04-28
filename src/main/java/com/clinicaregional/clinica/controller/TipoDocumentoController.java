@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/tipos-documento")
+@RequestMapping("api/tipos-documentos")
 public class TipoDocumentoController {
 
     private final TipoDocumentoService tipoDocumentoService;

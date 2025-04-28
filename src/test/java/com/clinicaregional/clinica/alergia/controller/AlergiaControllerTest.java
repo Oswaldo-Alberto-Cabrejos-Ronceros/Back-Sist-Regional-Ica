@@ -28,90 +28,89 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = AlergiaController.class,
-        excludeAutoConfiguration = {
+@WebMvcTest(controllers = AlergiaController.class, excludeAutoConfiguration = {
                 SecurityAutoConfiguration.class,
                 SecurityFilterAutoConfiguration.class
-        },
-        excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { JwtAuthFilter.class, JwtUtil.class })
-        })
+}, excludeFilters = {
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { JwtAuthFilter.class,
+                                JwtUtil.class })
+})
 class AlergiaControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockBean
-    private AlergiaService alergiaService;
+        @MockBean
+        private AlergiaService alergiaService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    private AlergiaDTO alergiaDTO;
+        private AlergiaDTO alergiaDTO;
 
-    @BeforeEach
-    void setUp() {
-        alergiaDTO = new AlergiaDTO(1L, "Polvo", TipoAlergia.AMBIENTAL);
-    }
+        @BeforeEach
+        void setUp() {
+                alergiaDTO = new AlergiaDTO(1L, "Polvo", TipoAlergia.AMBIENTAL);
+        }
 
-    @Test
-    @DisplayName("Listar todas las alergias debe retornar 200 OK")
-    void listarAlergias() throws Exception {
-        when(alergiaService.listarAlergias()).thenReturn(List.of(alergiaDTO));
+        @Test
+        @DisplayName("Listar todas las alergias debe retornar 200 OK")
+        void listarAlergias() throws Exception {
+                when(alergiaService.listarAlergias()).thenReturn(List.of(alergiaDTO));
 
-        mockMvc.perform(get("/api/alergias"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nombre").value("Polvo"));
-    }
+                mockMvc.perform(get("/api/alergias"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].nombre").value("Polvo"));
+        }
 
-    @Test
-    @DisplayName("Listar alergias por tipo debe retornar 200 OK")
-    void listarAlergiasPorTipo() throws Exception {
-        when(alergiaService.listarAlergiasPorTipo(TipoAlergia.AMBIENTAL)).thenReturn(List.of(alergiaDTO));
+        @Test
+        @DisplayName("Listar alergias por tipo debe retornar 200 OK")
+        void listarAlergiasPorTipo() throws Exception {
+                when(alergiaService.listarAlergiasPorTipo(TipoAlergia.AMBIENTAL)).thenReturn(List.of(alergiaDTO));
 
-        mockMvc.perform(get("/api/alergias/AMBIENTAL"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].tipoAlergia").value("AMBIENTAL"));
-    }
+                mockMvc.perform(get("/api/alergias/AMBIENTAL"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].tipoAlergia").value("AMBIENTAL"));
+        }
 
-    @Test
-    @DisplayName("Obtener alergia por ID existente debe retornar 200 OK")
-    void obtenerAlergiaPorId_existente() throws Exception {
-        when(alergiaService.getAlergiaPorId(1L)).thenReturn(Optional.of(alergiaDTO));
+        @Test
+        @DisplayName("Obtener alergia por ID existente debe retornar 200 OK")
+        void obtenerAlergiaPorId_existente() throws Exception {
+                when(alergiaService.getAlergiaPorId(1L)).thenReturn(Optional.of(alergiaDTO));
 
-        mockMvc.perform(get("/api/alergias/id/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Polvo"));
-    }
+                mockMvc.perform(get("/api/alergias/id/1"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.nombre").value("Polvo"));
+        }
 
-    @Test
-    @DisplayName("Crear nueva alergia debe retornar 201 Created")
-    void crearAlergia() throws Exception {
-        when(alergiaService.crearAlergia(any())).thenReturn(alergiaDTO);
+        @Test
+        @DisplayName("Crear nueva alergia debe retornar 201 Created")
+        void crearAlergia() throws Exception {
+                when(alergiaService.crearAlergia(any())).thenReturn(alergiaDTO);
 
-        mockMvc.perform(post("/api/alergias")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(alergiaDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.nombre").value("Polvo"));
-    }
+                mockMvc.perform(post("/api/alergias")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(alergiaDTO)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.nombre").value("Polvo"));
+        }
 
-    @Test
-    @DisplayName("Actualizar alergia existente debe retornar 200 OK")
-    void actualizarAlergia() throws Exception {
-        when(alergiaService.updateAlergia(any(), any())).thenReturn(alergiaDTO);
+        @Test
+        @DisplayName("Actualizar alergia existente debe retornar 200 OK")
+        void actualizarAlergia() throws Exception {
+                when(alergiaService.updateAlergia(any(), any())).thenReturn(alergiaDTO);
 
-        mockMvc.perform(put("/api/alergias/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(alergiaDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Polvo"));
-    }
+                mockMvc.perform(put("/api/alergias/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(alergiaDTO)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.nombre").value("Polvo"));
+        }
 
-    @Test
-    @DisplayName("Eliminar alergia existente debe retornar 204 No Content")
-    void eliminarAlergia() throws Exception {
-        mockMvc.perform(delete("/api/alergias/1"))
-                .andExpect(status().isNoContent());
-    }
+        @Test
+        @DisplayName("Eliminar alergia existente debe retornar 204 No Content")
+        void eliminarAlergia() throws Exception {
+                mockMvc.perform(delete("/api/alergias/1"))
+                                .andExpect(status().isNoContent());
+        }
 }

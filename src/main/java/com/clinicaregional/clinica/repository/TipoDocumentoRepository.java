@@ -9,5 +9,4 @@ import java.util.Optional;
 public interface TipoDocumentoRepository extends JpaRepository<TipoDocumento, Long> {
     boolean existsByNombreAndEstadoIsTrue(String nombre);
     Optional<TipoDocumento> findByIdAndEstadoIsTrue(Long id);
-
 }

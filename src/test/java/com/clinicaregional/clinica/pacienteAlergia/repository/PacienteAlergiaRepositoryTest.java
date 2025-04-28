@@ -49,7 +49,7 @@ class PacienteAlergiaRepositoryTest {
         // Arrange
         Paciente paciente = new Paciente();
         paciente.setNombres("Juan Perez");
-        paciente.setTipoDocumento(tipoDocumento); // 👈 ahora sí
+        paciente.setTipoDocumento(tipoDocumento);
         entityManager.persist(paciente);
 
         Alergia alergia = new Alergia();
@@ -79,7 +79,7 @@ class PacienteAlergiaRepositoryTest {
         // Arrange
         Paciente paciente = new Paciente();
         paciente.setNombres("Ana Lopez");
-        paciente.setTipoDocumento(tipoDocumento); // 👈 ahora sí
+        paciente.setTipoDocumento(tipoDocumento);
         entityManager.persist(paciente);
 
         Alergia alergia = new Alergia();
@@ -106,7 +106,7 @@ class PacienteAlergiaRepositoryTest {
         // Arrange
         Paciente paciente = new Paciente();
         paciente.setNombres("Luis Gonzalez");
-        paciente.setTipoDocumento(tipoDocumento); // 👈 ahora sí
+        paciente.setTipoDocumento(tipoDocumento);
         entityManager.persist(paciente);
 
         Alergia alergia1 = new Alergia();

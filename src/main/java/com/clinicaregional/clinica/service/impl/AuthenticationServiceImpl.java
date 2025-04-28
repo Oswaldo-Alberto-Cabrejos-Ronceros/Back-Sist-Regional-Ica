@@ -1,5 +1,7 @@
 package com.clinicaregional.clinica.service.impl;
 
+import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.request.RegisterRequest;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
@@ -8,6 +10,7 @@ import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
 import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.service.AuthenticationService;
+import com.clinicaregional.clinica.service.PacienteService;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.security.JwtUtil;
 import io.jsonwebtoken.JwtException;
@@ -28,18 +31,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final UsuarioMapper usuarioMapper;
+    private final PacienteService pacienteService;
 
     @Autowired
     public AuthenticationServiceImpl(JwtUtil jwtUtil,
-            UsuarioService usuarioService,
-            UserDetailsServiceImpl userDetailsServiceImpl,
-            UsuarioMapper usuarioMapper,
-            PasswordEncoder passwordEncoder) {
+                                     UsuarioService usuarioService,
+                                     UserDetailsServiceImpl userDetailsServiceImpl,
+                                     UsuarioMapper usuarioMapper,
+                                     PasswordEncoder passwordEncoder,
+                                     PacienteService pacienteService) {
         this.jwtUtil = jwtUtil;
         this.usuarioService = usuarioService;
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.usuarioMapper = usuarioMapper;
         this.passwordEncoder = passwordEncoder;
+        this.pacienteService = pacienteService;
     }
 
     @Override
@@ -81,11 +87,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthenticationResponseDTO registerUser(UsuarioRequestDTO usuarioRequestDTO) {
+    public AuthenticationResponseDTO registerUser(RegisterRequest registerRequest) {
         // Establecer el rol por defecto (Paciente)
-        usuarioRequestDTO.setRol(new RolDTO(1L, "Paciente"));
+        registerRequest.getUsuario().setRol(new RolDTO(1L, "Paciente"));
 
-        UsuarioDTO usuarioGuardado = usuarioService.guardar(usuarioRequestDTO);
+        UsuarioDTO usuarioGuardado = usuarioService.guardar(registerRequest.getUsuario());
+
+        registerRequest.getPaciente().setUsuario(usuarioGuardado);
+
+        PacienteDTO pacienteGuardado = pacienteService.crearPaciente(registerRequest.getPaciente());
 
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,

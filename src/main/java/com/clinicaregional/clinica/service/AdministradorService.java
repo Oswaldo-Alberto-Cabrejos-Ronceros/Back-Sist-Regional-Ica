@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface AdministradorService {
     List<AdministradorDTO> listarAdministradores();
-    Optional<AdministradorDTO> getById(Long id);
+    Optional<AdministradorDTO> getAdministradorById(Long id);
     AdministradorDTO createAdministrador(AdministradorDTO administradorDTO);
     AdministradorDTO updateAdministrador(Long id,AdministradorDTO administradorDTO);
     void deleteAdministrador(Long id);

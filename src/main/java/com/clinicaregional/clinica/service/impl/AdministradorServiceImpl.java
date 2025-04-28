@@ -37,9 +37,9 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<AdministradorDTO> getById(Long id) {
+    public Optional<AdministradorDTO> getAdministradorById(Long id) {
         activarFiltroEstado(true);
-        return administradorRepository.findById(id).map(administradorMapper::mapToAdministradorDTO);
+        return administradorRepository.findByIdAndEstadoIsTrue(id).map(administradorMapper::mapToAdministradorDTO);
     }
 
     @Transactional
@@ -62,7 +62,7 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
     @Override
     public AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO) {
         activarFiltroEstado(true);
-        Administrador findAdministrador = administradorRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
+        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
 
         if (administradorRepository.existsByNumeroDocumento(administradorDTO.getNumeroDocumento())) {
             throw new RuntimeException("Ya existe un administrador con el numero de documento ingresado");
@@ -91,7 +91,7 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
     @Override
     public void deleteAdministrador(Long id) {
         activarFiltroEstado(true);
-        Administrador findAdministrador = administradorRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
+        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
         findAdministrador.setEstado(false);
         administradorRepository.save(findAdministrador);
     }

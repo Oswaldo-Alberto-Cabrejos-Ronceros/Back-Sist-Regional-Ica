@@ -38,6 +38,6 @@ public class Administrador extends EntidadConEstado{
     private LocalDate fechaContratacion;
 
     @OneToOne
-    @JoinColumn(name = "usuario_id", unique = true)
+    @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 }

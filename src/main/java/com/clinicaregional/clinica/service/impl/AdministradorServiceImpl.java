@@ -1,0 +1,98 @@
+package com.clinicaregional.clinica.service.impl;
+
+import com.clinicaregional.clinica.dto.AdministradorDTO;
+import com.clinicaregional.clinica.entity.Administrador;
+import com.clinicaregional.clinica.entity.TipoDocumento;
+import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.mapper.AdministradorMapper;
+import com.clinicaregional.clinica.repository.AdministradorRepository;
+import com.clinicaregional.clinica.service.AdministradorService;
+import com.clinicaregional.clinica.util.FiltroEstado;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class AdministradorServiceImpl extends FiltroEstado implements AdministradorService {
+
+    private final AdministradorRepository administradorRepository;
+    private final AdministradorMapper administradorMapper;
+
+    @Autowired
+    public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper) {
+        this.administradorRepository = administradorRepository;
+        this.administradorMapper = administradorMapper;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<AdministradorDTO> listarAdministradores() {
+        activarFiltroEstado(true);
+        return administradorRepository.findAll().stream().map(administradorMapper::mapToAdministradorDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<AdministradorDTO> getById(Long id) {
+        activarFiltroEstado(true);
+        return administradorRepository.findById(id).map(administradorMapper::mapToAdministradorDTO);
+    }
+
+    @Transactional
+    @Override
+    public AdministradorDTO createAdministrador(AdministradorDTO administradorDTO) {
+        activarFiltroEstado(true);
+        if (administradorRepository.existsByNumeroDocumento(administradorDTO.getNumeroDocumento())) {
+            throw new RuntimeException("Ya existe un administrador con el numero de documento ingresado");
+        }
+        if (administradorRepository.existsByUsuario_Id(administradorDTO.getUsuarioId())) {
+            throw new RuntimeException("Ya existe un administrador con el usuario ingresado");
+        }
+
+        Administrador savedAdministrador = administradorRepository.save(administradorMapper.mapToAdministrador(administradorDTO));
+
+        return administradorMapper.mapToAdministradorDTO(savedAdministrador);
+    }
+
+    @Transactional
+    @Override
+    public AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO) {
+        activarFiltroEstado(true);
+        Administrador findAdministrador = administradorRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
+
+        if (administradorRepository.existsByNumeroDocumento(administradorDTO.getNumeroDocumento())) {
+            throw new RuntimeException("Ya existe un administrador con el numero de documento ingresado");
+        }
+        if (administradorRepository.existsByUsuario_Id(administradorDTO.getUsuarioId())) {
+            throw new RuntimeException("Ya existe un administrador con el usuario ingresado");
+        }
+
+
+        findAdministrador.setNombres(administradorDTO.getNombres());
+        findAdministrador.setApellidos(administradorDTO.getApellidos());
+        findAdministrador.setNumeroDocumento(administradorDTO.getNumeroDocumento());
+        TipoDocumento tipoDocumento = new TipoDocumento();
+        tipoDocumento.setId(administradorDTO.getTipoDocumentoId());
+        findAdministrador.setTipoDocumento(tipoDocumento);
+        findAdministrador.setTelefono(administradorDTO.getTelefono());
+        findAdministrador.setDireccion(administradorDTO.getDireccion());
+        findAdministrador.setFechaContratacion(administradorDTO.getFechaContratacion());
+        Usuario usuario = new Usuario();
+        usuario.setId(administradorDTO.getUsuarioId());
+        Administrador updatedAdministrador = administradorRepository.save(administradorMapper.mapToAdministrador(administradorDTO));
+        return administradorMapper.mapToAdministradorDTO(updatedAdministrador);
+    }
+
+    @Transactional
+    @Override
+    public void deleteAdministrador(Long id) {
+        activarFiltroEstado(true);
+        Administrador findAdministrador = administradorRepository.findById(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
+        findAdministrador.setEstado(false);
+        administradorRepository.save(findAdministrador);
+    }
+}

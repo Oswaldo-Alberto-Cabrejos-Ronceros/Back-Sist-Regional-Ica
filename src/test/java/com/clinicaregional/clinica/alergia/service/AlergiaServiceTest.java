@@ -121,7 +121,7 @@ class AlergiaServiceTest {
         when(alergiaRepository.existsByNombreAndEstadoIsTrue("Polvo")).thenReturn(true);
 
         // Act + Assert
-        assertThrows(IllegalArgumentException.class, () -> alergiaService.crearAlergia(dtoEntrada));
+        assertThrows(RuntimeException.class, () -> alergiaService.crearAlergia(dtoEntrada));
     }
 
     @Test

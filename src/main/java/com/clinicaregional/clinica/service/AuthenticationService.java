@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.service;
 
+import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.dto.request.RegisterRequest;
 import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
 import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
@@ -14,4 +15,6 @@ public interface AuthenticationService {
     public String refreshToken(String refreshToken);
 
     public AuthenticationResponseDTO registerUser(RegisterRequest registerRequest);
+
+    AuthenticationResponseDTO registerAdministrador(RegisterAdministradorRequest registerAdministradorRequest);
 }

@@ -88,7 +88,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Transactional
     @Override
-    public AuthenticationResponseDTO registerUser(RegisterRequest registerRequest) {
+    public AuthenticationResponseDTO registerPaciente(RegisterRequest registerRequest) {
         // Establecer el rol por defecto (Paciente)
         registerRequest.getUsuario().setRol(new RolDTO(1L, "PACIENTE"));
 

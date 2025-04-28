@@ -14,7 +14,7 @@ public interface AuthenticationService {
     //para refrescar token
     public String refreshToken(String refreshToken);
 
-    public AuthenticationResponseDTO registerUser(RegisterRequest registerRequest);
+    public AuthenticationResponseDTO registerPaciente(RegisterRequest registerRequest);
 
     AuthenticationResponseDTO registerAdministrador(RegisterAdministradorRequest registerAdministradorRequest);
 }

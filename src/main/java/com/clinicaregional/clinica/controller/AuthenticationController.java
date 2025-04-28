@@ -73,8 +73,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody @Valid RegisterRequest registerRequest, HttpServletResponse response) {
-        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerUser(registerRequest);
+    public ResponseEntity<AuthenticationResponseDTO> registerPaciente(@RequestBody @Valid RegisterRequest registerRequest, HttpServletResponse response) {
+        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerPaciente(registerRequest);
         //configuramos cookies httponly
         addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
         addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
@@ -85,7 +85,7 @@ public class AuthenticationController {
     //para registrar administrador
 
     @PostMapping("/administrador/register")
-    public ResponseEntity<AuthenticationResponseDTO> administradorRegister(@RequestBody @Valid RegisterAdministradorRequest registerAdministradorRequest, HttpServletResponse response){
+    public ResponseEntity<AuthenticationResponseDTO> registerAdministrador(@RequestBody @Valid RegisterAdministradorRequest registerAdministradorRequest, HttpServletResponse response){
         AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerAdministrador(registerAdministradorRequest);
         //configuramos cookies httponly
         addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());

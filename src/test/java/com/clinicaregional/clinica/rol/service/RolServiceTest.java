@@ -31,7 +31,7 @@ class RolServiceTest {
     private RolMapper rolMapper;
 
     @Mock
-    private FiltroEstado filtroEstado; // 👈 agregado
+    private FiltroEstado filtroEstado;
 
     @InjectMocks
     private RolServiceImpl rolService;
@@ -44,7 +44,7 @@ class RolServiceTest {
         rol = new Rol(1L, "ADMIN", "Administrador del sistema");
         rolDTO = new RolDTO(1L, "ADMIN", "Administrador del sistema");
 
-        doNothing().when(filtroEstado).activarFiltroEstado(true); // 👈 agregado
+        doNothing().when(filtroEstado).activarFiltroEstado(true);
     }
 
     @Test

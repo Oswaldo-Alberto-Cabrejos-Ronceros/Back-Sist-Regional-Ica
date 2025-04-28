@@ -58,7 +58,7 @@ public class TipoDocumentoServiceImpl implements TipoDocumentoService {
     public TipoDocumentoDTO createTipoDocumento(TipoDocumentoDTO tipoDocumento) {
         filtroEstado.activarFiltroEstado(true);
         if (tipoDocumentoRepository.existsByNombreAndEstadoIsTrue(tipoDocumento.getNombre())) {
-            throw new IllegalStateException("Tipo de documento ya existe en el sistema");
+            throw new IllegalArgumentException("El tipo de documento ya existe en el sistema");
         }
         TipoDocumento tipoDocumentoMapped = tipoDocumentoMapper.mapToTipoDocumento(tipoDocumento);
         TipoDocumento savedTipoDocumento = tipoDocumentoRepository.save(tipoDocumentoMapped);
@@ -70,10 +70,10 @@ public class TipoDocumentoServiceImpl implements TipoDocumentoService {
     public TipoDocumentoDTO updateTipoDocumento(Long id, TipoDocumentoDTO tipoDocumento) {
         filtroEstado.activarFiltroEstado(true);
         TipoDocumento tipoDocumentoExist = tipoDocumentoRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("No existe un tipo de documento con el id"));
 
         if (tipoDocumentoRepository.existsByNombreAndEstadoIsTrue(tipoDocumento.getNombre())) {
-            throw new IllegalStateException("Tipo de documento ya existe en el sistema");
+            throw new IllegalArgumentException("El tipo de documento ya existe en el sistema");
         }
 
         tipoDocumentoExist.setNombre(tipoDocumento.getNombre());
@@ -87,7 +87,7 @@ public class TipoDocumentoServiceImpl implements TipoDocumentoService {
     public void deleteTipoDocumento(Long id) {
         filtroEstado.activarFiltroEstado(true);
         TipoDocumento tipoDocumentoExist = tipoDocumentoRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("No existe un tipo de documento con el id"));
         tipoDocumentoExist.setEstado(false); // Borrado lógico
         tipoDocumentoRepository.save(tipoDocumentoExist);
     }

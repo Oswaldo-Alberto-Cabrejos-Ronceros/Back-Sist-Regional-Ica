@@ -10,6 +10,5 @@ public interface RecepcionistaService {
     List<RecepcionistaResponse> listar();
     Optional<RecepcionistaResponse> obtenerPorId(Long id);
     RecepcionistaResponse guardar(RecepcionistaRequest recepcionistaRequest);
-    RecepcionistaResponse actualizar(Long id, RecepcionistaRequest recepcionistaRequest);
     void eliminar(Long id);
 }

@@ -82,16 +82,4 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseToSend);
     }
 
-    //para registrar administrador
-
-    @PostMapping("/administrador/register")
-    public ResponseEntity<AuthenticationResponseDTO> registerAdministrador(@RequestBody @Valid RegisterAdministradorRequest registerAdministradorRequest, HttpServletResponse response){
-        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerAdministrador(registerAdministradorRequest);
-        //configuramos cookies httponly
-        addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
-        addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
-        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseToSend);
-    }
-
 }

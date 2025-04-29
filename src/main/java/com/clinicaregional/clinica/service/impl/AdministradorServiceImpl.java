@@ -1,6 +1,9 @@
 package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.AdministradorDTO;
+import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.entity.Administrador;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
@@ -25,10 +28,10 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
     private final UsuarioService usuarioService;
 
     @Autowired
-    public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper,UsuarioService usuarioService) {
+    public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper, UsuarioService usuarioService) {
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
-        this.usuarioService=usuarioService;
+        this.usuarioService = usuarioService;
     }
 
     @Transactional(readOnly = true)
@@ -47,16 +50,20 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
 
     @Transactional
     @Override
-    public AdministradorDTO createAdministrador(AdministradorDTO administradorDTO) {
+    public AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest) {
         activarFiltroEstado(true);
-        if (administradorRepository.existsByNumeroDocumento(administradorDTO.getNumeroDocumento())) {
+        if (administradorRepository.existsByNumeroDocumento(registerAdministradorRequest.getAdministrador().getNumeroDocumento())) {
             throw new RuntimeException("Ya existe un administrador con el numero de documento ingresado");
         }
-        if (administradorRepository.existsByUsuario_Id(administradorDTO.getUsuarioId())) {
-            throw new RuntimeException("Ya existe un administrador con el usuario ingresado");
-        }
 
-        Administrador savedAdministrador = administradorRepository.save(administradorMapper.mapToAdministrador(administradorDTO));
+        // Establecer el rol por defecto (ADMIN)
+        registerAdministradorRequest.getUsuario().setRol(new RolDTO(2L, "ADMINISTRADOR"));
+
+        UsuarioDTO usuarioGuardado = usuarioService.guardar(registerAdministradorRequest.getUsuario());
+
+        registerAdministradorRequest.getAdministrador().setUsuarioId(usuarioGuardado.getId());
+
+        Administrador savedAdministrador = administradorRepository.save(administradorMapper.mapToAdministrador(registerAdministradorRequest.getAdministrador()));
 
         return administradorMapper.mapToAdministradorDTO(savedAdministrador);
     }
@@ -73,7 +80,6 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
         if (administradorRepository.existsByUsuario_Id(administradorDTO.getUsuarioId())) {
             throw new RuntimeException("Ya existe un administrador con el usuario ingresado");
         }
-
 
         findAdministrador.setNombres(administradorDTO.getNombres());
         findAdministrador.setApellidos(administradorDTO.getApellidos());

@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.AdministradorDTO;
+import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.service.AdministradorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -29,8 +30,8 @@ public class AdministradorController {
     }
 
     @PostMapping
-    public ResponseEntity<AdministradorDTO> createAdministrador(@RequestBody @Valid AdministradorDTO administradorDTO) {
-        AdministradorDTO savedAdministrador = administradorService.createAdministrador(administradorDTO);
+    public ResponseEntity<AdministradorDTO> createAdministrador(@RequestBody @Valid RegisterAdministradorRequest registerAdministradorRequest) {
+        AdministradorDTO savedAdministrador = administradorService.createAdministrador(registerAdministradorRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAdministrador);
     }
 

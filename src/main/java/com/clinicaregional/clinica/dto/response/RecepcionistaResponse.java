@@ -14,10 +14,10 @@ public class RecepcionistaResponse {
     private String nombres;
     private String apellidos;
     private String numeroDocumento;
-    private TipoDocumento tipoDocumento;
+    private Long tipoDocumentoId;
     private String telefono;
     private String direccion;
     private TurnoTrabajo turnoTrabajo;
     private LocalDate fechaContratacion;
-    private Usuario usuario;
+    private Long usuarioId;
 }

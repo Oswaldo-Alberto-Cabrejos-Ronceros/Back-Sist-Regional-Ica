@@ -1,76 +1,154 @@
 package com.clinicaregional.clinica.service.impl;
 
+import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.entity.Recepcionista;
+import com.clinicaregional.clinica.entity.Rol;
+import com.clinicaregional.clinica.entity.TipoDocumento;
+import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.mapper.RecepcionistaMapper;
 import com.clinicaregional.clinica.repository.RecepcionistaRepository;
+import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
+import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.RecepcionistaService;
+import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class RecepcionistaServiceImpl implements RecepcionistaService {
 
     private final RecepcionistaRepository recepcionistaRepository;
+    private final TipoDocumentoRepository tipoDocumentoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final RecepcionistaMapper recepcionistaMapper;
+    private final UsuarioService usuarioService;
     private final FiltroEstado filtroEstado;
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<Recepcionista> listar() {
-        filtroEstado.activarFiltroEstado(true);
-        return recepcionistaRepository.findAll();
+    @Autowired
+    public RecepcionistaServiceImpl(
+            RecepcionistaRepository recepcionistaRepository,
+            TipoDocumentoRepository tipoDocumentoRepository,
+            UsuarioRepository usuarioRepository,
+            RecepcionistaMapper recepcionistaMapper,
+            UsuarioService usuarioService,
+            FiltroEstado filtroEstado) {
+        this.recepcionistaRepository = recepcionistaRepository;
+        this.tipoDocumentoRepository = tipoDocumentoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.recepcionistaMapper = recepcionistaMapper;
+        this.usuarioService = usuarioService;
+        this.filtroEstado = filtroEstado;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Recepcionista obtenerPorId(Long id) {
+    public List<RecepcionistaResponse> listar() {
+        filtroEstado.activarFiltroEstado(true);
+        return recepcionistaRepository.findAll()
+                .stream()
+                .map(recepcionistaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<RecepcionistaResponse> obtenerPorId(Long id) {
         filtroEstado.activarFiltroEstado(true);
         return recepcionistaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Recepcionista no encontrado"));
+                .map(recepcionistaMapper::toResponse);
     }
 
     @Transactional
     @Override
-    public Recepcionista guardar(Recepcionista recepcionista) {
+    public RecepcionistaResponse guardar(RecepcionistaRequest request) {
         filtroEstado.activarFiltroEstado(true);
-        if (recepcionistaRepository.existsByNumeroDocumento(recepcionista.getNumeroDocumento())) {
-            throw new RuntimeException("Recepcionista ya existe con el DNI ingresado");
+
+        if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento())) {
+            throw new RuntimeException("Ya existe un recepcionista con el mismo número de documento");
         }
-        return recepcionistaRepository.save(recepcionista);
+        //guardamos usuario
+        UsuarioRequestDTO newUsuario= new UsuarioRequestDTO();
+        newUsuario.setCorreo(request.getCorreo());
+        newUsuario.setPassword(request.getPassword());
+        RolDTO rolRecepcinista = new RolDTO();
+        rolRecepcinista.setId(3L);//ROL RECEPCIONISTA
+        newUsuario.setRol(rolRecepcinista);
+
+        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
+
+        Usuario usuario = new Usuario();
+        usuario.setId(usuarioDTO.getId());
+
+        TipoDocumento tipoDocumento = tipoDocumentoRepository.findByIdAndEstadoIsTrue(request.getTipoDocumentoId())
+                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
+
+        Recepcionista recepcionista = Recepcionista.builder()
+                .nombres(request.getNombres())
+                .apellidos(request.getApellidos())
+                .numeroDocumento(request.getNumeroDocumento())
+                .telefono(request.getTelefono())
+                .direccion(request.getDireccion())
+                .turnoTrabajo(request.getTurnoTrabajo())
+                .fechaContratacion(request.getFechaContratacion())
+                .usuario(usuario)
+                .tipoDocumento(tipoDocumento)
+                .estado(true)
+                .build();
+        return recepcionistaMapper.toResponse(recepcionistaRepository.save(recepcionista));
     }
 
     @Transactional
     @Override
-    public Recepcionista actualizar(Long id, Recepcionista recepcionista) {
+    public RecepcionistaResponse actualizar(Long id, RecepcionistaRequest request) {
         filtroEstado.activarFiltroEstado(true);
-        Recepcionista recepcionistaExistente = obtenerPorId(id);
 
-        if (recepcionistaRepository.existsByNumeroDocumento(recepcionista.getNumeroDocumento())) {
-            throw new RuntimeException("Recepcionista ya existe con el DNI ingresado");
+        Recepcionista recepcionistaExistente = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Recepcionista no encontrada con id: " + id));
+
+        if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento()) &&
+                !recepcionistaExistente.getNumeroDocumento().equals(request.getNumeroDocumento())) {
+            throw new RuntimeException("Ya existe un recepcionista con el número de documento ingresado.");
         }
 
-        recepcionistaExistente.setNombres(recepcionista.getNombres());
-        recepcionistaExistente.setApellidos(recepcionista.getApellidos());
-        recepcionistaExistente.setNumeroDocumento(recepcionista.getNumeroDocumento());
-        recepcionistaExistente.setTelefono(recepcionista.getTelefono());
-        recepcionistaExistente.setDireccion(recepcionista.getDireccion());
-        recepcionistaExistente.setTurnoTrabajo(recepcionista.getTurnoTrabajo());
-        recepcionistaExistente.setFechaContratacion(recepcionista.getFechaContratacion());
-        recepcionistaExistente.setTipoDocumento(recepcionista.getTipoDocumento());
-        recepcionistaExistente.setUsuario(recepcionista.getUsuario());
+        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(request.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + request.getUsuarioId()));
 
-        return recepcionistaRepository.save(recepcionistaExistente);
+        TipoDocumento tipoDocumento = tipoDocumentoRepository.findByIdAndEstadoIsTrue(request.getTipoDocumentoId())
+                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
+
+        recepcionistaExistente.setNombres(request.getNombres());
+        recepcionistaExistente.setApellidos(request.getApellidos());
+        recepcionistaExistente.setNumeroDocumento(request.getNumeroDocumento());
+        recepcionistaExistente.setTelefono(request.getTelefono());
+        recepcionistaExistente.setDireccion(request.getDireccion());
+        recepcionistaExistente.setTurnoTrabajo(request.getTurnoTrabajo());
+        recepcionistaExistente.setFechaContratacion(request.getFechaContratacion());
+        recepcionistaExistente.setTipoDocumento(tipoDocumento);
+        recepcionistaExistente.setUsuario(usuario);
+
+        return recepcionistaMapper.toResponse(recepcionistaRepository.save(recepcionistaExistente));
     }
 
     @Transactional
     @Override
     public void eliminar(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Recepcionista recepcionista = obtenerPorId(id);
-        recepcionista.setEstado(false); // Borrado lógico
+        Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Recepcionista no encontrada"));
+        recepcionista.setEstado(false); //borrado
+        usuarioService.eliminar(recepcionista.getUsuario().getId());
+        recepcionista.setUsuario(null);
         recepcionistaRepository.save(recepcionista);
     }
 }

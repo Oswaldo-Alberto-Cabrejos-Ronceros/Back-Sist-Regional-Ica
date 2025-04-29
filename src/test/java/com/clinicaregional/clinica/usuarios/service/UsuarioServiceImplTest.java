@@ -3,9 +3,15 @@ package com.clinicaregional.clinica.usuarios.service;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.entity.Medico;
+import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
+import com.clinicaregional.clinica.repository.AdministradorRepository;
+import com.clinicaregional.clinica.repository.MedicoRepository;
+import com.clinicaregional.clinica.repository.PacienteRepository;
+import com.clinicaregional.clinica.repository.RecepcionistaRepository;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
 import com.clinicaregional.clinica.util.FiltroEstado;
@@ -29,6 +35,10 @@ class UsuarioServiceImplTest {
         private RolRepository rolRepository;
         private PasswordEncoder passwordEncoder;
         private UsuarioMapper usuarioMapper;
+        private PacienteRepository pacienteRepository;
+        private MedicoRepository medicoRepository;
+        private RecepcionistaRepository recepcionistaRepository;
+        private AdministradorRepository administradorRepository;
         private FiltroEstado filtroEstado;
 
         @BeforeEach
@@ -37,6 +47,10 @@ class UsuarioServiceImplTest {
                 rolRepository = mock(RolRepository.class);
                 passwordEncoder = mock(PasswordEncoder.class);
                 usuarioMapper = mock(UsuarioMapper.class);
+                pacienteRepository = mock(PacienteRepository.class);
+                medicoRepository = mock(MedicoRepository.class);
+                recepcionistaRepository = mock(RecepcionistaRepository.class);
+                administradorRepository = mock(AdministradorRepository.class);
                 filtroEstado = mock(FiltroEstado.class);
 
                 usuarioService = new UsuarioServiceImpl(
@@ -44,6 +58,10 @@ class UsuarioServiceImplTest {
                                 rolRepository,
                                 passwordEncoder,
                                 usuarioMapper,
+                                pacienteRepository,
+                                medicoRepository,
+                                recepcionistaRepository,
+                                administradorRepository,
                                 filtroEstado);
 
                 lenient().doNothing().when(filtroEstado).activarFiltroEstado(true);

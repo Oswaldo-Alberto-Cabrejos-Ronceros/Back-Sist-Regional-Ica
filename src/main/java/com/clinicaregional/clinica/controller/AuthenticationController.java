@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
-import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
+import com.clinicaregional.clinica.dto.request.RegisterRequest;
 import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
 import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
 import com.clinicaregional.clinica.service.AuthenticationService;
@@ -76,13 +77,13 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody @Valid UsuarioRequestDTO UsuarioRequestDTO, HttpServletResponse response) {
-        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerUser(UsuarioRequestDTO);
+    public ResponseEntity<AuthenticationResponseDTO> registerPaciente(@RequestBody @Valid RegisterRequest registerRequest, HttpServletResponse response) {
+        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerPaciente(registerRequest);
         //configuramos cookies httponly
         addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
         addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
         AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
-        return ResponseEntity.ok(responseToSend);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseToSend);
     }
 
 }

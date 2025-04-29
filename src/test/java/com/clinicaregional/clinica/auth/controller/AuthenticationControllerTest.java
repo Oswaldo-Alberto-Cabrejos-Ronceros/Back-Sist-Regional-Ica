@@ -2,9 +2,14 @@
 package com.clinicaregional.clinica.auth.controller;
 
 import com.clinicaregional.clinica.controller.AuthenticationController;
+import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
+import com.clinicaregional.clinica.dto.request.RegisterRequest;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
+import com.clinicaregional.clinica.enums.Sexo;
+import com.clinicaregional.clinica.enums.TipoSangre;
 import com.clinicaregional.clinica.security.JwtUtil;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDate;
 
 @WebMvcTest(controllers = AuthenticationController.class, excludeAutoConfiguration = {
                 SecurityAutoConfiguration.class,
@@ -107,17 +113,42 @@ class AuthenticationControllerTest {
         }
 
         @Test
-        void registroUsuario_nuevoUsuario_devuelveJWTYCookies() throws Exception {
-                UsuarioRequestDTO request = new UsuarioRequestDTO("diegoTester@gmail.com", "Tester5461", true, null);
-                AuthenticationResponseDTO response = new AuthenticationResponseDTO(10L, "PACIENTE", "jwt123",
-                                "refresh123");
+        void registroUsuario_nuevoPaciente_devuelveJWTYCookies() throws Exception {
+                // 1. Crear UsuarioRequestDTO
+                UsuarioRequestDTO usuario = new UsuarioRequestDTO();
+                usuario.setCorreo("testpaciente@mail.com");
+                usuario.setPassword("Test1234");
+                usuario.setEstado(true);
+                usuario.setRol(null); // El servicio lo asigna como PACIENTE internamente
 
-                when(authenticationService.registerUser(any())).thenReturn(response);
+                // 2. Crear PacienteDTO
+                PacienteDTO paciente = new PacienteDTO();
+                paciente.setNombres("Juan");
+                paciente.setApellidos("Perez");
+                paciente.setFechaNacimiento(LocalDate.of(1990, 5, 10));
+                paciente.setSexo(Sexo.MASCULINO);
+                paciente.setTipoDocumento(new TipoDocumentoDTO(1L, "DNI", "Documento nacional"));
+                paciente.setNumeroIdentificacion("12345678");
+                paciente.setTelefono("987654321");
+                paciente.setDireccion("Av. Lima 123");
+                paciente.setNacionalidad("PERUANA");
+                paciente.setTipoSangre(TipoSangre.O_POSITIVO);
+                paciente.setAntecedentes("Ninguno");
 
+                // 3. Armar el request
+                RegisterRequest request = new RegisterRequest(usuario, paciente);
+
+                // 4. Simular respuesta del servicio
+                AuthenticationResponseDTO response = new AuthenticationResponseDTO(10L, "PACIENTE", "jwtToken123",
+                                "refreshToken456");
+
+                when(authenticationService.registerPaciente(any())).thenReturn(response);
+
+                // 5. Ejecutar y verificar
                 mockMvc.perform(post("/api/auth/register")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
-                                .andExpect(status().isOk())
+                                .andExpect(status().isCreated())
                                 .andExpect(cookie().exists("jwtToken"))
                                 .andExpect(cookie().exists("refreshToken"))
                                 .andExpect(jsonPath("$.usuarioId").value(10L))

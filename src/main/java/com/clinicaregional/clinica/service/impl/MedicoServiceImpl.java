@@ -9,13 +9,20 @@ import org.springframework.stereotype.Service;
 
 import com.clinicaregional.clinica.repository.MedicoRepository;
 import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
+import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
 import com.clinicaregional.clinica.entity.Medico;
+import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.MedicoMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.MedicoService;
+import com.clinicaregional.clinica.service.UsuarioService;
+
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
@@ -23,12 +30,14 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
     private final MedicoRepository medicoRepository;
     private final MedicoMapper medicoMapper;
     private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public MedicoServiceImpl(MedicoRepository medicoRepository, MedicoMapper medicoMapper, UsuarioRepository usuarioRepository) {
+    public MedicoServiceImpl(MedicoRepository medicoRepository, MedicoMapper medicoMapper, UsuarioRepository usuarioRepository, UsuarioService usuarioService) {
         this.usuarioRepository = usuarioRepository;
         this.medicoRepository = medicoRepository;
         this.medicoMapper = medicoMapper;
+        this.usuarioService = usuarioService;
     }
 
     @Transactional(readOnly = true)
@@ -51,14 +60,37 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
         if(medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
             throw new RuntimeException("Ya existe un medico con el rne ingresado");
         }
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
-        if(medicoRepository.existsByUsuario(usuario)){
-            throw new RuntimeException("Ya existe un medico con el usuario ingresado");
+        if (usuarioRepository.existsByCorreo(dto.getCorreo())) {
+            throw new RuntimeException("Ya existe un usuario con el correo ingresado");
         }
-        Medico medico = medicoMapper.mapToMedico(dto, usuario);
-        Medico guardado = medicoRepository.save(medico);
-        return medicoMapper.mapToMedicoResponseDTO(guardado);
+
+        UsuarioRequestDTO newUsuario = new UsuarioRequestDTO();
+        newUsuario.setCorreo(dto.getCorreo());
+        newUsuario.setPassword(dto.getPassword());
+        RolDTO rolMedico = new RolDTO();
+        rolMedico.setId(4L); // ID del rol de médico
+        newUsuario.setRol(rolMedico);
+        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);  
+        Usuario usuario1 = new Usuario();
+        usuario1.setId(usuarioDTO.getId());
+
+        Medico medico = Medico.builder()
+                .nombres(dto.getNombres())
+                .apellidos(dto.getApellidos())
+                .numeroColegiatura(dto.getNumeroColegiatura())
+                .numeroRNE(dto.getNumeroRNE())
+                .telefono(dto.getTelefono())
+                .direccion(dto.getDireccion())
+                .descripcion(dto.getDescripcion())
+                .imagen(dto.getImagen())
+                .fechaContratacion(dto.getFechaContratacion())
+                .tipoContrato(dto.getTipoContrato())
+                .tipoMedico(dto.getTipoMedico())
+                .usuario(usuario1)
+                .build();
+
+        return medicoMapper.mapToMedicoResponseDTO(medicoRepository.save(medico));
+
     }
 
     @Transactional

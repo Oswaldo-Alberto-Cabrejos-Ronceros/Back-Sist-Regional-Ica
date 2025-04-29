@@ -57,4 +57,12 @@ public class MedicoRequestDTO {
 
     private Long usuarioId;
 
+    @NotBlank(message = "Correo es obligatorio para crear usuario")
+    @Email(message = "Debe ser un correo válido")
+    private String correo;
+
+    @NotBlank(message = "Contraseña es obligatoria para crear usuario")
+    @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
+    private String password;
+
 }

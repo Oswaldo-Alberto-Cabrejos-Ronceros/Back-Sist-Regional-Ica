@@ -79,6 +79,38 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
 
     @Transactional
     @Override
+    public RecepcionistaResponse actualizar(Long id, RecepcionistaRequest request) {
+        activarFiltroEstado(true);
+
+        Recepcionista recepcionistaExistente = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Recepcionista no encontrada con id: " + id));
+
+        if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento()) &&
+                !recepcionistaExistente.getNumeroDocumento().equals(request.getNumeroDocumento())) {
+            throw new RuntimeException("Ya existe un recepcionista con el número de documento ingresado.");
+        }
+
+        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(request.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + request.getUsuarioId()));
+
+        TipoDocumento tipoDocumento = tipoDocumentoRepository.findByIdAndEstadoIsTrue(request.getTipoDocumentoId())
+                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
+
+        recepcionistaExistente.setNombres(request.getNombres());
+        recepcionistaExistente.setApellidos(request.getApellidos());
+        recepcionistaExistente.setNumeroDocumento(request.getNumeroDocumento());
+        recepcionistaExistente.setTelefono(request.getTelefono());
+        recepcionistaExistente.setDireccion(request.getDireccion());
+        recepcionistaExistente.setTurnoTrabajo(request.getTurnoTrabajo());
+        recepcionistaExistente.setFechaContratacion(request.getFechaContratacion());
+        recepcionistaExistente.setTipoDocumento(tipoDocumento);
+        recepcionistaExistente.setUsuario(usuario);
+
+        return recepcionistaMapper.toResponse(recepcionistaRepository.save(recepcionistaExistente));
+    }
+
+    @Transactional
+    @Override
     public void eliminar(Long id) {
         activarFiltroEstado(true);
         Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id)

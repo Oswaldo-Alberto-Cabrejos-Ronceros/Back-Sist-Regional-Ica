@@ -110,6 +110,8 @@ public class PacienteServiceImpl extends FiltroEstado implements PacienteService
         activarFiltroEstado(true);
         Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
         paciente.setEstado(false); //borrado logico
+        usuarioService.eliminar(paciente.getUsuario().getId());
+        paciente.setUsuario(null);
         pacienteRepository.save(paciente);
     }
 }

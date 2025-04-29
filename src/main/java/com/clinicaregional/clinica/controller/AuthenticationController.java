@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.controller;
 
+import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.dto.request.RegisterRequest;
 import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
 import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
@@ -72,13 +73,25 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody @Valid RegisterRequest registerRequest, HttpServletResponse response) {
-        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerUser(registerRequest);
+    public ResponseEntity<AuthenticationResponseDTO> registerPaciente(@RequestBody @Valid RegisterRequest registerRequest, HttpServletResponse response) {
+        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerPaciente(registerRequest);
         //configuramos cookies httponly
         addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
         addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
         AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
-        return ResponseEntity.ok(responseToSend);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseToSend);
+    }
+
+    //para registrar administrador
+
+    @PostMapping("/administrador/register")
+    public ResponseEntity<AuthenticationResponseDTO> registerAdministrador(@RequestBody @Valid RegisterAdministradorRequest registerAdministradorRequest, HttpServletResponse response){
+        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerAdministrador(registerAdministradorRequest);
+        //configuramos cookies httponly
+        addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
+        addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
+        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseToSend);
     }
 
 }

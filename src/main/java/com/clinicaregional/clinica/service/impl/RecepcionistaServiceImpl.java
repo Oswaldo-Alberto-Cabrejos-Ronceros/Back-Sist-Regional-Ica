@@ -27,6 +27,7 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     private final TipoDocumentoRepository tipoDocumentoRepository;
     private final UsuarioRepository usuarioRepository;
     private final RecepcionistaMapper recepcionistaMapper;
+    private final UsuarioService usuarioService;
 
     @Transactional(readOnly = true)
     @Override
@@ -113,9 +114,10 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     @Override
     public void eliminar(Long id) {
         activarFiltroEstado(true);
-        Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Recepcionista no encontrado"));
-        recepcionista.setEstado(false);
+        Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Recepcionista no encontrada"));
+        recepcionista.setEstado(false); //borrado
+        usuarioService.eliminar(recepcionista.getUsuario().getId());
+        recepcionista.setUsuario(null);
         recepcionistaRepository.save(recepcionista);
     }
 }

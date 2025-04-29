@@ -7,6 +7,7 @@ import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.AdministradorMapper;
 import com.clinicaregional.clinica.repository.AdministradorRepository;
 import com.clinicaregional.clinica.service.AdministradorService;
+import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,13 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
 
     private final AdministradorRepository administradorRepository;
     private final AdministradorMapper administradorMapper;
+    private final UsuarioService usuarioService;
 
     @Autowired
-    public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper) {
+    public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper,UsuarioService usuarioService) {
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
+        this.usuarioService=usuarioService;
     }
 
     @Transactional(readOnly = true)
@@ -92,7 +95,9 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
     public void deleteAdministrador(Long id) {
         activarFiltroEstado(true);
         Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
-        findAdministrador.setEstado(false);
+        findAdministrador.setEstado(false); //borrado logico
+        usuarioService.eliminar(findAdministrador.getUsuario().getId());
+        findAdministrador.setUsuario(null);
         administradorRepository.save(findAdministrador);
     }
 }

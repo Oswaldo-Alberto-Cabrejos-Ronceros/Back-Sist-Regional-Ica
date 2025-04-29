@@ -12,4 +12,5 @@ public interface RecepcionistaRepository extends JpaRepository<Recepcionista, Lo
     Optional<Recepcionista> findByIdAndEstadoIsTrue(Long id);
     boolean existsByNumeroDocumento(String numeroDocumento);
     boolean existsByUsuario(Usuario usuario);
+    Optional<Recepcionista> findByUsuario_Id(Long id);
 }

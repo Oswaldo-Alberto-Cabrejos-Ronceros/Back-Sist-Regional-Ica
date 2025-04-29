@@ -10,4 +10,5 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {
     boolean existsByNumeroColegiatura(String numeroColegiatura);
     boolean existsByNumeroRNE(String numeroRNE);
     boolean existsByUsuario(Usuario usuario);
+    Optional findByUsuario_Id(Long id);
 }

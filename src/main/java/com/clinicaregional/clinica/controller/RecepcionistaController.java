@@ -2,13 +2,13 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
-import com.clinicaregional.clinica.entity.Recepcionista;
 import com.clinicaregional.clinica.service.RecepcionistaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -16,25 +16,29 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Recepcionista", description = "Operaciones CRUD para recepcionistas")
 public class RecepcionistaController {
+
     private final RecepcionistaService recepcionistaService;
+
+    @PostMapping
+    public ResponseEntity<RecepcionistaResponse> registrar(@RequestBody RecepcionistaRequest recepcionistaRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(recepcionistaService.guardar(recepcionistaRequest));
+    }
+
     @GetMapping
-    public ResponseEntity<List<RecepcionistaResponse>> listarTodos() {
+    public ResponseEntity<List<RecepcionistaResponse>> listar() {
         return ResponseEntity.ok(recepcionistaService.listar());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RecepcionistaResponse> obtenerPorId(@PathVariable Long id) {
-        return recepcionistaService.obtenerPorId(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public ResponseEntity<RecepcionistaResponse> registrar(@RequestBody RecepcionistaRequest recepcionista) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(recepcionistaService.guardar(recepcionista));
+        return recepcionistaService.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RecepcionistaResponse> actualizar(@PathVariable Long id, @RequestBody RecepcionistaRequest recepcionista) {
-        return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionista));
+    public ResponseEntity<RecepcionistaResponse> actualizar(@PathVariable Long id, @RequestBody RecepcionistaRequest recepcionistaRequest) {
+        return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionistaRequest));
     }
 
     @DeleteMapping("/{id}")

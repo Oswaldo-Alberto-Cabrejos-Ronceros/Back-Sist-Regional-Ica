@@ -3,7 +3,6 @@ package com.clinicaregional.clinica.especialidades.service;
 import com.clinicaregional.clinica.dto.request.EspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 import com.clinicaregional.clinica.entity.Especialidad;
-import com.clinicaregional.clinica.mapper.EspecialidadMapper;
 import com.clinicaregional.clinica.repository.EspecialidadRepository;
 import com.clinicaregional.clinica.service.impl.EspecialidadServiceImpl;
 import com.clinicaregional.clinica.util.FiltroEstado;
@@ -79,7 +78,6 @@ class EspecialidadServiceImplTest {
     @DisplayName("Guardar nueva especialidad exitosamente")
     void guardarEspecialidad_exitoso() {
         EspecialidadRequest request = new EspecialidadRequest("Neurología", "Especialidad del cerebro", "neuro.jpg");
-        Especialidad especialidad = EspecialidadMapper.toEntity(request);
         Especialidad especialidadGuardada = Especialidad.builder()
                 .id(1L)
                 .nombre("Neurología")

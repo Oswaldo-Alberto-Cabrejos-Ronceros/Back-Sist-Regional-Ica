@@ -36,6 +36,8 @@ class EspecialidadServiceTest {
 
     private Especialidad especialidad;
     private EspecialidadRequest especialidadRequest;
+
+    @Mock
     private EspecialidadResponse especialidadResponse;
 
     @BeforeEach

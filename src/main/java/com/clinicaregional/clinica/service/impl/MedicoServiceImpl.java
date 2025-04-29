@@ -21,6 +21,9 @@ import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.MedicoService;
 import com.clinicaregional.clinica.service.UsuarioService;
 
+import org.springframework.transaction.annotation.Transactional;
+
+
 @Service
 public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
 
@@ -37,6 +40,7 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
         this.usuarioService = usuarioService;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<MedicoResponseDTO> obtenerMedicos() {
         activarFiltroEstado(true);
@@ -46,6 +50,7 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public MedicoResponseDTO guardarMedico(MedicoRequestDTO dto) {
         activarFiltroEstado(true);
@@ -88,6 +93,7 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
 
     }
 
+    @Transactional
     @Override
     public MedicoResponseDTO actualizarMedico(Long id, MedicoRequestDTO dto) {
         activarFiltroEstado(true);
@@ -125,11 +131,16 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
         return medicoMapper.mapToMedicoResponseDTO(actualizado);
     }
 
+    @Transactional
     @Override
     public void eliminarMedico(Long id) {
         activarFiltroEstado(true);
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Medico no encontrado con ID: " + id));
         medico.setEstado(false); //borrado logico
+        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId()).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        usuario.setEstado(false);
+        medico.setUsuario(null);
+        usuarioRepository.save(usuario);
         medicoRepository.save(medico);
     }
 }

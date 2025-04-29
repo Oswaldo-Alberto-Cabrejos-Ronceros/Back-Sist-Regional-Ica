@@ -107,6 +107,7 @@ public class MedicoServiceImpl extends FiltroEstado implements MedicoService {
         medico.setEstado(false); //borrado logico
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId()).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
         usuario.setEstado(false);
+        medico.setUsuario(null);
         usuarioRepository.save(usuario);
         medicoRepository.save(medico);
     }

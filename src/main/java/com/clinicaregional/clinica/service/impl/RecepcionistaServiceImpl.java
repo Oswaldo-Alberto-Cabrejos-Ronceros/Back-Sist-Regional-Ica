@@ -1,8 +1,12 @@
 package com.clinicaregional.clinica.service.impl;
 
+import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.entity.Recepcionista;
+import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.RecepcionistaMapper;
@@ -56,9 +60,18 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
         if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento())) {
             throw new RuntimeException("Ya existe un recepcionista con el mismo número de documento");
         }
+        //guardamos usuario
+        UsuarioRequestDTO newUsuario= new UsuarioRequestDTO();
+        newUsuario.setCorreo(request.getCorreo());
+        newUsuario.setPassword(request.getPassword());
+        RolDTO rolRecepcinista = new RolDTO();
+        rolRecepcinista.setId(3L);//ROL RECEPCIONISTA
+        newUsuario.setRol(rolRecepcinista);
 
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(request.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + request.getUsuarioId()));
+        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
+
+        Usuario usuario = new Usuario();
+        usuario.setId(usuarioDTO.getId());
 
         TipoDocumento tipoDocumento = tipoDocumentoRepository.findByIdAndEstadoIsTrue(request.getTipoDocumentoId())
                 .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
@@ -75,7 +88,6 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
                 .tipoDocumento(tipoDocumento)
                 .estado(true)
                 .build();
-
         return recepcionistaMapper.toResponse(recepcionistaRepository.save(recepcionista));
     }
 

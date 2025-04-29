@@ -106,25 +106,4 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         return usuarioMapper.mapToAuthenticationResponseDTO(usuarioGuardado, jwtToken, refreshToken);
     }
-
-    @Transactional
-    @Override
-    public AuthenticationResponseDTO registerAdministrador(RegisterAdministradorRequest registerAdministradorRequest) {
-        // Establecer el rol por defecto (ADMIN)
-        registerAdministradorRequest.getUsuario().setRol(new RolDTO(2L, "ADMINISTRADOR"));
-
-        UsuarioDTO usuarioGuardado = usuarioService.guardar(registerAdministradorRequest.getUsuario());
-
-        registerAdministradorRequest.getAdministrador().setUsuarioId(usuarioGuardado.getId());
-
-        AdministradorDTO savedAdministrador = administradorService.createAdministrador(registerAdministradorRequest.getAdministrador());
-
-        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
-
-        String jwtToken = jwtUtil.generateAccessToken(authentication);
-        String refreshToken = jwtUtil.generateRefreshToken(authentication);
-
-        return usuarioMapper.mapToAuthenticationResponseDTO(usuarioGuardado, jwtToken, refreshToken);
-    }
 }

@@ -10,6 +10,7 @@ import com.clinicaregional.clinica.repository.RecepcionistaRepository;
 import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.RecepcionistaService;
+import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

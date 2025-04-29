@@ -9,4 +9,5 @@ public interface AdministradorRepository extends JpaRepository<Administrador, Lo
     Optional<Administrador> findByIdAndEstadoIsTrue(Long id);
     boolean existsByNumeroDocumento(String numeroDocumento);
     boolean existsByUsuario_Id(Long id);
+    Optional<Administrador> findByUsuario_Id(Long id);
 }

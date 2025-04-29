@@ -2,10 +2,9 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
-import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.entity.*;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
-import com.clinicaregional.clinica.repository.UsuarioRepository;
-import com.clinicaregional.clinica.repository.RolRepository;
+import com.clinicaregional.clinica.repository.*;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +24,23 @@ public class UsuarioServiceImpl extends FiltroEstado implements UsuarioService {
     private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioMapper usuarioMapper;
+    private final PacienteRepository pacienteRepository;
+    private final MedicoRepository medicoRepository;
+    private final RecepcionistaRepository recepcionistaRepository;
+    private final AdministradorRepository administradorRepository;
 
     @Autowired
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository, PasswordEncoder passwordEncoder, UsuarioMapper usuarioMapper) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository, PasswordEncoder passwordEncoder, UsuarioMapper usuarioMapper,
+                              PacienteRepository pacienteRepository, MedicoRepository medicoRepository, RecepcionistaRepository recepcionistaRepository,
+                              AdministradorRepository administradorRepository) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.usuarioMapper = usuarioMapper;
+        this.pacienteRepository = pacienteRepository;
+        this.medicoRepository = medicoRepository;
+        this.recepcionistaRepository = recepcionistaRepository;
+        this.administradorRepository = administradorRepository;
     }
 
     @Transactional(readOnly = true)
@@ -47,6 +56,7 @@ public class UsuarioServiceImpl extends FiltroEstado implements UsuarioService {
         activarFiltroEstado(true);
         return usuarioRepository.findByIdAndEstadoIsTrue(id).map(usuarioMapper::mapToUsuarioDTO);
     }
+
     @Transactional(readOnly = true)
     @Override
     public Optional<Usuario> obtenerPorIdContenxt(Long id) {
@@ -110,6 +120,35 @@ public class UsuarioServiceImpl extends FiltroEstado implements UsuarioService {
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un usuario con el id:" + id));
         usuario.setEstado(false);//borrado logico
         usuarioRepository.save(usuario);
+        switch (usuario.getRol().getNombre()) {
+            case "ADMIN":
+                Administrador administrador = administradorRepository.findByUsuario_Id(usuario.getId()).orElseThrow(() -> new RuntimeException("Administrador no existe con el id de usuario ingresado"));
+                administrador.setUsuario(null);
+                administrador.setEstado(false);
+                administradorRepository.save(administrador);
+                break;
+            case "PACIENTE":
+                Paciente paciente = pacienteRepository.findByUsuario_Id(usuario.getId()).orElseThrow(() -> new RuntimeException("Paciente no existe con el id de usuario ingresado"));
+                paciente.setUsuario(null);
+                paciente.setEstado(false);
+                pacienteRepository.save(paciente);
+                break;
+            case "MEDICO":
+                Medico medico = medicoRepository.findByUsuario_Id(usuario.getId()).orElseThrow(() -> new RuntimeException("Medico no existe con el id de usuario ingresado"));
+                medico.setUsuario(null);
+                medico.setEstado(false);
+                medicoRepository.save(medico);
+                break;
+            case "RECEPCIONISTA":
+                Recepcionista recepcionista = recepcionistaRepository.findByUsuario_Id(usuario.getId()).orElseThrow(() -> new RuntimeException("Medico no existe con el id de usuario ingresado"));
+                recepcionista.setUsuario(null);
+                recepcionista.setEstado(false);
+                recepcionistaRepository.save(recepcionista);
+                break;
+            default:
+                throw new IllegalStateException("Rol no manejado: " + usuario.getRol().getNombre());
+
+        }
     }
 
 }

@@ -116,7 +116,7 @@ class MedicoRepositoryTest {
                 .fechaContratacion(LocalDateTime.now())
                 .tipoContrato(TipoContrato.NOCTURNO)
                 .tipoMedico(TipoMedico.PRACTICANTE)
-                .usuario(usuario2) // ASIGNAR usuario diferente
+                .usuario(usuario2)
                 .estado(false)
                 .build();
 

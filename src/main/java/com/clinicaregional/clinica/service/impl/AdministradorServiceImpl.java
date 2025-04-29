@@ -22,6 +22,7 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
     private final AdministradorRepository administradorRepository;
     private final AdministradorMapper administradorMapper;
 
+
     @Autowired
     public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper) {
         this.administradorRepository = administradorRepository;

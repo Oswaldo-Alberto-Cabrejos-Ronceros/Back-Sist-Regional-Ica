@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-class PacienteServiceTest {
+class PacienteServiceImplTest {
 
     @Mock
     private PacienteRepository pacienteRepository;
@@ -40,10 +41,10 @@ class PacienteServiceTest {
     private FiltroEstado filtroEstado;
 
     @Mock
-    private UsuarioService usuarioService;
+    private TipoDocumentoService tipoDocumentoService;
 
     @Mock
-    private TipoDocumentoService tipoDocumentoService;
+    private UsuarioService usuarioService;
 
     @InjectMocks
     private PacienteServiceImpl pacienteService;
@@ -55,9 +56,7 @@ class PacienteServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        TipoDocumentoDTO tipoDocumentoDTO = new TipoDocumentoDTO();
-        tipoDocumentoDTO.setId(1L);
-        tipoDocumentoDTO.setNombre("DNI");
+        TipoDocumentoDTO tipoDocumentoDTO = new TipoDocumentoDTO(1L, "DNI", "Documento");
 
         paciente = Paciente.builder()
                 .id(1L)
@@ -90,11 +89,14 @@ class PacienteServiceTest {
     @Test
     @DisplayName("Listar todos los pacientes")
     void listarPacientes() {
+        // Arrange
         when(pacienteRepository.findAll()).thenReturn(List.of(paciente));
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
+        // Act
         List<PacienteDTO> resultado = pacienteService.listarPacientes();
 
+        // Assert
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getNombres()).isEqualTo("Juan");
         verify(pacienteRepository).findAll();
@@ -103,43 +105,46 @@ class PacienteServiceTest {
     @Test
     @DisplayName("Obtener paciente por ID")
     void getPacientePorId() {
+        // Arrange
         when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
+        // Act
         Optional<PacienteDTO> resultado = pacienteService.getPacientePorId(1L);
 
+        // Assert
         assertThat(resultado).isPresent();
         assertThat(resultado.get().getId()).isEqualTo(1L);
         verify(pacienteRepository).findByIdAndEstadoIsTrue(1L);
     }
 
     @Test
-    @DisplayName("Obtener paciente por número de identificación")
+    @DisplayName("Obtener paciente por identificación")
     void getPacientePorIdentificacion() {
+        // Arrange
         when(pacienteRepository.findByNumeroIdentificacion("12345678")).thenReturn(Optional.of(paciente));
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
+        // Act
         Optional<PacienteDTO> resultado = pacienteService.getPacientePorIdentificacion("12345678");
 
+        // Assert
         assertThat(resultado).isPresent();
         assertThat(resultado.get().getNumeroIdentificacion()).isEqualTo("12345678");
         verify(pacienteRepository).findByNumeroIdentificacion("12345678");
     }
 
     @Test
-    @DisplayName("Crear nuevo paciente")
+    @DisplayName("Crear paciente correctamente")
     void crearPaciente() {
         // Arrange
         TipoDocumento tipoDocumento = TipoDocumento.builder()
                 .id(1L)
                 .nombre("DNI")
-                .descripcion("Documento Nacional de Identidad")
+                .descripcion("Documento Nacional")
                 .estado(true)
                 .build();
-
-        when(tipoDocumentoService.getTipoDocumentoByIdContext(anyLong()))
-                .thenReturn(Optional.of(tipoDocumento));
-
+        when(tipoDocumentoService.getTipoDocumentoByIdContext(anyLong())).thenReturn(Optional.of(tipoDocumento));
         when(pacienteMapper.mapToPaciente(any(PacienteDTO.class))).thenReturn(paciente);
         when(pacienteRepository.save(any(Paciente.class))).thenReturn(paciente);
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
@@ -154,32 +159,37 @@ class PacienteServiceTest {
     }
 
     @Test
-    @DisplayName("Actualizar paciente existente")
+    @DisplayName("Actualizar paciente correctamente")
     void actualizarPaciente() {
+        // Arrange
         when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
         when(pacienteRepository.save(any(Paciente.class))).thenReturn(paciente);
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
+        // Act
         PacienteDTO resultado = pacienteService.actualizarPaciente(1L, pacienteDTO);
 
+        // Assert
         assertThat(resultado).isNotNull();
         assertThat(resultado.getId()).isEqualTo(1L);
         verify(pacienteRepository).save(any(Paciente.class));
     }
 
     @Test
-    @DisplayName("Eliminar paciente existente")
+    @DisplayName("Eliminar paciente correctamente")
     void eliminarPaciente() {
+        // Arrange
         Usuario usuario = new Usuario();
-        usuario.setId(10L);
+        usuario.setId(99L);
         paciente.setUsuario(usuario);
-
         when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
 
+        // Act
         pacienteService.eliminarPaciente(1L);
 
-        verify(pacienteRepository).save(any(Paciente.class));
+        // Assert
         assertThat(paciente.getEstado()).isFalse();
+        verify(usuarioService).eliminar(99L);
+        verify(pacienteRepository).save(paciente);
     }
-
 }

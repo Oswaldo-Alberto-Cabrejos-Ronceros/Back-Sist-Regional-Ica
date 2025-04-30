@@ -32,7 +32,8 @@ public class PacienteController {
 
     @GetMapping("/num-identificacion/{numIdentificacion}")
     public ResponseEntity<PacienteDTO> getPacienteByNumIdentificacion(@PathVariable String numIdentificacion) {
-        return pacienteService.getPacientePorIdentificacion(numIdentificacion).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return pacienteService.getPacientePorIdentificacion(numIdentificacion).map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -42,9 +43,17 @@ public class PacienteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id, @RequestBody @Valid PacienteDTO pacienteDTO) {
-        PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
-        return ResponseEntity.ok(updatedPaciente);
+    public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
+            @RequestBody @Valid PacienteDTO pacienteDTO) {
+        try {
+            PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
+            return ResponseEntity.ok(updatedPaciente);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("no encontrado")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")

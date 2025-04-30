@@ -1,12 +1,15 @@
 package com.clinicaregional.clinica.service;
 
+import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.entity.Recepcionista;
 import java.util.List;
+import java.util.Optional;
 
 public interface RecepcionistaService {
-    List<Recepcionista> listar();
-    Recepcionista obtenerPorId(Long id);
-    Recepcionista guardar(Recepcionista recepcionista);
-    Recepcionista actualizar(Long id, Recepcionista recepcionista);
+    List<RecepcionistaResponse> listar();
+    Optional<RecepcionistaResponse> obtenerPorId(Long id);
+    RecepcionistaResponse guardar(RecepcionistaRequest recepcionistaRequest);
+    RecepcionistaResponse actualizar(Long id, RecepcionistaRequest recepcionistaRequest);
     void eliminar(Long id);
 }

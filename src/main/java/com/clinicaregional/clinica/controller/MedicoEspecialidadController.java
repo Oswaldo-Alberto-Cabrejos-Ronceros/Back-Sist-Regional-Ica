@@ -3,7 +3,6 @@ package com.clinicaregional.clinica.controller;
 import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
 import com.clinicaregional.clinica.service.MedicoEspecialidadService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

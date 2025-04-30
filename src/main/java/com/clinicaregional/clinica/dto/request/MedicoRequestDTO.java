@@ -25,11 +25,9 @@ public class MedicoRequestDTO {
     @Size(min = 2, max = 64, message = "Apellidos debe tener entre 2 y 64 caracteres")
     private String apellidos;
 
-    @Null
     @Pattern(regexp = "\\d{11}", message = "El numero de colegiatura solo debe contener numeros y 11 digitos")
     private String numeroColegiatura;
 
-    @Null
     @Pattern(regexp = "\\d{9}", message = "El numero RNE solo debe contener numeros y 9 digitos")
     private String numeroRNE;
 
@@ -57,7 +55,14 @@ public class MedicoRequestDTO {
     @NotNull(message = "El tipo de medico es obligatorio")
     private TipoMedico tipoMedico;
 
-    @Null
     private Long usuarioId;
+
+    @NotBlank(message = "Correo es obligatorio para crear usuario")
+    @Email(message = "Debe ser un correo válido")
+    private String correo;
+
+    @NotBlank(message = "Contraseña es obligatoria para crear usuario")
+    @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
+    private String password;
 
 }

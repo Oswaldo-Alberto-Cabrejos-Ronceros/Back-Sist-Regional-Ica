@@ -1,12 +1,20 @@
-package com.clinicaregional.clinica.dto.request;
+package com.clinicaregional.clinica.dto;
 
-import com.clinicaregional.clinica.enums.TurnoTrabajo;
 import jakarta.validation.constraints.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
-@Data
-public class RecepcionistaRequest {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class AdministradorDTO {
+
+    private Long id;
     @NotBlank(message = "Nombres es obligatorio")
     @Size(min = 2, max = 48, message = "Nombres debe tener entre 2 y 48 caracteres")
     private String nombres;
@@ -30,20 +38,10 @@ public class RecepcionistaRequest {
     @Size(max = 156, message = "La direccion debe ser menor a 156 caracteres")
     private String direccion;
 
-
-    private TurnoTrabajo turnoTrabajo;
-
     @NotNull(message = "Fecha de contratacion es obligatorio")
     @PastOrPresent(message = "La fecha de contratación debe ser antes o hoy")
     private LocalDate fechaContratacion;
 
     private Long usuarioId;
 
-    @NotBlank(message = "Correo es obligatorio para crear usuario")
-    @Email(message = "Debe ser un correo válido")
-    private String correo;
-
-    @NotBlank(message = "Contraseña es obligatoria para crear usuario")
-    @Size(min = 6, message = "La contraseña debe tener mínimo 6 caracteres")
-    private String password;
 }

@@ -2,10 +2,9 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
-import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.entity.*;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
-import com.clinicaregional.clinica.repository.UsuarioRepository;
-import com.clinicaregional.clinica.repository.RolRepository;
+import com.clinicaregional.clinica.repository.*;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,18 +22,26 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioMapper usuarioMapper;
+    private final PacienteRepository pacienteRepository;
+    private final MedicoRepository medicoRepository;
+    private final RecepcionistaRepository recepcionistaRepository;
+    private final AdministradorRepository administradorRepository;
     private final FiltroEstado filtroEstado;
 
     @Autowired
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository,
-                               RolRepository rolRepository,
-                               PasswordEncoder passwordEncoder,
-                               UsuarioMapper usuarioMapper,
-                               FiltroEstado filtroEstado) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository,
+            PasswordEncoder passwordEncoder, UsuarioMapper usuarioMapper,
+            PacienteRepository pacienteRepository, MedicoRepository medicoRepository,
+            RecepcionistaRepository recepcionistaRepository,
+            AdministradorRepository administradorRepository, FiltroEstado filtroEstado) {
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.passwordEncoder = passwordEncoder;
         this.usuarioMapper = usuarioMapper;
+        this.pacienteRepository = pacienteRepository;
+        this.medicoRepository = medicoRepository;
+        this.recepcionistaRepository = recepcionistaRepository;
+        this.administradorRepository = administradorRepository;
         this.filtroEstado = filtroEstado;
     }
 
@@ -91,8 +98,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
         rolRepository.findById(request.getRol().getId())
-                .ifPresentOrElse(usuario::setRol, 
-                    () -> { throw new IllegalStateException("El rol especificado no existe"); });
+                .ifPresentOrElse(usuario::setRol,
+                        () -> {
+                            throw new IllegalStateException("El rol especificado no existe");
+                        });
 
         Usuario usuarioSaved = usuarioRepository.save(usuario);
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);
@@ -108,8 +117,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
 
         rolRepository.findById(request.getRol().getId())
-                .ifPresentOrElse(usuario::setRol, 
-                    () -> { throw new IllegalStateException("El rol especificado no existe"); });
+                .ifPresentOrElse(usuario::setRol,
+                        () -> {
+                            throw new IllegalStateException("El rol especificado no existe");
+                        });
 
         Usuario usuarioSaved = usuarioRepository.save(usuario);
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);
@@ -124,5 +135,39 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         usuario.setEstado(false); // Borrado lógico
         usuarioRepository.save(usuario);
+        switch (usuario.getRol().getNombre()) {
+            case "ADMIN":
+                Administrador administrador = administradorRepository.findByUsuario_Id(usuario.getId()).orElseThrow(
+                        () -> new RuntimeException("Administrador no existe con el id de usuario ingresado"));
+                administrador.setUsuario(null);
+                administrador.setEstado(false);
+                administradorRepository.save(administrador);
+                break;
+            case "PACIENTE":
+                Paciente paciente = pacienteRepository.findByUsuario_Id(usuario.getId())
+                        .orElseThrow(() -> new RuntimeException("Paciente no existe con el id de usuario ingresado"));
+                paciente.setUsuario(null);
+                paciente.setEstado(false);
+                pacienteRepository.save(paciente);
+                break;
+            case "MEDICO":
+                Medico medico = medicoRepository.findByUsuario_Id(usuario.getId())
+                        .orElseThrow(() -> new RuntimeException("Medico no existe con el id de usuario ingresado"));
+                medico.setUsuario(null);
+                medico.setEstado(false);
+                medicoRepository.save(medico);
+                break;
+            case "RECEPCIONISTA":
+                Recepcionista recepcionista = recepcionistaRepository.findByUsuario_Id(usuario.getId())
+                        .orElseThrow(() -> new RuntimeException("Medico no existe con el id de usuario ingresado"));
+                recepcionista.setUsuario(null);
+                recepcionista.setEstado(false);
+                recepcionistaRepository.save(recepcionista);
+                break;
+            default:
+                throw new IllegalStateException("Rol no manejado: " + usuario.getRol().getNombre());
+
+        }
     }
+
 }

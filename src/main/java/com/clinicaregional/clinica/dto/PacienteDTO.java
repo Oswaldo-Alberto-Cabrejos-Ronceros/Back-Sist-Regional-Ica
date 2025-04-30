@@ -54,7 +54,6 @@ public class PacienteDTO {
     @Size(max = 255, message = "Los antecedentes deben ser menores a 255")
     private String antecedentes;
 
-    @Null
     private UsuarioDTO usuario;
 
 }

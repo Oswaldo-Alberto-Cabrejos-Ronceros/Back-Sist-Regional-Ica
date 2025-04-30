@@ -3,9 +3,16 @@ package com.clinicaregional.clinica.usuarios.service;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.entity.Medico;
+import com.clinicaregional.clinica.entity.Paciente;
+import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
+import com.clinicaregional.clinica.repository.AdministradorRepository;
+import com.clinicaregional.clinica.repository.MedicoRepository;
+import com.clinicaregional.clinica.repository.PacienteRepository;
+import com.clinicaregional.clinica.repository.RecepcionistaRepository;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
 import com.clinicaregional.clinica.util.FiltroEstado;
@@ -29,6 +36,10 @@ class UsuarioServiceImplTest {
         private RolRepository rolRepository;
         private PasswordEncoder passwordEncoder;
         private UsuarioMapper usuarioMapper;
+        private PacienteRepository pacienteRepository;
+        private MedicoRepository medicoRepository;
+        private RecepcionistaRepository recepcionistaRepository;
+        private AdministradorRepository administradorRepository;
         private FiltroEstado filtroEstado;
 
         @BeforeEach
@@ -37,6 +48,10 @@ class UsuarioServiceImplTest {
                 rolRepository = mock(RolRepository.class);
                 passwordEncoder = mock(PasswordEncoder.class);
                 usuarioMapper = mock(UsuarioMapper.class);
+                pacienteRepository = mock(PacienteRepository.class);
+                medicoRepository = mock(MedicoRepository.class);
+                recepcionistaRepository = mock(RecepcionistaRepository.class);
+                administradorRepository = mock(AdministradorRepository.class);
                 filtroEstado = mock(FiltroEstado.class);
 
                 usuarioService = new UsuarioServiceImpl(
@@ -44,6 +59,10 @@ class UsuarioServiceImplTest {
                                 rolRepository,
                                 passwordEncoder,
                                 usuarioMapper,
+                                pacienteRepository,
+                                medicoRepository,
+                                recepcionistaRepository,
+                                administradorRepository,
                                 filtroEstado);
 
                 lenient().doNothing().when(filtroEstado).activarFiltroEstado(true);
@@ -111,15 +130,28 @@ class UsuarioServiceImplTest {
 
         @Test
         void eliminar_usuario_existente() {
+                // Arrange
+                Rol rol = new Rol(1L, "PACIENTE", "Paciente");
                 Usuario usuario = new Usuario();
                 usuario.setId(1L);
                 usuario.setCorreo("tester5461@gmail.com");
+                usuario.setRol(rol);
+                usuario.setEstado(true);
+
+                Paciente paciente = new Paciente();
+                paciente.setUsuario(usuario);
+                paciente.setEstado(true);
 
                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
+                when(pacienteRepository.findByUsuario_Id(1L)).thenReturn(Optional.of(paciente));
 
+                // Act
                 usuarioService.eliminar(1L);
 
+                // Assert
+                assertThat(usuario.getEstado()).isFalse();
                 verify(usuarioRepository).save(usuario);
+                verify(pacienteRepository).save(paciente);
         }
 
         @Test
@@ -190,16 +222,27 @@ class UsuarioServiceImplTest {
 
         @Test
         void eliminar_usuarioExistente_exitoso() {
+                // Arrange
+                Rol rol = new Rol(1L, "PACIENTE", "Paciente");
                 Usuario usuarioExistente = new Usuario();
                 usuarioExistente.setId(1L);
                 usuarioExistente.setEstado(true);
+                usuarioExistente.setRol(rol); // ✅ Asegúrate de agregar un rol válido
+
+                Paciente paciente = new Paciente(); // simulamos que existe
+                paciente.setEstado(true);
+                paciente.setUsuario(usuarioExistente);
 
                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
+                when(pacienteRepository.findByUsuario_Id(1L)).thenReturn(Optional.of(paciente));
 
+                // Act
                 usuarioService.eliminar(1L);
 
+                // Assert
                 assertThat(usuarioExistente.getEstado()).isFalse();
                 verify(usuarioRepository, times(1)).save(usuarioExistente);
+                verify(pacienteRepository, times(1)).save(paciente);
         }
 
         @Test

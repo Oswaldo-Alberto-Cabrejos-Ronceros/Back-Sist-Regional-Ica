@@ -95,6 +95,7 @@ public class MedicoServiceImpl implements MedicoService {
                 .tipoContrato(dto.getTipoContrato())
                 .tipoMedico(dto.getTipoMedico())
                 .usuario(usuario1)
+                .estado(true)
                 .build();
 
         return medicoMapper.mapToMedicoResponseDTO(medicoRepository.save(medico));

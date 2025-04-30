@@ -14,6 +14,8 @@ import com.clinicaregional.clinica.security.JwtUtil;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -49,6 +51,7 @@ class AuthenticationControllerTest {
         private ObjectMapper objectMapper;
 
         @Test
+        @DisplayName("Login exitoso con credenciales válidas, devuelve JWT y cookies")
         void loginExitoso_conCredencialesValidas_devuelveJwt() throws Exception {
                 LoginRequestDTO request = new LoginRequestDTO("testerDiego@gmail.com", "123456");
                 AuthenticationResponseDTO response = new AuthenticationResponseDTO(1L, "PACIENTE", "accessToken",

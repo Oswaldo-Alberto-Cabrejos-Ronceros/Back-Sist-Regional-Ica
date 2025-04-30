@@ -3,9 +3,14 @@ package com.clinicaregional.clinica.usuarios.service;
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
+import com.clinicaregional.clinica.repository.AdministradorRepository;
+import com.clinicaregional.clinica.repository.MedicoRepository;
+import com.clinicaregional.clinica.repository.PacienteRepository;
+import com.clinicaregional.clinica.repository.RecepcionistaRepository;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
@@ -24,6 +29,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +58,18 @@ class UsuarioServiceTest {
     private Usuario usuario;
     private UsuarioDTO usuarioDTO;
     private UsuarioRequestDTO usuarioRequestDTO;
+
+    @Mock
+    private PacienteRepository pacienteRepository;
+
+    @Mock
+    private MedicoRepository medicoRepository;
+
+    @Mock
+    private AdministradorRepository administradorRepository;
+
+    @Mock
+    private RecepcionistaRepository recepcionistaRepository;
 
     @BeforeEach
     void setUp() {
@@ -164,11 +183,22 @@ class UsuarioServiceTest {
 
     @Test
     void eliminarUsuario_exitoso() {
+        // Arrange
         when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
 
+        // Simula que el usuario tiene el rol "PACIENTE"
+        Paciente paciente = new Paciente();
+        paciente.setUsuario(usuario);
+        paciente.setEstado(true);
+
+        when(pacienteRepository.findByUsuario_Id(1L)).thenReturn(Optional.of(paciente));
+
+        // Act
         usuarioService.eliminar(1L);
 
+        // Assert
         verify(usuarioRepository, times(1)).save(any(Usuario.class));
+        verify(pacienteRepository, times(1)).save(any(Paciente.class));
     }
 
     @Test

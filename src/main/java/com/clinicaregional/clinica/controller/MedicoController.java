@@ -29,12 +29,24 @@ public class MedicoController {
 
     @PostMapping
     public ResponseEntity<MedicoResponseDTO> crear(@RequestBody @Valid MedicoRequestDTO dto) {
-        return ResponseEntity.ok(medicoService.guardarMedico(dto));
+        MedicoResponseDTO creado = medicoService.guardarMedico(dto);
+        return ResponseEntity.status(201).body(creado);
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<MedicoResponseDTO> actualizar(@PathVariable Long id, @RequestBody @Valid MedicoRequestDTO dto) {
-        return ResponseEntity.ok(medicoService.actualizarMedico(id, dto));
+    public ResponseEntity<MedicoResponseDTO> actualizar(@PathVariable Long id,
+            @RequestBody @Valid MedicoRequestDTO dto) {
+        try {
+            MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto);
+            return ResponseEntity.ok(actualizado);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("no encontrado")) {
+                return ResponseEntity.notFound().build();
+            }
+            throw e;
+        }
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         medicoService.eliminarMedico(id);

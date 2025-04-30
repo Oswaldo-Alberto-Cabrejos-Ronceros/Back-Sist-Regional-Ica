@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class PacienteAlergiaServiceImpl extends FiltroEstado implements PacienteAlergiaService {
+public class PacienteAlergiaServiceImpl implements PacienteAlergiaService {
 
     private final PacienteAlergiaRepository pacienteAlergiaRepository;
     private final PacienteAlergiaMapper pacienteAlergiaMapper;
@@ -29,47 +29,69 @@ public class PacienteAlergiaServiceImpl extends FiltroEstado implements Paciente
     private final PacienteMapper pacienteMapper;
     private final AlergiaService alergiaService;
     private final AlergiaMapper alergiaMapper;
+    private final FiltroEstado filtroEstado;
 
     @Autowired
-    public PacienteAlergiaServiceImpl(PacienteAlergiaRepository pacienteAlergiaRepository, PacienteAlergiaMapper pacienteAlergiaMapper, PacienteService pacienteService, PacienteMapper pacienteMapper, AlergiaService alergiaService, AlergiaMapper alergiaMapper) {
+    public PacienteAlergiaServiceImpl(
+            PacienteAlergiaRepository pacienteAlergiaRepository,
+            PacienteAlergiaMapper pacienteAlergiaMapper,
+            PacienteService pacienteService,
+            PacienteMapper pacienteMapper,
+            AlergiaService alergiaService,
+            AlergiaMapper alergiaMapper,
+            FiltroEstado filtroEstado) {
         this.pacienteAlergiaRepository = pacienteAlergiaRepository;
         this.pacienteAlergiaMapper = pacienteAlergiaMapper;
         this.pacienteService = pacienteService;
         this.pacienteMapper = pacienteMapper;
         this.alergiaService = alergiaService;
         this.alergiaMapper = alergiaMapper;
+        this.filtroEstado = filtroEstado;
     }
 
     @Override
     public List<PacienteAlergiaDTO> listarPacienteAlergias() {
-        activarFiltroEstado(true);
-        return pacienteAlergiaRepository.findAll().stream().map(pacienteAlergiaMapper::mapToPacienteAlergiaDTO).collect(Collectors.toList());
+        filtroEstado.activarFiltroEstado(true);
+        return pacienteAlergiaRepository.findAll()
+                .stream()
+                .map(pacienteAlergiaMapper::mapToPacienteAlergiaDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<PacienteAlergiaDTO> listarPacienteAlergiasPorPaciente(Long id) {
-        activarFiltroEstado(true);
-        PacienteDTO findPaciente = pacienteService.getPacientePorId(id).orElseThrow(() -> new RuntimeException("No se encontro el paciente con id:" + id));
+        filtroEstado.activarFiltroEstado(true);
+        PacienteDTO findPaciente = pacienteService.getPacientePorId(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró el paciente con id: " + id));
         Paciente paciente = pacienteMapper.mapToPaciente(findPaciente);
-        return pacienteAlergiaRepository.findByPaciente(paciente).stream().map(pacienteAlergiaMapper::mapToPacienteAlergiaDTO).collect(Collectors.toList());
+        return pacienteAlergiaRepository.findByPaciente(paciente)
+                .stream()
+                .map(pacienteAlergiaMapper::mapToPacienteAlergiaDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Optional<PacienteAlergiaDTO> getPacienteAlergiaById(Long id) {
-        activarFiltroEstado(true);
-        return pacienteAlergiaRepository.findByIdAndEstadoIsTrue(id).map(pacienteAlergiaMapper::mapToPacienteAlergiaDTO);
+        filtroEstado.activarFiltroEstado(true);
+        return pacienteAlergiaRepository.findByIdAndEstadoIsTrue(id)
+                .map(pacienteAlergiaMapper::mapToPacienteAlergiaDTO);
     }
 
     @Override
     public PacienteAlergiaDTO createPacienteAlergia(PacienteAlergiaDTO pacienteAlergiaDTO) {
-        activarFiltroEstado(true);
-        //verificamos que exista el paciente
-        PacienteDTO pacienteDTO = pacienteService.getPacientePorId(pacienteAlergiaDTO.getPacienteId()).orElseThrow(() -> new RuntimeException("No se encontro paciente con el id ingresado"));
-        //verificamos que exista la alergia
-        AlergiaDTO alergiaDTO = alergiaService.getAlergiaPorId(pacienteAlergiaDTO.getAlergia().getId()).orElseThrow(() -> new RuntimeException("No se encontro alergia con el id ingresado"));
-        if (pacienteAlergiaRepository.existsByPacienteAndAlergia(pacienteMapper.mapToPaciente(pacienteDTO), alergiaMapper.mapToAlergia(alergiaDTO))) {
+        filtroEstado.activarFiltroEstado(true);
+        PacienteDTO pacienteDTO = pacienteService.getPacientePorId(pacienteAlergiaDTO.getPacienteId())
+                .orElseThrow(() -> new RuntimeException("No se encontró paciente con el id ingresado"));
+
+        AlergiaDTO alergiaDTO = alergiaService.getAlergiaPorId(pacienteAlergiaDTO.getAlergia().getId())
+                .orElseThrow(() -> new RuntimeException("No se encontró alergia con el id ingresado"));
+
+        if (pacienteAlergiaRepository.existsByPacienteAndAlergia(
+                pacienteMapper.mapToPaciente(pacienteDTO),
+                alergiaMapper.mapToAlergia(alergiaDTO))) {
             throw new RuntimeException("Paciente Alergia ya existe");
         }
+
         pacienteAlergiaDTO.setAlergia(alergiaDTO);
         PacienteAlergia pacienteAlergia = pacienteAlergiaMapper.mapToPacienteAlergia(pacienteAlergiaDTO);
         pacienteAlergia.setPaciente(pacienteMapper.mapToPaciente(pacienteDTO));
@@ -79,8 +101,10 @@ public class PacienteAlergiaServiceImpl extends FiltroEstado implements Paciente
 
     @Override
     public PacienteAlergiaDTO updatePacienteAlergia(Long id, PacienteAlergiaDTO pacienteAlergiaDTO) {
-        activarFiltroEstado(true);
-        PacienteAlergia pacienteAlergia = pacienteAlergiaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No se encontro alergia paciente con el id ingresado"));
+        filtroEstado.activarFiltroEstado(true);
+        PacienteAlergia pacienteAlergia = pacienteAlergiaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró alergia paciente con el id ingresado"));
+
         pacienteAlergia.setGravedad(pacienteAlergiaDTO.getGravedad());
         PacienteAlergia updatedPacienteAlergia = pacienteAlergiaRepository.save(pacienteAlergia);
         return pacienteAlergiaMapper.mapToPacienteAlergiaDTO(updatedPacienteAlergia);
@@ -88,9 +112,10 @@ public class PacienteAlergiaServiceImpl extends FiltroEstado implements Paciente
 
     @Override
     public void deletePacienteAlergia(Long id) {
-        activarFiltroEstado(true);
-        PacienteAlergia pacienteAlergia = pacienteAlergiaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No se encontro alergia paciente con el id ingresado"));
-        pacienteAlergia.setEstado(false);
+        filtroEstado.activarFiltroEstado(true);
+        PacienteAlergia pacienteAlergia = pacienteAlergiaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró alergia paciente con el id ingresado"));
+        pacienteAlergia.setEstado(false); // Borrado lógico
         pacienteAlergiaRepository.save(pacienteAlergia);
     }
 }

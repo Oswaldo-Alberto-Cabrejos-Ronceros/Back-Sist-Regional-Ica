@@ -23,29 +23,46 @@ public class EspecialidadController {
 
     @GetMapping
     public ResponseEntity<List<EspecialidadResponse>> listarEspecialidades() {
-        return ResponseEntity.ok(especialidadService.listarEspecialidades());
+        List<EspecialidadResponse> especialidades = especialidadService.listarEspecialidades();
+        return ResponseEntity.ok(especialidades);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EspecialidadResponse> getEspecialidad(@PathVariable Long id) {
-        return especialidadService.getEspecialidadById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<EspecialidadResponse> obtenerEspecialidadPorId(@PathVariable Long id) {
+        return especialidadService.getEspecialidadById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<EspecialidadResponse> guardarEspecialidad(@RequestBody @Valid EspecialidadRequest especialidadRequest) {
+    public ResponseEntity<EspecialidadResponse> crearEspecialidad(@RequestBody @Valid EspecialidadRequest especialidadRequest) {
         EspecialidadResponse response = especialidadService.guardarEspecialidad(especialidadRequest);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(201).body(response); // 201 Created
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EspecialidadResponse> actualizarEspecialidad(@PathVariable Long id, @RequestBody @Valid EspecialidadRequest especialidadRequest) {
-        EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> actualizarEspecialidad(@PathVariable Long id, @RequestBody @Valid EspecialidadRequest especialidadRequest) {
+        try {
+            EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            if (ex.getMessage() != null && ex.getMessage().contains("no encontrada")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarEspecialidad(@PathVariable Long id) {
-        especialidadService.eliminarEspecialidad(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> eliminarEspecialidad(@PathVariable Long id) {
+        try {
+            especialidadService.eliminarEspecialidad(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException ex) {
+            if (ex.getMessage() != null && ex.getMessage().contains("no encontrada")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
 }

@@ -27,6 +27,12 @@ public class JwtUtil {
     private Key key;
     //inicializamos key
 
+    @Value("${jwt.expiration}")
+    private int jwtExpirationMs;
+
+    @Value("${jwt.refresh}")
+    private int refreshExpirationMs;
+
     @PostConstruct
     public void init() {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
@@ -36,13 +42,13 @@ public class JwtUtil {
     public String generateAccessToken(Authentication authentication) {
         String email = authentication.getPrincipal().toString();
         String authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
-        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).claim("authorities", authorities).setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000)).signWith(key).compact();
+        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).claim("authorities", authorities).setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs)).signWith(key).compact();
     }
 
     //para generar el token de refresco
     public String generateRefreshToken(Authentication authentication) {
         String email = authentication.getPrincipal().toString();
-        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + 120 * 60 * 60 * 1000)).signWith(key).compact();
+        return Jwts.builder().setSubject(email).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + refreshExpirationMs)).signWith(key).compact();
     }
 
 

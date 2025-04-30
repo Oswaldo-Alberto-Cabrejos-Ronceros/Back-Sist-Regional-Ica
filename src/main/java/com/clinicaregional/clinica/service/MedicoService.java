@@ -8,11 +8,11 @@ import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
 public interface MedicoService {
 
         List<MedicoResponseDTO> obtenerMedicos();
-    
-        MedicoResponseDTO actualizarMedico(Long id, MedicoRequestDTO dto); 
-    
-        MedicoResponseDTO guardarMedico(MedicoRequestDTO dto); 
-    
+
+        MedicoResponseDTO actualizarMedico(Long id, MedicoRequestDTO dto);
+
+        MedicoResponseDTO guardarMedico(MedicoRequestDTO dto);
+
         void eliminarMedico(Long id);
 
 }

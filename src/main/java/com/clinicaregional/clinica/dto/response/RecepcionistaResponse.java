@@ -3,12 +3,18 @@ package com.clinicaregional.clinica.dto.response;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.enums.TurnoTrabajo;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RecepcionistaResponse {
     private Long id;
     private String nombres;
@@ -20,4 +26,5 @@ public class RecepcionistaResponse {
     private TurnoTrabajo turnoTrabajo;
     private LocalDate fechaContratacion;
     private Long usuarioId;
+
 }

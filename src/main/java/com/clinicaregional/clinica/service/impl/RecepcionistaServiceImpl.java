@@ -17,6 +17,8 @@ import com.clinicaregional.clinica.service.RecepcionistaService;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,19 +27,35 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-public class RecepcionistaServiceImpl extends FiltroEstado implements RecepcionistaService {
+public class RecepcionistaServiceImpl implements RecepcionistaService {
 
     private final RecepcionistaRepository recepcionistaRepository;
     private final TipoDocumentoRepository tipoDocumentoRepository;
     private final UsuarioRepository usuarioRepository;
     private final RecepcionistaMapper recepcionistaMapper;
     private final UsuarioService usuarioService;
+    private final FiltroEstado filtroEstado;
+
+    @Autowired
+    public RecepcionistaServiceImpl(
+            RecepcionistaRepository recepcionistaRepository,
+            TipoDocumentoRepository tipoDocumentoRepository,
+            UsuarioRepository usuarioRepository,
+            RecepcionistaMapper recepcionistaMapper,
+            UsuarioService usuarioService,
+            FiltroEstado filtroEstado) {
+        this.recepcionistaRepository = recepcionistaRepository;
+        this.tipoDocumentoRepository = tipoDocumentoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.recepcionistaMapper = recepcionistaMapper;
+        this.usuarioService = usuarioService;
+        this.filtroEstado = filtroEstado;
+    }
 
     @Transactional(readOnly = true)
     @Override
     public List<RecepcionistaResponse> listar() {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         return recepcionistaRepository.findAll()
                 .stream()
                 .map(recepcionistaMapper::toResponse)
@@ -47,7 +65,7 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     @Transactional(readOnly = true)
     @Override
     public Optional<RecepcionistaResponse> obtenerPorId(Long id) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         return recepcionistaRepository.findByIdAndEstadoIsTrue(id)
                 .map(recepcionistaMapper::toResponse);
     }
@@ -55,7 +73,7 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     @Transactional
     @Override
     public RecepcionistaResponse guardar(RecepcionistaRequest request) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
 
         if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento())) {
             throw new RuntimeException("Ya existe un recepcionista con el mismo número de documento");
@@ -94,7 +112,7 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     @Transactional
     @Override
     public RecepcionistaResponse actualizar(Long id, RecepcionistaRequest request) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
 
         Recepcionista recepcionistaExistente = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new RuntimeException("Recepcionista no encontrada con id: " + id));
@@ -126,7 +144,7 @@ public class RecepcionistaServiceImpl extends FiltroEstado implements Recepcioni
     @Transactional
     @Override
     public void eliminar(Long id) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Recepcionista no encontrada"));
         recepcionista.setEstado(false); //borrado
         usuarioService.eliminar(recepcionista.getUsuario().getId());

@@ -8,7 +8,7 @@ public abstract class FiltroEstado {
     @PersistenceContext
     protected EntityManager entityManager;
 
-    protected void activarFiltroEstado(boolean estado) {
+    public void activarFiltroEstado(boolean estado) {
         entityManager.unwrap(Session.class).enableFilter("estadoActivo").setParameter("estado", estado);
     }
 }

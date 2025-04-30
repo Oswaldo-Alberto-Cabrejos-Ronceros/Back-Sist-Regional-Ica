@@ -21,37 +21,39 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class AdministradorServiceImpl extends FiltroEstado implements AdministradorService {
+public class AdministradorServiceImpl implements AdministradorService {
 
     private final AdministradorRepository administradorRepository;
     private final AdministradorMapper administradorMapper;
     private final UsuarioService usuarioService;
+    private final FiltroEstado filtroEstado;
 
     @Autowired
-    public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper, UsuarioService usuarioService) {
+    public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado) {
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
         this.usuarioService = usuarioService;
+        this.filtroEstado = filtroEstado;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<AdministradorDTO> listarAdministradores() {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         return administradorRepository.findAll().stream().map(administradorMapper::mapToAdministradorDTO).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<AdministradorDTO> getAdministradorById(Long id) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         return administradorRepository.findByIdAndEstadoIsTrue(id).map(administradorMapper::mapToAdministradorDTO);
     }
 
     @Transactional
     @Override
     public AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         if (administradorRepository.existsByNumeroDocumento(registerAdministradorRequest.getAdministrador().getNumeroDocumento())) {
             throw new RuntimeException("Ya existe un administrador con el numero de documento ingresado");
         }
@@ -71,7 +73,7 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
     @Transactional
     @Override
     public AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
 
         if (administradorRepository.existsByNumeroDocumento(administradorDTO.getNumeroDocumento())) {
@@ -99,7 +101,7 @@ public class AdministradorServiceImpl extends FiltroEstado implements Administra
     @Transactional
     @Override
     public void deleteAdministrador(Long id) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
         findAdministrador.setEstado(false); //borrado logico
         usuarioService.eliminar(findAdministrador.getUsuario().getId());

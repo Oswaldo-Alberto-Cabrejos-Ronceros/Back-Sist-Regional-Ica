@@ -42,33 +42,37 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
-        AuthenticationResponseDTO authenticationResponseDTO = authenticationService.authenticateUser(loginRequestDTO);
-        //configuramos cookies httponly
-        addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
-        addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
-        AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
-        return ResponseEntity.ok(responseToSend);
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+        try {
+            AuthenticationResponseDTO authenticationResponseDTO = authenticationService.authenticateUser(loginRequestDTO);
+            addCokkie(response, "jwtToken", authenticationResponseDTO.getJwtToken());
+            addCokkie(response, "refreshToken", authenticationResponseDTO.getRefreshToken());
+            AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
+            return ResponseEntity.ok(responseToSend);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Sin cookies"));
         }
-        Optional<Cookie> refreshToken = Arrays.stream(cookies).filter(c -> c.getName().equals("refreshToken")).findFirst();
+        Optional<Cookie> refreshToken = Arrays.stream(cookies)
+                .filter(c -> c.getName().equals("refreshToken"))
+                .findFirst();
         if (refreshToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Refresh token no encontrado"));
         }
 
         try {
             String newAccessToken = authenticationService.refreshToken(refreshToken.get().getValue());
-            //creamos nueva cookie
-            addCokkie(response,"jwtToken",newAccessToken);
+            addCokkie(response, "jwtToken", newAccessToken);
             return ResponseEntity.ok(Map.of("Message", "Token refrescado correctamente"));
-        } catch (JwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
 

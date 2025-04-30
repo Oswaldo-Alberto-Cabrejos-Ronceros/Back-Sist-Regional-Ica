@@ -21,75 +21,89 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class PacienteServiceImpl extends FiltroEstado implements PacienteService {
+public class PacienteServiceImpl implements PacienteService {
 
     private final PacienteRepository pacienteRepository;
     private final PacienteMapper pacienteMapper;
     private final TipoDocumentoService tipoDocumentoService;
     private final UsuarioService usuarioService;
+    private final FiltroEstado filtroEstado;
 
     @Autowired
-    public PacienteServiceImpl(PacienteRepository pacienteRepository, PacienteMapper pacienteMapper, TipoDocumentoService tipoDocumentoService, UsuarioService usuarioService) {
+    public PacienteServiceImpl(
+            PacienteRepository pacienteRepository,
+            PacienteMapper pacienteMapper,
+            TipoDocumentoService tipoDocumentoService,
+            UsuarioService usuarioService,
+            FiltroEstado filtroEstado) {
         this.pacienteRepository = pacienteRepository;
         this.pacienteMapper = pacienteMapper;
         this.tipoDocumentoService = tipoDocumentoService;
         this.usuarioService = usuarioService;
+        this.filtroEstado = filtroEstado;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<PacienteDTO> listarPacientes() {
-        activarFiltroEstado(true);
-        return pacienteRepository.findAll().stream().map(pacienteMapper::mapToPacienteDTO).collect(Collectors.toList());
+        filtroEstado.activarFiltroEstado(true);
+        return pacienteRepository.findAll()
+                .stream()
+                .map(pacienteMapper::mapToPacienteDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<PacienteDTO> getPacientePorId(Long id) {
-        activarFiltroEstado(true);
-        return pacienteRepository.findByIdAndEstadoIsTrue(id).map(pacienteMapper::mapToPacienteDTO);
+        filtroEstado.activarFiltroEstado(true);
+        return pacienteRepository.findByIdAndEstadoIsTrue(id)
+                .map(pacienteMapper::mapToPacienteDTO);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<PacienteDTO> getPacientePorIdentificacion(String identificacion) {
-        activarFiltroEstado(true);
-        return pacienteRepository.findByNumeroIdentificacion(identificacion).map(pacienteMapper::mapToPacienteDTO);
+        filtroEstado.activarFiltroEstado(true);
+        return pacienteRepository.findByNumeroIdentificacion(identificacion)
+                .map(pacienteMapper::mapToPacienteDTO);
     }
 
     @Transactional
     @Override
     public PacienteDTO crearPaciente(PacienteDTO pacienteDTO) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         if (pacienteRepository.findByNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion()).isPresent()) {
-            throw new RuntimeException("Ya exise un paciente con ese numero de identificación");
+            throw new RuntimeException("Ya existe un paciente con ese número de identificación");
         }
 
-        TipoDocumento tipoDocumento = tipoDocumentoService.getTipoDocumentoByIdContext(pacienteDTO.getTipoDocumento().getId()).orElseThrow(() -> new RuntimeException("No se encontro un tipo de documento con el id ingresado"));
-
+        TipoDocumento tipoDocumento = tipoDocumentoService.getTipoDocumentoByIdContext(pacienteDTO.getTipoDocumento().getId())
+                .orElseThrow(() -> new RuntimeException("No se encontró un tipo de documento con el id ingresado"));
 
         Paciente paciente = pacienteMapper.mapToPaciente(pacienteDTO);
-
         paciente.setTipoDocumento(tipoDocumento);
 
         if (paciente.getUsuario() != null) {
-            Usuario usuario = usuarioService.obtenerPorIdContenxt(pacienteDTO.getUsuario().getId()).orElseThrow(() -> new RuntimeException("No se encontro un usuario con el id ingresado"));
+            Usuario usuario = usuarioService.obtenerPorIdContenxt(pacienteDTO.getUsuario().getId())
+                    .orElseThrow(() -> new RuntimeException("No se encontró un usuario con el id ingresado"));
             paciente.setUsuario(usuario);
         }
 
         Paciente savedPaciente = pacienteRepository.save(paciente);
-
         return pacienteMapper.mapToPacienteDTO(savedPaciente);
     }
 
     @Transactional
     @Override
     public PacienteDTO actualizarPaciente(Long id, PacienteDTO pacienteDTO) {
-        activarFiltroEstado(true);
-        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+        filtroEstado.activarFiltroEstado(true);
+        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+
         if (pacienteRepository.findByNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion()).isPresent()) {
-            throw new RuntimeException("Ya existe un paciente con ese numero de identificacion");
+            throw new RuntimeException("Ya existe un paciente con ese número de identificación");
         }
+
         paciente.setNombres(pacienteDTO.getNombres());
         paciente.setApellidos(pacienteDTO.getApellidos());
         paciente.setFechaNacimiento(pacienteDTO.getFechaNacimiento());
@@ -100,6 +114,7 @@ public class PacienteServiceImpl extends FiltroEstado implements PacienteService
         paciente.setDireccion(pacienteDTO.getDireccion());
         paciente.setTipoSangre(pacienteDTO.getTipoSangre());
         paciente.setAntecedentes(pacienteDTO.getAntecedentes());
+
         Paciente updatedPaciente = pacienteRepository.save(paciente);
         return pacienteMapper.mapToPacienteDTO(updatedPaciente);
     }
@@ -107,7 +122,7 @@ public class PacienteServiceImpl extends FiltroEstado implements PacienteService
     @Transactional
     @Override
     public void eliminarPaciente(Long id) {
-        activarFiltroEstado(true);
+        filtroEstado.activarFiltroEstado(true);
         Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
         paciente.setEstado(false); //borrado logico
         usuarioService.eliminar(paciente.getUsuario().getId());

@@ -3,7 +3,6 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.EstadoSeguroDTO;
 import com.clinicaregional.clinica.dto.SeguroDTO;
-import com.clinicaregional.clinica.enums.EstadoSeguro;
 import com.clinicaregional.clinica.service.SeguroService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

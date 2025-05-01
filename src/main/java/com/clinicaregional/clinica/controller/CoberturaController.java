@@ -10,7 +10,7 @@ import com.clinicaregional.clinica.dto.CoberturaDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cobertura")
+@RequestMapping("/api/coberturas")
 public class CoberturaController {
     private final CoberturaService coberturaService;
 

@@ -24,7 +24,7 @@ public class PacienteAlergiaMapper {
 
     public PacienteAlergia mapToPacienteAlergia(PacienteAlergiaDTO pacienteAlergiaDTO) {
         Paciente paciente = new Paciente();
-        paciente.setId(paciente.getId());
+        paciente.setId(pacienteAlergiaDTO.getPacienteId());
         return new PacienteAlergia(pacienteAlergiaDTO.getId(), paciente,
                 alergiaMapper.mapToAlergia(pacienteAlergiaDTO.getAlergia()), pacienteAlergiaDTO.getGravedad());
     }

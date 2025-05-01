@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 
+import com.clinicaregional.clinica.dto.EstadoSeguroDTO;
 import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.enums.EstadoSeguro;
 import com.clinicaregional.clinica.service.SeguroService;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/seguro")
+@RequestMapping("/api/seguros")
 public class SeguroController {
     private final SeguroService seguroService;
 
@@ -48,8 +49,8 @@ public class SeguroController {
     }
 
     @PatchMapping("/estado-seguro/{id}")
-    public ResponseEntity<SeguroDTO> updateEstadoSeguro(@PathVariable Long id, @RequestBody EstadoSeguro estadoSeguro) {
-        SeguroDTO updateSeguro = seguroService.updateEstadoSeguro(id, estadoSeguro);
+    public ResponseEntity<SeguroDTO> updateEstadoSeguro(@PathVariable Long id, @RequestBody EstadoSeguroDTO estadoSeguro) {
+        SeguroDTO updateSeguro = seguroService.updateEstadoSeguro(id, estadoSeguro.getEstadoSeguro());
         return ResponseEntity.ok(updateSeguro);
     }
 

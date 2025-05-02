@@ -8,6 +8,5 @@ import java.util.Optional;
 @Repository
 public interface OpinionRepository extends JpaRepository<Opinion, Long> {
 
-    Optional<Opinion> findByIdAndEstadoIsTrue(Long id);
-
+    Optional<Opinion> findByIdAndVisibleIsTrue(Long id);
 }

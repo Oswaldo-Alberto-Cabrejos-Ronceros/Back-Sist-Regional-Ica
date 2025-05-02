@@ -34,7 +34,7 @@ public class OpinionServiceImpl extends FiltroEstado implements OpinionService {
     @Transactional(readOnly = true)
     public List<OpinionResponse> listar() {
         activarFiltroEstado(true);
-        return opinionRepository.findAll()
+        return opinionRepository.findAllByVisibleIsTrue()
                 .stream()
                 .map(opinionMapper::toResponse)
                 .collect(Collectors.toList());
@@ -44,7 +44,7 @@ public class OpinionServiceImpl extends FiltroEstado implements OpinionService {
     @Transactional(readOnly = true)
     public Optional<OpinionResponse> obtenerPorId(Long id) {
         activarFiltroEstado(true);
-        return opinionRepository.findByIdAndEstadoIsTrue(id)
+        return opinionRepository.findByIdAndVisibleIsTrue(id)
                 .map(opinionMapper::toResponse);
     }
 
@@ -72,10 +72,9 @@ public class OpinionServiceImpl extends FiltroEstado implements OpinionService {
     @Transactional
     public void eliminar(Long id) {
         activarFiltroEstado(true);
-        Opinion opinion = opinionRepository.findByIdAndEstadoIsTrue(id)
+        Opinion opinion = opinionRepository.findByIdAndVisibleIsTrue(id)
                 .orElseThrow(() -> new RuntimeException("Opinión no encontrada con ID: " + id));
-        opinion.setVisible(false); // <--- AQUÍ EL CAMBIO
+        opinion.setVisible(false);
         opinionRepository.save(opinion);
     }
-
 }

@@ -20,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 //para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")
-public class Servicio {
+public class Servicio extends EntidadConEstado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

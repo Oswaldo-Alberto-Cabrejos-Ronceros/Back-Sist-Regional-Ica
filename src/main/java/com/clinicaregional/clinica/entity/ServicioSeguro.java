@@ -13,7 +13,7 @@ import org.hibernate.annotations.Filter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "servicios")
+@Table(name = "servicios_seguros")
 @SuperBuilder
 //para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")

@@ -6,6 +6,7 @@ import com.clinicaregional.clinica.mapper.ServicioSeguroMapper;
 import com.clinicaregional.clinica.repository.ServicioRepository;
 import com.clinicaregional.clinica.repository.ServicioSeguroRepository;
 import com.clinicaregional.clinica.service.CoberturaService;
+import com.clinicaregional.clinica.service.SeguroCoberturaService;
 import com.clinicaregional.clinica.service.SeguroService;
 import com.clinicaregional.clinica.service.ServicioSeguroService;
 import com.clinicaregional.clinica.util.FiltroEstado;
@@ -26,16 +27,18 @@ public class ServicioSeguroServiceImpl implements ServicioSeguroService {
     private final ServicioRepository servicioRepository;
     private final SeguroService seguroService;
     private final CoberturaService coberturaService;
+    private final SeguroCoberturaService seguroCoberturaService;
 
     @Autowired
-    public ServicioSeguroServiceImpl(ServicioSeguroRepository servicioSeguroRepository,ServicioSeguroMapper servicioSeguroMapper,FiltroEstado filtroEstado,
-                                     ServicioRepository servicioRepository,SeguroService seguroService,CoberturaService coberturaService) {
+    public ServicioSeguroServiceImpl(ServicioSeguroRepository servicioSeguroRepository, ServicioSeguroMapper servicioSeguroMapper, FiltroEstado filtroEstado,
+                                     ServicioRepository servicioRepository, SeguroService seguroService, CoberturaService coberturaService, SeguroCoberturaService seguroCoberturaService) {
         this.servicioSeguroRepository = servicioSeguroRepository;
         this.servicioSeguroMapper = servicioSeguroMapper;
         this.filtroEstado = filtroEstado;
         this.servicioRepository = servicioRepository;
-        this.seguroService=seguroService;
-        this.coberturaService=coberturaService;
+        this.seguroService = seguroService;
+        this.coberturaService = coberturaService;
+        this.seguroCoberturaService = seguroCoberturaService;
     }
 
     @Transactional(readOnly = true)
@@ -76,11 +79,15 @@ public class ServicioSeguroServiceImpl implements ServicioSeguroService {
     @Override
     public ServicioSeguroDTO createServicioSeguro(ServicioSeguroDTO servicioSeguroDTO) {
         filtroEstado.activarFiltroEstado(true);
-        servicioRepository.findByIdAndEstadoIsTrue(servicioSeguroDTO.getServicioId()).orElseThrow(()->new RuntimeException("No se encontro el servicio con el id ingresado"));
+        servicioRepository.findByIdAndEstadoIsTrue(servicioSeguroDTO.getServicioId()).orElseThrow(() -> new RuntimeException("No se encontro el servicio con el id ingresado"));
         seguroService.getSeguroById(servicioSeguroDTO.getSeguroId());
         coberturaService.getCoberturaById(servicioSeguroDTO.getCoberturaId());
-        if(servicioSeguroRepository.existsByServicio_IdAndSeguro_IdAndCobertura_Id(servicioSeguroDTO.getServicioId(),servicioSeguroDTO.getSeguroId(),
-                servicioSeguroDTO.getCoberturaId())){
+        if (seguroCoberturaService.existsBySeguroAndCobertura(servicioSeguroDTO.getServicioId(), servicioSeguroDTO.getCoberturaId())) {
+            throw new RuntimeException("El seguro no cubre la cobertura ingresada");
+        }
+
+        if (servicioSeguroRepository.existsByServicio_IdAndSeguro_IdAndCobertura_Id(servicioSeguroDTO.getServicioId(), servicioSeguroDTO.getSeguroId(),
+                servicioSeguroDTO.getCoberturaId())) {
             throw new RuntimeException("Ya existe un ServicioSeguro con el servicio, seguro y cobertura ingresado");
         }
         ServicioSeguro savedServicioSeguro = servicioSeguroRepository.save(servicioSeguroMapper.mapToServicioSeguro(servicioSeguroDTO));
@@ -90,7 +97,7 @@ public class ServicioSeguroServiceImpl implements ServicioSeguroService {
     @Transactional
     @Override
     public void deleteServicioSeguro(Long id) {
-        ServicioSeguro findServicioSeguro = servicioSeguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(()->new RuntimeException("No se encontro el Servicio Seguro con el id ingresado"));
+        ServicioSeguro findServicioSeguro = servicioSeguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No se encontro el Servicio Seguro con el id ingresado"));
         findServicioSeguro.setEstado(false);
         servicioSeguroRepository.save(findServicioSeguro);
     }

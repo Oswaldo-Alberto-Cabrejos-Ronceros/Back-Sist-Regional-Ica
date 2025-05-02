@@ -63,6 +63,13 @@ public class SeguroCoberturaServiceImpl implements SeguroCoberturaService {
         return seguroCoberturaRepository.findByIdAndEstadoIsTrue(id).map(seguroCoberturaMapper::mapToSeguroCoberturaDTO);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsBySeguroAndCobertura(Long seguroId, Long coberturaId) {
+        filtroEstado.activarFiltroEstado(true);
+        return seguroCoberturaRepository.existsBySeguro_IdAndCobertura_Id(seguroId, coberturaId);
+    }
+
     @Transactional
     @Override
     public SeguroCoberturaDTO createSeguroCobertura(SeguroCoberturaDTO seguroCoberturaDTO) {

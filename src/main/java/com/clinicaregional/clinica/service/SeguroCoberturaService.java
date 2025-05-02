@@ -10,6 +10,7 @@ public interface SeguroCoberturaService {
     List<SeguroCoberturaDTO> listarPorSeguro(Long seguroId);
     List<SeguroCoberturaDTO> listarPorCobertura(Long coberturaId);
     Optional<SeguroCoberturaDTO> getSeguroCoberturaById(Long id);
+    boolean existsBySeguroAndCobertura(Long seguroId, Long coberturaId);
     SeguroCoberturaDTO createSeguroCobertura(SeguroCoberturaDTO seguroCoberturaDTO);
     void deleteSeguroCobertura(Long id);
 }

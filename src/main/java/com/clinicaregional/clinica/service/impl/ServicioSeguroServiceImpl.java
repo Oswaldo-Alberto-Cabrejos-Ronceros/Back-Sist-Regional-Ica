@@ -82,7 +82,7 @@ public class ServicioSeguroServiceImpl implements ServicioSeguroService {
         servicioRepository.findByIdAndEstadoIsTrue(servicioSeguroDTO.getServicioId()).orElseThrow(() -> new RuntimeException("No se encontro el servicio con el id ingresado"));
         seguroService.getSeguroById(servicioSeguroDTO.getSeguroId());
         coberturaService.getCoberturaById(servicioSeguroDTO.getCoberturaId());
-        if (seguroCoberturaService.existsBySeguroAndCobertura(servicioSeguroDTO.getServicioId(), servicioSeguroDTO.getCoberturaId())) {
+        if (!seguroCoberturaService.existsBySeguroAndCobertura(servicioSeguroDTO.getServicioId(), servicioSeguroDTO.getCoberturaId())) {
             throw new RuntimeException("El seguro no cubre la cobertura ingresada");
         }
 

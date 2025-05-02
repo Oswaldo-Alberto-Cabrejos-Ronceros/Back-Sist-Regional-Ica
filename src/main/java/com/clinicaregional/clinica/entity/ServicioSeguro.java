@@ -17,7 +17,7 @@ import org.hibernate.annotations.Filter;
 @SuperBuilder
 //para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")
-public class ServicioSeguro {
+public class ServicioSeguro extends EntidadConEstado {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

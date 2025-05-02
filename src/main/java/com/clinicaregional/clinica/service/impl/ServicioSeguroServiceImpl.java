@@ -9,6 +9,7 @@ import com.clinicaregional.clinica.service.CoberturaService;
 import com.clinicaregional.clinica.service.SeguroService;
 import com.clinicaregional.clinica.service.ServicioSeguroService;
 import com.clinicaregional.clinica.util.FiltroEstado;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +20,14 @@ import java.util.stream.Collectors;
 @Service
 public class ServicioSeguroServiceImpl implements ServicioSeguroService {
 
-    private ServicioSeguroRepository servicioSeguroRepository;
-    private ServicioSeguroMapper servicioSeguroMapper;
-    private FiltroEstado filtroEstado;
-    private ServicioRepository servicioRepository;
-    private SeguroService seguroService;
-    private CoberturaService coberturaService;
+    private final ServicioSeguroRepository servicioSeguroRepository;
+    private final ServicioSeguroMapper servicioSeguroMapper;
+    private final FiltroEstado filtroEstado;
+    private final ServicioRepository servicioRepository;
+    private final SeguroService seguroService;
+    private final CoberturaService coberturaService;
 
+    @Autowired
     public ServicioSeguroServiceImpl(ServicioSeguroRepository servicioSeguroRepository,ServicioSeguroMapper servicioSeguroMapper,FiltroEstado filtroEstado,
                                      ServicioRepository servicioRepository,SeguroService seguroService,CoberturaService coberturaService) {
         this.servicioSeguroRepository = servicioSeguroRepository;

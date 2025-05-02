@@ -74,7 +74,7 @@ public class OpinionServiceImpl extends FiltroEstado implements OpinionService {
         activarFiltroEstado(true);
         Opinion opinion = opinionRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new RuntimeException("Opinión no encontrada con ID: " + id));
-        opinion.setEstado(false);
+        opinion.setVisible(false); // <--- AQUÍ EL CAMBIO
         opinionRepository.save(opinion);
     }
 

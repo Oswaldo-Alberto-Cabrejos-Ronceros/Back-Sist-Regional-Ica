@@ -48,6 +48,7 @@ public class ServicioServiceImpl implements ServicioService {
         servicioRepository.save(servicio);
     }
 
+    @Transactional
     @Override
     public ServicioResponse actualizarServicio(Long id, ServicioRequest servicioRequest) {
         filtroEstado.activarFiltroEstado(true);

@@ -41,6 +41,17 @@ public class AuthenticationController {
         response.addCookie(cookie);
     }
 
+    //funcion para eliminar una cookie
+    private void deleteCokkie(HttpServletResponse response,String name){
+        Cookie cookie = new Cookie(name,"");
+        cookie.setHttpOnly(true);
+        cookie.setAttribute("SameSite", "Lax");
+        cookie.setSecure(false); //en produccion ira en true al trabajar en https
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         try {
@@ -86,4 +97,10 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseToSend);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        deleteCokkie(response,"jwtToken");
+        deleteCokkie(response,"refreshToken");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Map.of("Message", "Logout exitoso"));
+    }
 }

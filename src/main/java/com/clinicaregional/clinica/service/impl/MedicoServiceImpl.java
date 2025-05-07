@@ -23,7 +23,6 @@ import com.clinicaregional.clinica.service.UsuarioService;
 
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 public class MedicoServiceImpl implements MedicoService {
 
@@ -65,9 +64,19 @@ public class MedicoServiceImpl implements MedicoService {
         if (medicoRepository.existsByNumeroColegiatura(dto.getNumeroColegiatura())) {
             throw new RuntimeException("Ya existe un médico con el número de colegiatura ingresado");
         }
-        if (medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
-            throw new RuntimeException("Ya existe un médico con el RNE ingresado");
+
+        // Validar RNE solo si es ESPECIALISTA
+        if (dto.getTipoMedico().name().equals("ESPECIALISTA")) {
+            if (dto.getNumeroRNE() == null || dto.getNumeroRNE().isBlank()) {
+                throw new RuntimeException("El número RNE es obligatorio para médicos especialistas");
+            }
+            if (medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
+                throw new RuntimeException("Ya existe un médico con el RNE ingresado");
+            }
+        } else {
+            dto.setNumeroRNE(null); // limpiar por si se envió accidentalmente
         }
+
         if (usuarioRepository.existsByCorreo(dto.getCorreo())) {
             throw new RuntimeException("Ya existe un usuario con el correo ingresado");
         }
@@ -78,7 +87,8 @@ public class MedicoServiceImpl implements MedicoService {
         RolDTO rolMedico = new RolDTO();
         rolMedico.setId(4L); // ID del rol de médico
         newUsuario.setRol(rolMedico);
-        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);  
+        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
+
         Usuario usuario1 = new Usuario();
         usuario1.setId(usuarioDTO.getId());
 
@@ -99,7 +109,6 @@ public class MedicoServiceImpl implements MedicoService {
                 .build();
 
         return medicoMapper.mapToMedicoResponseDTO(medicoRepository.save(medico));
-
     }
 
     @Transactional
@@ -144,9 +153,11 @@ public class MedicoServiceImpl implements MedicoService {
     @Override
     public void eliminarMedico(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Medico no encontrado con ID: " + id));
-        medico.setEstado(false); //borrado logico
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId()).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Medico no encontrado con ID: " + id));
+        medico.setEstado(false); // borrado logico
+        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         usuario.setEstado(false);
         medico.setUsuario(null);
         usuarioRepository.save(usuario);

@@ -6,16 +6,16 @@ import java.time.LocalTime;
 import java.util.Date;
 
 import com.clinicaregional.clinica.enums.EstadoCita;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CitaResponse {
 
     private Long id;

@@ -20,11 +20,13 @@ public class CitaMapper {
         Servicio servicio = new Servicio();
         servicio.setId(citaRequest.getServicioId());
         //seguro
-        Seguro seguro = new Seguro();
+        Seguro seguro = null;
         //cobertura
-        Cobertura cobertura = new Cobertura();
+        Cobertura cobertura = null;
         if(citaRequest.getSeguroId()!=null&&citaRequest.getCoberturaId()!=null){
+            seguro = new Seguro();
             seguro.setId(citaRequest.getSeguroId());
+            cobertura=new Cobertura();
             cobertura.setId(citaRequest.getCoberturaId());
         }
         return Cita.builder().fecha(citaRequest.getFecha())
@@ -37,8 +39,15 @@ public class CitaMapper {
 
     //de entidad a Response
     public CitaResponse toResponse(Cita cita) {
-        return new CitaResponse(cita.getId(),cita.getFecha(),cita.getHora(),
-                cita.getEstadoCita(),cita.getNotas(),cita.getAntecedentes(),cita.getPaciente().getId(),
-                cita.getMedico().getId(),cita.getServicio().getId(),cita.getSeguro().getId(),cita.getCobertura().getId());
+        CitaResponse citaResponse = null;
+        if(cita.getSeguro()!=null&&cita.getCobertura()!=null){
+            citaResponse= new CitaResponse(cita.getId(),cita.getFecha(),cita.getHora(),
+                    cita.getEstadoCita(),cita.getNotas(),cita.getAntecedentes(),cita.getPaciente().getId(),
+                    cita.getMedico().getId(),cita.getServicio().getId(),cita.getSeguro().getId(),cita.getCobertura().getId());
+        } else{
+            citaResponse=CitaResponse.builder().id(cita.getId()).fecha(cita.getFecha()).hora(cita.getHora()).estadoCita(cita.getEstadoCita()).notas(cita.getNotas())
+                    .antecedentes(cita.getAntecedentes()).pacienteId(cita.getPaciente().getId()).medicoId(cita.getMedico().getId()).servicioId(cita.getServicio().getId()).build();
+        }
+        return citaResponse;
     }
 }

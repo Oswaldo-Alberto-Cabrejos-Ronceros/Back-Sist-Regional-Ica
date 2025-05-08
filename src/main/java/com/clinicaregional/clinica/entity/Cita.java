@@ -5,16 +5,14 @@ import java.time.LocalTime;
 
 import com.clinicaregional.clinica.enums.EstadoCita;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "citas")
 public class Cita {
 

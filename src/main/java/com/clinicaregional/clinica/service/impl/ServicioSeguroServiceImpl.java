@@ -75,6 +75,12 @@ public class ServicioSeguroServiceImpl implements ServicioSeguroService {
         return servicioSeguroRepository.findByIdAndEstadoIsTrue(id).map(servicioSeguroMapper::mapToServicioSeguroDTO);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<ServicioSeguroDTO> getSeguroServicioBySeguroAndServicio(Long seguroId, Long servicioId) {
+        return servicioSeguroRepository.findBySeguro_IdAndServicio_Id(seguroId,servicioId).map(servicioSeguroMapper::mapToServicioSeguroDTO);
+    }
+
     @Transactional
     @Override
     public ServicioSeguroDTO createServicioSeguro(ServicioSeguroDTO servicioSeguroDTO) {

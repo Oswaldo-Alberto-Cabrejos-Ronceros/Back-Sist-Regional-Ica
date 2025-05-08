@@ -11,5 +11,6 @@ public interface ServicioSeguroRepository extends JpaRepository<ServicioSeguro, 
     List<ServicioSeguro> findByServicio_Id(Long id);
     List<ServicioSeguro> findBySeguro_Id(Long id);
     List<ServicioSeguro> findByCobertura_Id(Long id);
+    Optional<ServicioSeguro> findBySeguro_IdAndServicio_Id(Long seguroId, Long servicioId);
     boolean existsByServicio_IdAndSeguro_IdAndCobertura_Id(Long servicioId, Long seguroId, Long coberturaId);
 }

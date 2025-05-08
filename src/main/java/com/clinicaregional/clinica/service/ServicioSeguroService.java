@@ -11,6 +11,7 @@ public interface ServicioSeguroService {
     List<ServicioSeguroDTO> listarPorSeguro(Long seguroId);
     List<ServicioSeguroDTO> listarPorCobertura(Long coberturaId);
     Optional<ServicioSeguroDTO> getSeguroServicioById(Long id);
+    Optional<ServicioSeguroDTO> getSeguroServicioBySeguroAndServicio(Long seguroId, Long servicioId);
     ServicioSeguroDTO createServicioSeguro(ServicioSeguroDTO servicioSeguroDTO);
     void deleteServicioSeguro(Long id);
 

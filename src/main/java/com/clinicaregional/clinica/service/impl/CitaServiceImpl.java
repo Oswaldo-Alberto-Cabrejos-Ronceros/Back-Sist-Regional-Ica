@@ -40,7 +40,7 @@ public class CitaServiceImpl implements CitaService {
     @Override
     public CitaResponse guardar(CitaRequest citaRequest) {
         //bloque horario en estado CANCELADA o NO_ASISTIO disponibles
-        if (citaRepository.existsByFechaAndHoraAndEstadoCitaNotAndEstadoCitaNot(citaRequest.getFecha(), citaRequest.getHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
+        if (citaRepository.existsByFechaHoraAndEstadoCitaNotAndEstadoCitaNot(citaRequest.getFechaHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
             throw new RuntimeException("Fecha y Hora no disponibles");
         }
         Cita savedCita = citaRepository.save(citaMapper.toEntity(citaRequest));
@@ -51,11 +51,10 @@ public class CitaServiceImpl implements CitaService {
     @Override
     public CitaResponse actualizar(Long id, CitaRequest citaRequest) {
         Cita existingCita = citaRepository.findById(id).orElseThrow(() -> new RuntimeException("No se encontro la cita"));
-        if (citaRepository.existsByFechaAndHoraAndEstadoCitaNotAndEstadoCitaNot(citaRequest.getFecha(), citaRequest.getHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
+        if (citaRepository.existsByFechaHoraAndEstadoCitaNotAndEstadoCitaNot(citaRequest.getFechaHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
             throw new RuntimeException("Fecha y Hora no disponibles");
         }
-        existingCita.setFecha(citaRequest.getFecha());
-        existingCita.setHora(citaRequest.getHora());
+        existingCita.setFechaHora(citaRequest.getFechaHora());
         existingCita.setEstadoCita(citaRequest.getEstadoCita());
         existingCita.setNotas(citaRequest.getNotas());
         existingCita.setAntecedentes(citaRequest.getAntecedentes());
@@ -82,7 +81,7 @@ public class CitaServiceImpl implements CitaService {
     @Override
     public CitaResponse reprogramar(Long id, CitaReprogramarRequest citaReprogramarRequest) {
         Cita cita = citaRepository.findById(id).orElseThrow(() -> new RuntimeException("No se encontro la cita"));
-        if (citaRepository.existsByFechaAndHoraAndEstadoCitaNotAndEstadoCitaNot(citaReprogramarRequest.getFecha(), citaReprogramarRequest.getHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
+        if (citaRepository.existsByFechaHoraAndEstadoCitaNotAndEstadoCitaNot(citaReprogramarRequest.getFechaHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
             throw new RuntimeException("Fecha y Hora no disponibles");
         }
         if (cita.getEstadoCita() == EstadoCita.CANCELADA) {
@@ -92,8 +91,7 @@ public class CitaServiceImpl implements CitaService {
             throw new RuntimeException("La cita ya ha sido atendida");
         }
         cita.setEstadoCita(EstadoCita.REPROGRAMADA);
-        cita.setFecha(citaReprogramarRequest.getFecha());
-        cita.setHora(citaReprogramarRequest.getHora());
+        cita.setFechaHora(citaReprogramarRequest.getFechaHora());
         citaRepository.save(cita);
         return citaMapper.toResponse(cita);
     }

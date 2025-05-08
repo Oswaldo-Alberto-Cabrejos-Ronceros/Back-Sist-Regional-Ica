@@ -4,9 +4,10 @@ import com.clinicaregional.clinica.enums.EstadoCita;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 
 public interface CitaRepository extends JpaRepository<Cita, Long> {
-  boolean existsByFechaAndHoraAndEstadoCitaNotAndEstadoCitaNot(LocalDate fecha, LocalTime hora, EstadoCita estadocita, EstadoCita estadoCitaSecond);
+  boolean existsByFechaHoraAndEstadoCitaNotAndEstadoCitaNot(LocalDateTime fechaHora, EstadoCita estadocita, EstadoCita estadoCitaSecond);
 } 

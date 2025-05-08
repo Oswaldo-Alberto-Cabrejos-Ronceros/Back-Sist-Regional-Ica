@@ -25,4 +25,19 @@ public class Cita {
     private EstadoCita estadoCita;
     private String notas;
     private String antecedentes;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "paciente_id", nullable = false)
+    private Paciente paciente;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medico_id", nullable = false)
+    private Medico medico;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "servicio_id", nullable = false)
+    private Servicio servicio;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seguro_id")
+    private Seguro seguro;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seguro_id")
+    private Cobertura cobertura;
 }

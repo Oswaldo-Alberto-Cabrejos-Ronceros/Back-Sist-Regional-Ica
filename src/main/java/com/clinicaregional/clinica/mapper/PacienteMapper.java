@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.mapper;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.entity.Paciente;
+import com.clinicaregional.clinica.entity.Seguro;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +33,13 @@ public class PacienteMapper {
                 paciente.getDireccion(),
                 paciente.getTipoSangre(),
                 paciente.getAntecedentes(),
-                paciente.getUsuario()!=null ? usuarioMapper.mapToUsuarioDTO(paciente.getUsuario()):null //usuario puede ser null
+                paciente.getUsuario()!=null ? usuarioMapper.mapToUsuarioDTO(paciente.getUsuario()):null ,//usuario puede ser null
+                paciente.getSeguro()!=null ? paciente.getSeguro().getId():null
         );
     }
     public Paciente mapToPaciente(PacienteDTO pacienteDTO) {
+        Seguro seguro =new Seguro();
+        seguro.setId(pacienteDTO.getSeguroId());
         return new Paciente(
                 pacienteDTO.getId(),
                 pacienteDTO.getNombres(),
@@ -49,7 +53,8 @@ public class PacienteMapper {
                 pacienteDTO.getDireccion(),
                 pacienteDTO.getTipoSangre(),
                 pacienteDTO.getAntecedentes(),
-                pacienteDTO.getUsuario()!=null ? usuarioMapper.mapToUsuario(pacienteDTO.getUsuario()):null //usuario puede ser null
+                pacienteDTO.getUsuario()!=null ? usuarioMapper.mapToUsuario(pacienteDTO.getUsuario()):null, //usuario puede ser null
+                pacienteDTO.getSeguroId()!=null ? seguro:null
         );
     }
 }

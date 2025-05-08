@@ -56,4 +56,5 @@ public class PacienteDTO {
 
     private UsuarioDTO usuario;
 
+    private Long seguroId;
 }

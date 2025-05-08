@@ -1,29 +1,24 @@
 package com.clinicaregional.clinica.dto.request;
 
-import com.clinicaregional.clinica.enums.EstadoCita;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class CitaRequest {
-
+public class CitaReprogramarRequest {
     @NotNull(message = "La fecha no puede estar en blanco")
     @FutureOrPresent(message = "La fecha no puede ser pasada")
     private LocalDate fecha;
     @NotNull(message = "La hora no puede estar en blanco")
     @FutureOrPresent(message = "La hora no puede ser pasada")
     private LocalTime hora;
-    private EstadoCita estadoCita;
-    private String notas;
-    private String antecedentes;
-
 }

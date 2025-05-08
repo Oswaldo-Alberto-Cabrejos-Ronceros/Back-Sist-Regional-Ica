@@ -5,6 +5,7 @@ import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.entity.Cita;
 import com.clinicaregional.clinica.repository.CitaRepository;
 import com.clinicaregional.clinica.service.CitaService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CitaServiceImpl implements CitaService {
 
-    @Autowired
-    private CitaRepository citaRepository;
+    private final CitaRepository citaRepository;
 
     @Override
     public List<CitaResponse> listar() {

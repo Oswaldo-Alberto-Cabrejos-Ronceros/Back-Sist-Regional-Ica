@@ -38,6 +38,6 @@ public class Cita {
     @JoinColumn(name = "seguro_id")
     private Seguro seguro;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seguro_id")
+    @JoinColumn(name = "cobertura_id")
     private Cobertura cobertura;
 }

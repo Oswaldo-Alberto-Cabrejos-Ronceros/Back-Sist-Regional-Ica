@@ -1,8 +1,9 @@
 package com.clinicaregional.clinica.entity;
 
-import java.sql.Date;
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
+import com.clinicaregional.clinica.enums.EstadoCita;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,9 +22,9 @@ public class Cita {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cita_id")
     private Long id;
-    private Date fecha;
-    private Time hora;
-    private boolean estadoCita;
+    private LocalDate fecha;
+    private LocalTime hora;
+    private EstadoCita estadoCita;
     private String notas;
     private String antecedentes;
 }

@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.service;
 
+import com.clinicaregional.clinica.dto.request.CitaReprogramarRequest;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
 
@@ -16,6 +17,12 @@ public interface CitaService {
 
     CitaResponse actualizar(Long id, CitaRequest citaRequest);
 
-    void eliminar(Long id);
+    void cancelar(Long id);
+
+    CitaResponse reprogramar(Long id, CitaReprogramarRequest citaReprogramarRequest);
+
+    void marcarAtentida (Long id);
+
+    void marcoNoAsistio(Long id);
 
 }

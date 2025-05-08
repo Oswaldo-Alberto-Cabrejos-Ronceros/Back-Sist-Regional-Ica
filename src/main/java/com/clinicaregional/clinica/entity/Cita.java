@@ -1,8 +1,6 @@
 package com.clinicaregional.clinica.entity;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
+import java.time.LocalDateTime;
 import com.clinicaregional.clinica.enums.EstadoCita;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,8 +18,7 @@ public class Cita {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cita_id")
     private Long id;
-    private LocalDate fecha;
-    private LocalTime hora;
+    private LocalDateTime fechaHora;
     private EstadoCita estadoCita;
     private String notas;
     private String antecedentes;

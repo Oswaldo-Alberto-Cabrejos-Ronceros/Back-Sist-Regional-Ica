@@ -29,8 +29,7 @@ public class CitaMapper {
             cobertura=new Cobertura();
             cobertura.setId(citaRequest.getCoberturaId());
         }
-        return Cita.builder().fecha(citaRequest.getFecha())
-                .hora(citaRequest.getHora())
+        return Cita.builder().fechaHora(citaRequest.getFechaHora())
                 .estadoCita(citaRequest.getEstadoCita())
                 .notas(citaRequest.getNotas())
                 .antecedentes(citaRequest.getAntecedentes()).paciente(paciente).medico(medico)
@@ -41,11 +40,11 @@ public class CitaMapper {
     public CitaResponse toResponse(Cita cita) {
         CitaResponse citaResponse = null;
         if(cita.getSeguro()!=null&&cita.getCobertura()!=null){
-            citaResponse= new CitaResponse(cita.getId(),cita.getFecha(),cita.getHora(),
+            citaResponse= new CitaResponse(cita.getId(),cita.getFechaHora().toLocalDate(),cita.getFechaHora().toLocalTime(),
                     cita.getEstadoCita(),cita.getNotas(),cita.getAntecedentes(),cita.getPaciente().getId(),
                     cita.getMedico().getId(),cita.getServicio().getId(),cita.getSeguro().getId(),cita.getCobertura().getId());
         } else{
-            citaResponse=CitaResponse.builder().id(cita.getId()).fecha(cita.getFecha()).hora(cita.getHora()).estadoCita(cita.getEstadoCita()).notas(cita.getNotas())
+            citaResponse=CitaResponse.builder().id(cita.getId()).fecha(cita.getFechaHora().toLocalDate()).hora(cita.getFechaHora().toLocalTime()).estadoCita(cita.getEstadoCita()).notas(cita.getNotas())
                     .antecedentes(cita.getAntecedentes()).pacienteId(cita.getPaciente().getId()).medicoId(cita.getMedico().getId()).servicioId(cita.getServicio().getId()).build();
         }
         return citaResponse;

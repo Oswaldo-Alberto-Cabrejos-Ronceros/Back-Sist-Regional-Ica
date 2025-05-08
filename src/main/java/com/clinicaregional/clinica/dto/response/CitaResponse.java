@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.Date;
 
 import com.clinicaregional.clinica.enums.EstadoCita;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,5 +24,9 @@ public class CitaResponse {
     private EstadoCita estadoCita;
     private String notas;
     private String antecedentes;
-
+    private Long pacienteId;
+    private Long medicoId;
+    private Long servicioId;
+    private Long seguroId;
+    private Long coberturaId;
 }

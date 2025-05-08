@@ -25,5 +25,12 @@ public class CitaRequest {
     private EstadoCita estadoCita;
     private String notas;
     private String antecedentes;
-
+    @NotNull(message = "El paciente es obligatorio")
+    private Long pacienteId;
+    @NotNull(message = "El medico es obligatorio")
+    private Long medicoId;
+    @NotNull(message = "El service es obligatorio")
+    private Long servicioId;
+    private Long seguroId;
+    private Long coberturaId;
 }

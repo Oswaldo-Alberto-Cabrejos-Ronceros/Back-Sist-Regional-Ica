@@ -19,21 +19,11 @@ public class CitaMapper {
         //servicio
         Servicio servicio = new Servicio();
         servicio.setId(citaRequest.getServicioId());
-        //seguro
-        Seguro seguro = null;
-        //cobertura
-        Cobertura cobertura = null;
-        if(citaRequest.getSeguroId()!=null&&citaRequest.getCoberturaId()!=null){
-            seguro = new Seguro();
-            seguro.setId(citaRequest.getSeguroId());
-            cobertura=new Cobertura();
-            cobertura.setId(citaRequest.getCoberturaId());
-        }
         return Cita.builder().fechaHora(citaRequest.getFechaHora())
                 .estadoCita(citaRequest.getEstadoCita())
                 .notas(citaRequest.getNotas())
                 .antecedentes(citaRequest.getAntecedentes()).paciente(paciente).medico(medico)
-                .servicio(servicio).seguro(seguro).cobertura(cobertura).build();
+                .servicio(servicio).build();
     }
 
     //de entidad a Response

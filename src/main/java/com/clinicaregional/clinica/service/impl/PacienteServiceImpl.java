@@ -130,6 +130,7 @@ public class PacienteServiceImpl implements PacienteService {
             seguroService.getSeguroById(pacienteDTO.getSeguroId()).orElseThrow(()->new RuntimeException("No se encontro seguro con el id ingresado"));
             Seguro seguro = new Seguro();
             seguro.setId(pacienteDTO.getSeguroId());
+            paciente.setSeguro(seguro);
         }
 
         Paciente updatedPaciente = pacienteRepository.save(paciente);

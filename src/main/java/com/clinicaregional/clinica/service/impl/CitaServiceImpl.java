@@ -13,6 +13,7 @@ import com.clinicaregional.clinica.enums.EstadoCita;
 import com.clinicaregional.clinica.enums.EstadoSeguro;
 import com.clinicaregional.clinica.mapper.CitaMapper;
 import com.clinicaregional.clinica.repository.CitaRepository;
+import com.clinicaregional.clinica.repository.MedicoRepository;
 import com.clinicaregional.clinica.service.CitaService;
 import com.clinicaregional.clinica.service.PacienteService;
 import com.clinicaregional.clinica.service.SeguroService;
@@ -34,6 +35,7 @@ public class CitaServiceImpl implements CitaService {
     private final PacienteService pacienteService;
     private final SeguroService seguroService;
     private final ServicioSeguroService servicioSeguroService;
+    private final MedicoRepository medicoRepository;
 
     @Transactional(readOnly = true)
     @Override
@@ -51,35 +53,58 @@ public class CitaServiceImpl implements CitaService {
     @Transactional
     @Override
     public CitaResponse guardar(CitaRequest citaRequest) {
-        //bloque horario en estado CANCELADA o NO_ASISTIO disponibles
-        if (citaRepository.existsByFechaHoraAndEstadoCitaNotAndEstadoCitaNot(citaRequest.getFechaHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
-            throw new RuntimeException("Fecha y Hora no disponibles");
+        // Validar disponibilidad de fecha y hora
+        if (citaRepository.existsByFechaHoraAndEstadoCitaNotAndEstadoCitaNot(
+                citaRequest.getFechaHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
+            throw new RuntimeException("Fecha y hora no disponibles");
         }
-        Cita cita = citaMapper.toEntity(citaRequest);
-        //obtenemos paciente para saber si tiene seguro
-        PacienteDTO paciente = pacienteService.getPacientePorId(citaRequest.getPacienteId()).orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
 
-        if(paciente.getSeguroId()!=null){
-            SeguroDTO seguro=seguroService.getSeguroById(paciente.getSeguroId()).orElseThrow(() -> new RuntimeException("Seguro no encontrado"));
-            if(seguro.getEstadoSeguro()!=EstadoSeguro.INACTIVO){
-                Long servicioId=citaRequest.getServicioId();
-                ServicioSeguroDTO servicioSeguro = servicioSeguroService.getSeguroServicioBySeguroAndServicio(citaRequest.getServicioId(), servicioId).orElse(null);
-                if(servicioSeguro!=null){
-                    //creamos seguro y cobertura
-                    Seguro seguroAdd=new Seguro();
-                    seguroAdd.setId(servicioSeguro.getId());
-                    Cobertura coberturaAdd = new Cobertura();
-                    coberturaAdd.setId(servicioSeguro.getId());
-                    //lo agreamos a cita
-                    cita.setSeguro(seguroAdd);
-                    cita.setCobertura(coberturaAdd);
+        // Verificar que el paciente existe
+        PacienteDTO paciente = pacienteService.getPacientePorId(citaRequest.getPacienteId())
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+
+        // Verificar que el médico existe
+        if (citaRequest.getMedicoId() == null) {
+            throw new RuntimeException("Debe seleccionar un médico");
+        }
+
+        boolean medicoExiste = medicoRepository.existsById(citaRequest.getMedicoId());
+        if (!medicoExiste) {
+            throw new RuntimeException("Médico no encontrado");
+        }
+
+        Cita cita = citaMapper.toEntity(citaRequest);
+
+        // Validar si el seguro cubre el servicio
+        if (paciente.getSeguroId() != null) {
+            SeguroDTO seguro = seguroService.getSeguroById(paciente.getSeguroId())
+                    .orElseThrow(() -> new RuntimeException("Seguro no encontrado"));
+
+            if (seguro.getEstadoSeguro() != EstadoSeguro.INACTIVO) {
+                Long servicioId = citaRequest.getServicioId();
+                ServicioSeguroDTO servicioSeguro = servicioSeguroService
+                        .getSeguroServicioBySeguroAndServicio(paciente.getSeguroId(), servicioId)
+                        .orElse(null);
+
+                if (servicioSeguro == null) {
+                    throw new RuntimeException("El seguro no cubre el servicio seleccionado");
                 }
+
+                Seguro seguroAdd = new Seguro();
+                seguroAdd.setId(servicioSeguro.getId());
+
+                Cobertura coberturaAdd = new Cobertura();
+                coberturaAdd.setId(servicioSeguro.getId());
+
+                cita.setSeguro(seguroAdd);
+                cita.setCobertura(coberturaAdd);
             }
         }
 
         Cita savedCita = citaRepository.save(cita);
         return citaMapper.toResponse(savedCita);
     }
+
 
     @Transactional
     @Override

@@ -54,4 +54,6 @@ public class Paciente extends EntidadConEstado {
     @OneToOne(cascade = CascadeType.ALL)
     private Usuario usuario;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Seguro seguro;
 }

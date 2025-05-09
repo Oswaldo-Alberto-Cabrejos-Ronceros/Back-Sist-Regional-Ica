@@ -91,6 +91,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponseDTO registerPaciente(RegisterRequest registerRequest) {
         // Establecer el rol por defecto (Paciente)
         registerRequest.getUsuario().setRol(new RolDTO(1L, "PACIENTE"));
+        // ponemos el seguro en null
+        registerRequest.getPaciente().setSeguroId(null);
 
         UsuarioDTO usuarioGuardado = usuarioService.guardar(registerRequest.getUsuario());
 

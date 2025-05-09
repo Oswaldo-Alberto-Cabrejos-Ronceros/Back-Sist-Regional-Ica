@@ -27,6 +27,4 @@ public class CitaRequest {
     private Long medicoId;
     @NotNull(message = "El service es obligatorio")
     private Long servicioId;
-    private Long seguroId;
-    private Long coberturaId;
 }

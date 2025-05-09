@@ -1,14 +1,17 @@
 package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.entity.Paciente;
+import com.clinicaregional.clinica.entity.Seguro;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
 import com.clinicaregional.clinica.mapper.PacienteMapper;
 import com.clinicaregional.clinica.repository.PacienteRepository;
 import com.clinicaregional.clinica.service.PacienteService;
+import com.clinicaregional.clinica.service.SeguroService;
 import com.clinicaregional.clinica.service.TipoDocumentoService;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
@@ -27,6 +30,7 @@ public class PacienteServiceImpl implements PacienteService {
     private final PacienteMapper pacienteMapper;
     private final TipoDocumentoService tipoDocumentoService;
     private final UsuarioService usuarioService;
+    private final SeguroService seguroService;
     private final FiltroEstado filtroEstado;
 
     @Autowired
@@ -35,11 +39,13 @@ public class PacienteServiceImpl implements PacienteService {
             PacienteMapper pacienteMapper,
             TipoDocumentoService tipoDocumentoService,
             UsuarioService usuarioService,
+            SeguroService seguroService,
             FiltroEstado filtroEstado) {
         this.pacienteRepository = pacienteRepository;
         this.pacienteMapper = pacienteMapper;
         this.tipoDocumentoService = tipoDocumentoService;
         this.usuarioService = usuarioService;
+        this.seguroService = seguroService;
         this.filtroEstado = filtroEstado;
     }
 
@@ -89,6 +95,11 @@ public class PacienteServiceImpl implements PacienteService {
             paciente.setUsuario(usuario);
         }
 
+        if(paciente.getSeguro() != null) {
+            seguroService.getSeguroById(paciente.getSeguro().getId()).orElseThrow(()->new RuntimeException("No se encontro seguro con el id ingresado"));
+        }
+
+
         Paciente savedPaciente = pacienteRepository.save(paciente);
         return pacienteMapper.mapToPacienteDTO(savedPaciente);
     }
@@ -114,6 +125,13 @@ public class PacienteServiceImpl implements PacienteService {
         paciente.setDireccion(pacienteDTO.getDireccion());
         paciente.setTipoSangre(pacienteDTO.getTipoSangre());
         paciente.setAntecedentes(pacienteDTO.getAntecedentes());
+
+        if(pacienteDTO.getSeguroId()!=null) {
+            seguroService.getSeguroById(pacienteDTO.getSeguroId()).orElseThrow(()->new RuntimeException("No se encontro seguro con el id ingresado"));
+            Seguro seguro = new Seguro();
+            seguro.setId(pacienteDTO.getSeguroId());
+            paciente.setSeguro(seguro);
+        }
 
         Paciente updatedPaciente = pacienteRepository.save(paciente);
         return pacienteMapper.mapToPacienteDTO(updatedPaciente);

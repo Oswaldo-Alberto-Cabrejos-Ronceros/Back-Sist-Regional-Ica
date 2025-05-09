@@ -1,13 +1,22 @@
 package com.clinicaregional.clinica.service.impl;
 
+import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.SeguroDTO;
+import com.clinicaregional.clinica.dto.ServicioSeguroDTO;
 import com.clinicaregional.clinica.dto.request.CitaReprogramarRequest;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.entity.Cita;
+import com.clinicaregional.clinica.entity.Cobertura;
+import com.clinicaregional.clinica.entity.Seguro;
 import com.clinicaregional.clinica.enums.EstadoCita;
+import com.clinicaregional.clinica.enums.EstadoSeguro;
 import com.clinicaregional.clinica.mapper.CitaMapper;
 import com.clinicaregional.clinica.repository.CitaRepository;
 import com.clinicaregional.clinica.service.CitaService;
+import com.clinicaregional.clinica.service.PacienteService;
+import com.clinicaregional.clinica.service.SeguroService;
+import com.clinicaregional.clinica.service.ServicioSeguroService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +31,9 @@ public class CitaServiceImpl implements CitaService {
 
     private final CitaRepository citaRepository;
     private final CitaMapper citaMapper;
+    private final PacienteService pacienteService;
+    private final SeguroService seguroService;
+    private final ServicioSeguroService servicioSeguroService;
 
     @Transactional(readOnly = true)
     @Override
@@ -43,7 +55,29 @@ public class CitaServiceImpl implements CitaService {
         if (citaRepository.existsByFechaHoraAndEstadoCitaNotAndEstadoCitaNot(citaRequest.getFechaHora(), EstadoCita.CANCELADA, EstadoCita.EN_CURSO)) {
             throw new RuntimeException("Fecha y Hora no disponibles");
         }
-        Cita savedCita = citaRepository.save(citaMapper.toEntity(citaRequest));
+        Cita cita = citaMapper.toEntity(citaRequest);
+        //obtenemos paciente para saber si tiene seguro
+        PacienteDTO paciente = pacienteService.getPacientePorId(citaRequest.getPacienteId()).orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+
+        if(paciente.getSeguroId()!=null){
+            SeguroDTO seguro=seguroService.getSeguroById(paciente.getSeguroId()).orElseThrow(() -> new RuntimeException("Seguro no encontrado"));
+            if(seguro.getEstadoSeguro()!=EstadoSeguro.INACTIVO){
+                Long servicioId=citaRequest.getServicioId();
+                ServicioSeguroDTO servicioSeguro = servicioSeguroService.getSeguroServicioBySeguroAndServicio(citaRequest.getServicioId(), servicioId).orElse(null);
+                if(servicioSeguro!=null){
+                    //creamos seguro y cobertura
+                    Seguro seguroAdd=new Seguro();
+                    seguroAdd.setId(servicioSeguro.getId());
+                    Cobertura coberturaAdd = new Cobertura();
+                    coberturaAdd.setId(servicioSeguro.getId());
+                    //lo agreamos a cita
+                    cita.setSeguro(seguroAdd);
+                    cita.setCobertura(coberturaAdd);
+                }
+            }
+        }
+
+        Cita savedCita = citaRepository.save(cita);
         return citaMapper.toResponse(savedCita);
     }
 

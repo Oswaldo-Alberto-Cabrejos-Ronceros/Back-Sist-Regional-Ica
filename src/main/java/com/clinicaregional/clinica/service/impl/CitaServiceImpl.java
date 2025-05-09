@@ -61,19 +61,20 @@ public class CitaServiceImpl implements CitaService {
 
         if(paciente.getSeguroId()!=null){
             SeguroDTO seguro=seguroService.getSeguroById(paciente.getSeguroId()).orElseThrow(() -> new RuntimeException("Seguro no encontrado"));
-            if(seguro.getEstadoSeguro()==EstadoSeguro.INACTIVO){
-                throw new RuntimeException("Seguro el seguro esta inactivo");
+            if(seguro.getEstadoSeguro()!=EstadoSeguro.INACTIVO){
+                Long servicioId=citaRequest.getServicioId();
+                ServicioSeguroDTO servicioSeguro = servicioSeguroService.getSeguroServicioBySeguroAndServicio(citaRequest.getServicioId(), servicioId).orElse(null);
+                if(servicioSeguro!=null){
+                    //creamos seguro y cobertura
+                    Seguro seguroAdd=new Seguro();
+                    seguroAdd.setId(servicioSeguro.getId());
+                    Cobertura coberturaAdd = new Cobertura();
+                    coberturaAdd.setId(servicioSeguro.getId());
+                    //lo agreamos a cita
+                    cita.setSeguro(seguroAdd);
+                    cita.setCobertura(coberturaAdd);
+                }
             }
-            Long servicioId=citaRequest.getServicioId();
-            ServicioSeguroDTO servicioSeguro = servicioSeguroService.getSeguroServicioBySeguroAndServicio(citaRequest.getServicioId(), servicioId).orElseThrow(()->new RuntimeException("El seguro no cubre el servicio"));
-            //creamos seguro y cobertura
-            Seguro seguroAdd=new Seguro();
-            seguroAdd.setId(servicioSeguro.getId());
-            Cobertura coberturaAdd = new Cobertura();
-            coberturaAdd.setId(servicioSeguro.getId());
-            //lo agreamos a cita
-            cita.setSeguro(seguroAdd);
-            cita.setCobertura(coberturaAdd);
         }
 
         Cita savedCita = citaRepository.save(cita);

@@ -2,13 +2,10 @@ package com.clinicaregional.clinica.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 import com.clinicaregional.clinica.service.ServicioService;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestBody;
+
 import jakarta.validation.Valid;
 
 import com.clinicaregional.clinica.dto.request.ServicioRequest;
@@ -52,7 +49,7 @@ public class ServicioController {
             servicioService.eliminarServicio(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            if (e.getMessage() != null && e.getMessage().contains("no encontrada")) {
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("no encontrado")) {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.badRequest().body(e.getMessage());

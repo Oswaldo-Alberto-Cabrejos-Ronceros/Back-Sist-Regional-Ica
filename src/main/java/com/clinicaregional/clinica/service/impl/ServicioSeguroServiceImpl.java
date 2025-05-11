@@ -30,8 +30,10 @@ public class ServicioSeguroServiceImpl implements ServicioSeguroService {
     private final SeguroCoberturaService seguroCoberturaService;
 
     @Autowired
-    public ServicioSeguroServiceImpl(ServicioSeguroRepository servicioSeguroRepository, ServicioSeguroMapper servicioSeguroMapper, FiltroEstado filtroEstado,
-                                     ServicioRepository servicioRepository, SeguroService seguroService, CoberturaService coberturaService, SeguroCoberturaService seguroCoberturaService) {
+    public ServicioSeguroServiceImpl(ServicioSeguroRepository servicioSeguroRepository,
+            ServicioSeguroMapper servicioSeguroMapper, FiltroEstado filtroEstado,
+            ServicioRepository servicioRepository, SeguroService seguroService, CoberturaService coberturaService,
+            SeguroCoberturaService seguroCoberturaService) {
         this.servicioSeguroRepository = servicioSeguroRepository;
         this.servicioSeguroMapper = servicioSeguroMapper;
         this.filtroEstado = filtroEstado;
@@ -45,28 +47,32 @@ public class ServicioSeguroServiceImpl implements ServicioSeguroService {
     @Override
     public List<ServicioSeguroDTO> listarServicioSeguro() {
         filtroEstado.activarFiltroEstado(true);
-        return servicioSeguroRepository.findAll().stream().map(servicioSeguroMapper::mapToServicioSeguroDTO).collect(Collectors.toList());
+        return servicioSeguroRepository.findAll().stream().map(servicioSeguroMapper::mapToServicioSeguroDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ServicioSeguroDTO> listarPorServicio(Long servicioId) {
         filtroEstado.activarFiltroEstado(true);
-        return servicioSeguroRepository.findByServicio_Id(servicioId).stream().map(servicioSeguroMapper::mapToServicioSeguroDTO).collect(Collectors.toList());
+        return servicioSeguroRepository.findByServicio_Id(servicioId).stream()
+                .map(servicioSeguroMapper::mapToServicioSeguroDTO).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ServicioSeguroDTO> listarPorSeguro(Long seguroId) {
         filtroEstado.activarFiltroEstado(true);
-        return servicioSeguroRepository.findBySeguro_Id(seguroId).stream().map(servicioSeguroMapper::mapToServicioSeguroDTO).collect(Collectors.toList());
+        return servicioSeguroRepository.findBySeguro_Id(seguroId).stream()
+                .map(servicioSeguroMapper::mapToServicioSeguroDTO).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ServicioSeguroDTO> listarPorCobertura(Long coberturaId) {
         filtroEstado.activarFiltroEstado(true);
-        return servicioSeguroRepository.findByCobertura_Id(coberturaId).stream().map(servicioSeguroMapper::mapToServicioSeguroDTO).collect(Collectors.toList());
+        return servicioSeguroRepository.findByCobertura_Id(coberturaId).stream()
+                .map(servicioSeguroMapper::mapToServicioSeguroDTO).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -79,25 +85,30 @@ public class ServicioSeguroServiceImpl implements ServicioSeguroService {
     @Override
     public ServicioSeguroDTO createServicioSeguro(ServicioSeguroDTO servicioSeguroDTO) {
         filtroEstado.activarFiltroEstado(true);
-        servicioRepository.findByIdAndEstadoIsTrue(servicioSeguroDTO.getServicioId()).orElseThrow(() -> new RuntimeException("No se encontro el servicio con el id ingresado"));
+        servicioRepository.findByIdAndEstadoIsTrue(servicioSeguroDTO.getServicioId())
+                .orElseThrow(() -> new RuntimeException("No se encontro el servicio con el id ingresado"));
         seguroService.getSeguroById(servicioSeguroDTO.getSeguroId());
         coberturaService.getCoberturaById(servicioSeguroDTO.getCoberturaId());
-        if (!seguroCoberturaService.existsBySeguroAndCobertura(servicioSeguroDTO.getServicioId(), servicioSeguroDTO.getCoberturaId())) {
+        if (!seguroCoberturaService.existsBySeguroAndCobertura(servicioSeguroDTO.getSeguroId(),
+                servicioSeguroDTO.getCoberturaId())) {
             throw new RuntimeException("El seguro no cubre la cobertura ingresada");
         }
 
-        if (servicioSeguroRepository.existsByServicio_IdAndSeguro_IdAndCobertura_Id(servicioSeguroDTO.getServicioId(), servicioSeguroDTO.getSeguroId(),
+        if (servicioSeguroRepository.existsByServicio_IdAndSeguro_IdAndCobertura_Id(servicioSeguroDTO.getServicioId(),
+                servicioSeguroDTO.getSeguroId(),
                 servicioSeguroDTO.getCoberturaId())) {
             throw new RuntimeException("Ya existe un ServicioSeguro con el servicio, seguro y cobertura ingresado");
         }
-        ServicioSeguro savedServicioSeguro = servicioSeguroRepository.save(servicioSeguroMapper.mapToServicioSeguro(servicioSeguroDTO));
+        ServicioSeguro savedServicioSeguro = servicioSeguroRepository
+                .save(servicioSeguroMapper.mapToServicioSeguro(servicioSeguroDTO));
         return servicioSeguroMapper.mapToServicioSeguroDTO(savedServicioSeguro);
     }
 
     @Transactional
     @Override
     public void deleteServicioSeguro(Long id) {
-        ServicioSeguro findServicioSeguro = servicioSeguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No se encontro el Servicio Seguro con el id ingresado"));
+        ServicioSeguro findServicioSeguro = servicioSeguroRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("No se encontro el Servicio Seguro con el id ingresado"));
         findServicioSeguro.setEstado(false);
         servicioSeguroRepository.save(findServicioSeguro);
     }

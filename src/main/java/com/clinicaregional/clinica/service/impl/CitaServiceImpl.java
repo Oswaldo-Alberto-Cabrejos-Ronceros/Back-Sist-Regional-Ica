@@ -9,11 +9,13 @@ import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.entity.Cita;
 import com.clinicaregional.clinica.entity.Cobertura;
 import com.clinicaregional.clinica.entity.Seguro;
+import com.clinicaregional.clinica.entity.Servicio;
 import com.clinicaregional.clinica.enums.EstadoCita;
 import com.clinicaregional.clinica.enums.EstadoSeguro;
 import com.clinicaregional.clinica.mapper.CitaMapper;
 import com.clinicaregional.clinica.repository.CitaRepository;
 import com.clinicaregional.clinica.repository.MedicoRepository;
+import com.clinicaregional.clinica.repository.ServicioRepository;
 import com.clinicaregional.clinica.service.CitaService;
 import com.clinicaregional.clinica.service.PacienteService;
 import com.clinicaregional.clinica.service.SeguroService;
@@ -36,6 +38,7 @@ public class CitaServiceImpl implements CitaService {
     private final SeguroService seguroService;
     private final ServicioSeguroService servicioSeguroService;
     private final MedicoRepository medicoRepository;
+    private final ServicioRepository servicioRepository;
 
     @Transactional(readOnly = true)
     @Override
@@ -182,6 +185,19 @@ public class CitaServiceImpl implements CitaService {
         }
         cita.setEstadoCita(EstadoCita.NO_ASISTIO);
         citaRepository.save(cita);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<Servicio> listarServiciosActivos() {
+        return servicioRepository.findAllByEstadoTrue();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Servicio obtenerServicioPorId(Long id) {
+        return servicioRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Servicio no encontrado o inactivo"));
     }
 
 }

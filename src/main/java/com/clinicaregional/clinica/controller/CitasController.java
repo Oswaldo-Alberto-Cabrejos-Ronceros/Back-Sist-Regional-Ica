@@ -4,6 +4,7 @@ import com.clinicaregional.clinica.dto.request.CitaReprogramarRequest;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.service.CitaService;
+import com.clinicaregional.clinica.entity.Servicio;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -68,5 +69,18 @@ public class CitasController {
         citaService.marcoNoAsistio(id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/servicios")
+    public ResponseEntity<List<Servicio>> listarServiciosActivos() {
+        List<Servicio> servicios = citaService.listarServiciosActivos();
+        return ResponseEntity.ok(servicios);
+    }
+
+    @GetMapping("/servicios/{id}")
+    public ResponseEntity<Servicio> obtenerServicioPorId(@PathVariable Long id) {
+        Servicio servicio = citaService.obtenerServicioPorId(id);
+        return ResponseEntity.ok(servicio);
+    }
+
 }
 

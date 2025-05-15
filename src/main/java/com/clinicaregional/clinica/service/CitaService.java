@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service;
 import com.clinicaregional.clinica.dto.request.CitaReprogramarRequest;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
+import com.clinicaregional.clinica.entity.Servicio;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,5 +25,9 @@ public interface CitaService {
     void marcarAtentida (Long id);
 
     void marcoNoAsistio(Long id);
+
+    List<Servicio> listarServiciosActivos();
+
+    Servicio obtenerServicioPorId(Long id);
 
 }

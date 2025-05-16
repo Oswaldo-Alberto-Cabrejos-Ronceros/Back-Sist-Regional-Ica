@@ -11,6 +11,8 @@ import com.clinicaregional.clinica.util.FiltroEstado;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -63,5 +65,15 @@ public class ServicioServiceImpl implements ServicioService {
         Servicio updatedServicio = servicioRepository.save(servicio);
         return servicioMapper.mapToServicioResponse(updatedServicio);
     }
-    
+
+    @Override
+    public List<Servicio> listarTodosActivos() {
+        return servicioRepository.findAllByEstadoTrue();
+    }
+
+    @Override
+    public Optional<Servicio> buscarPorIdActivo(Long id) {
+        return servicioRepository.findByIdAndEstadoIsTrue(id);
+    }
+
 }

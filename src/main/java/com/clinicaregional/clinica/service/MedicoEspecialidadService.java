@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface MedicoEspecialidadService {
 
+    List<MedicoEspecialidadResponse> obtenerTodasRelacionesME();
+
     MedicoEspecialidadResponse registrarRelacionME(MedicoEspecialidadRequest request);
 
     MedicoEspecialidadResponse actualizarRelacionME(Long medicoId, Long especialidadId, MedicoEspecialidadRequest request);

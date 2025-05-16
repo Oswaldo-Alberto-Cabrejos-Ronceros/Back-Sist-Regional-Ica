@@ -28,22 +28,21 @@ class MedicoEspecialidadServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
         medicoEspecialidadRequest = new MedicoEspecialidadRequest(1L, 2L, LocalDate.now());
-        medicoEspecialidadResponse = new MedicoEspecialidadResponse(1L, "Juan Pérez", 2L, "Cardiología", LocalDate.now());
+        medicoEspecialidadResponse = new MedicoEspecialidadResponse(1L, "Juan Pérez", "12345678901", "987654321", 2L,
+                "Cardiología", LocalDate.now());
     }
 
     @Test
     @DisplayName("Registrar nueva relación Médico-Especialidad")
     void registrarRelacionME() {
-        // Arrange
         when(medicoEspecialidadService.registrarRelacionME(any())).thenReturn(medicoEspecialidadResponse);
 
-        // Act
         MedicoEspecialidadResponse resultado = medicoEspecialidadService.registrarRelacionME(medicoEspecialidadRequest);
 
-        // Assert
         assertThat(resultado).isNotNull();
+        assertThat(resultado.getNumeroColegiatura()).isEqualTo("12345678901");
+        assertThat(resultado.getNumeroRNE()).isEqualTo("987654321");
         verify(medicoEspecialidadService, times(1)).registrarRelacionME(any());
     }
 
@@ -51,10 +50,12 @@ class MedicoEspecialidadServiceTest {
     @DisplayName("Actualizar relación Médico-Especialidad existente")
     void actualizarRelacionME() {
         // Arrange
-        when(medicoEspecialidadService.actualizarRelacionME(eq(1L), eq(2L), any())).thenReturn(medicoEspecialidadResponse);
+        when(medicoEspecialidadService.actualizarRelacionME(eq(1L), eq(2L), any()))
+                .thenReturn(medicoEspecialidadResponse);
 
         // Act
-        MedicoEspecialidadResponse resultado = medicoEspecialidadService.actualizarRelacionME(1L, 2L, medicoEspecialidadRequest);
+        MedicoEspecialidadResponse resultado = medicoEspecialidadService.actualizarRelacionME(1L, 2L,
+                medicoEspecialidadRequest);
 
         // Assert
         assertThat(resultado).isNotNull();
@@ -78,7 +79,8 @@ class MedicoEspecialidadServiceTest {
     @DisplayName("Obtener especialidades de un médico")
     void obtenerEspecialidadDelMedico() {
         // Arrange
-        when(medicoEspecialidadService.obtenerEspecialidadDelMedico(1L)).thenReturn(List.of(medicoEspecialidadResponse));
+        when(medicoEspecialidadService.obtenerEspecialidadDelMedico(1L))
+                .thenReturn(List.of(medicoEspecialidadResponse));
 
         // Act
         List<MedicoEspecialidadResponse> resultado = medicoEspecialidadService.obtenerEspecialidadDelMedico(1L);
@@ -92,7 +94,8 @@ class MedicoEspecialidadServiceTest {
     @DisplayName("Obtener médicos de una especialidad")
     void obtenerMedicosPorEspecialidad() {
         // Arrange
-        when(medicoEspecialidadService.obtenerMedicosPorEspecialidad(2L)).thenReturn(List.of(medicoEspecialidadResponse));
+        when(medicoEspecialidadService.obtenerMedicosPorEspecialidad(2L))
+                .thenReturn(List.of(medicoEspecialidadResponse));
 
         // Act
         List<MedicoEspecialidadResponse> resultado = medicoEspecialidadService.obtenerMedicosPorEspecialidad(2L);

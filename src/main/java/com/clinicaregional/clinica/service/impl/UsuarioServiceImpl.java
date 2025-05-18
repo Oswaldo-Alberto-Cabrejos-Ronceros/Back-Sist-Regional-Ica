@@ -4,6 +4,7 @@ import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.entity.*;
 import com.clinicaregional.clinica.exception.BadRequestException;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.*;
@@ -92,8 +93,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioDTO guardar(UsuarioRequestDTO request) {
         filtroEstado.activarFiltroEstado(true);
+
         if (usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())) {
-            throw new IllegalStateException("Ya existe un usuario con el correo ingresado");
+            throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
 
         Usuario usuario = usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request);
@@ -102,7 +104,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         rolRepository.findById(request.getRol().getId())
                 .ifPresentOrElse(usuario::setRol,
                         () -> {
-                            throw new IllegalStateException("El rol especificado no existe");
+                            throw new BadRequestException("El rol especificado no existe");
                         });
 
         Usuario usuarioSaved = usuarioRepository.save(usuario);

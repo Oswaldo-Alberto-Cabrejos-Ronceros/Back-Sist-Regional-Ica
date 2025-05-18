@@ -3,6 +3,8 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.entity.*;
+import com.clinicaregional.clinica.exception.BadRequestException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.*;
 import com.clinicaregional.clinica.service.UsuarioService;
@@ -111,16 +113,16 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioDTO actualizar(Long id, UsuarioRequestDTO request) {
         filtroEstado.activarFiltroEstado(true);
+
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No existe un usuario con el id:" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe un usuario con el id: " + id));
 
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        rolRepository.findById(request.getRol().getId())
-                .ifPresentOrElse(usuario::setRol,
-                        () -> {
-                            throw new IllegalStateException("El rol especificado no existe");
-                        });
+        Rol rol = rolRepository.findById(request.getRol().getId())
+                .orElseThrow(() -> new BadRequestException("El rol especificado no existe"));
+
+        usuario.setRol(rol);
 
         Usuario usuarioSaved = usuarioRepository.save(usuario);
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);

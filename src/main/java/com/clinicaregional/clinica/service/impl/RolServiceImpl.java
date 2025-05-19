@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.RolMapper;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.RolService;
@@ -62,11 +63,17 @@ public class RolServiceImpl implements RolService {
     @Override
     public RolDTO actualizar(Long id, RolDTO rol) {
         filtroEstado.activarFiltroEstado(true);
+
         Rol rolExisting = rolRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No existe un rol con el id" + id));
-        if (rolRepository.existsByNombreAndEstadoIsTrue(rol.getNombre())) {
-            throw new IllegalArgumentException("El nombre ya existe");
+                .orElseThrow(() -> new ResourceNotFoundException("No existe un rol con el id: " + id));
+
+        boolean nombreDuplicado = rolRepository.existsByNombreAndEstadoIsTrue(rol.getNombre())
+                && !rolExisting.getNombre().equalsIgnoreCase(rol.getNombre());
+
+        if (nombreDuplicado) {
+            throw new DuplicateResourceException("Ya existe un rol con el nombre ingresado");
         }
+
         rolExisting.setNombre(rol.getNombre());
         rolExisting.setDescripcion(rol.getDescripcion());
         Rol savedRol = rolRepository.save(rolExisting);

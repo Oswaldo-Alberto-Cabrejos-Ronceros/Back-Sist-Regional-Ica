@@ -59,9 +59,11 @@ public class TipoDocumentoServiceImpl implements TipoDocumentoService {
     @Override
     public TipoDocumentoDTO createTipoDocumento(TipoDocumentoDTO tipoDocumento) {
         filtroEstado.activarFiltroEstado(true);
+
         if (tipoDocumentoRepository.existsByNombreAndEstadoIsTrue(tipoDocumento.getNombre())) {
-            throw new IllegalArgumentException("El tipo de documento ya existe en el sistema");
+            throw new DuplicateResourceException("El tipo de documento ya existe en el sistema");
         }
+
         TipoDocumento tipoDocumentoMapped = tipoDocumentoMapper.mapToTipoDocumento(tipoDocumento);
         TipoDocumento savedTipoDocumento = tipoDocumentoRepository.save(tipoDocumentoMapped);
         return tipoDocumentoMapper.mapToTipoDocumentoDTO(savedTipoDocumento);
@@ -95,8 +97,10 @@ public class TipoDocumentoServiceImpl implements TipoDocumentoService {
     @Override
     public void deleteTipoDocumento(Long id) {
         filtroEstado.activarFiltroEstado(true);
+
         TipoDocumento tipoDocumentoExist = tipoDocumentoRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new IllegalArgumentException("No existe un tipo de documento con el id"));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe un tipo de documento con el id"));
+
         tipoDocumentoExist.setEstado(false); // Borrado lógico
         tipoDocumentoRepository.save(tipoDocumentoExist);
     }

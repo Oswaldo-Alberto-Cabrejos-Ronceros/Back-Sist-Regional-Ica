@@ -35,6 +35,9 @@ public class Medico extends EntidadConEstado{
     private String apellidos;
     private String numeroColegiatura;
     private String numeroRNE;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private TipoDocumento tipoDocumento;
+    private String numeroDocumento;
     private String telefono;
     private String direccion;
     private String descripcion;

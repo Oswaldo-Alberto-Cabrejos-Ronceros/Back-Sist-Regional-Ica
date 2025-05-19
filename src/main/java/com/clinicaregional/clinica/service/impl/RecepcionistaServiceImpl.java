@@ -9,6 +9,8 @@ import com.clinicaregional.clinica.entity.Recepcionista;
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.RecepcionistaMapper;
 import com.clinicaregional.clinica.repository.RecepcionistaRepository;
 import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
@@ -115,18 +117,20 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         filtroEstado.activarFiltroEstado(true);
 
         Recepcionista recepcionistaExistente = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Recepcionista no encontrada con id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Recepcionista no encontrada con id: " + id));
 
-        if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento()) &&
-                !recepcionistaExistente.getNumeroDocumento().equals(request.getNumeroDocumento())) {
-            throw new RuntimeException("Ya existe un recepcionista con el número de documento ingresado.");
+        boolean documentoDuplicado = recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento())
+                && !recepcionistaExistente.getNumeroDocumento().equalsIgnoreCase(request.getNumeroDocumento());
+
+        if (documentoDuplicado) {
+            throw new DuplicateResourceException("Ya existe un recepcionista con el número de documento ingresado.");
         }
 
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(request.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + request.getUsuarioId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + request.getUsuarioId()));
 
         TipoDocumento tipoDocumento = tipoDocumentoRepository.findByIdAndEstadoIsTrue(request.getTipoDocumentoId())
-                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
 
         recepcionistaExistente.setNombres(request.getNombres());
         recepcionistaExistente.setApellidos(request.getApellidos());
@@ -140,6 +144,7 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
 
         return recepcionistaMapper.toResponse(recepcionistaRepository.save(recepcionistaExistente));
     }
+
 
     @Transactional
     @Override

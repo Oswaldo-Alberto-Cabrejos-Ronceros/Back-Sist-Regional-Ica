@@ -3,6 +3,8 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.entity.Seguro;
 import com.clinicaregional.clinica.enums.EstadoSeguro;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.SeguroMapper;
 import com.clinicaregional.clinica.repository.SeguroRepository;
 import com.clinicaregional.clinica.service.SeguroService;
@@ -65,17 +67,26 @@ public class SeguroServiceImpl implements SeguroService {
     @Override
     public SeguroDTO updateSeguro(Long id, SeguroDTO seguroDTO) {
         filtroEstado.activarFiltroEstado(true);
-        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No se encontro el seguro con el id: " + id));
-        if (seguroRepository.existsByNombre(seguroDTO.getNombre())) {
-            throw new RuntimeException("El nombre ya existe");
+
+        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró el seguro con el id: " + id));
+
+        boolean nombreDuplicado = seguroRepository.existsByNombreAndEstadoIsTrue(seguroDTO.getNombre()) &&
+                !findSeguro.getNombre().equalsIgnoreCase(seguroDTO.getNombre());
+
+        if (nombreDuplicado) {
+            throw new DuplicateResourceException("Ya existe un seguro con el nombre ingresado");
         }
+
         findSeguro.setNombre(seguroDTO.getNombre());
         findSeguro.setDescripcion(seguroDTO.getDescripcion());
         findSeguro.setImagenUrl(seguroDTO.getImagenUrl());
         findSeguro.setEstadoSeguro(seguroDTO.getEstadoSeguro());
+
         Seguro updatedSeguro = seguroRepository.save(findSeguro);
         return seguroMapper.mapToSeguroDTO(updatedSeguro);
     }
+
 
     @Transactional
     @Override

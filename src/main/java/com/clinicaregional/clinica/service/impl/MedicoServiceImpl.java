@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import java.util.stream.Collectors;
 import java.util.List;
 
+import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,13 @@ public class MedicoServiceImpl implements MedicoService {
                 .stream()
                 .map(medicoMapper::mapToMedicoResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<MedicoResponsePublicDTO> obtenerMedicosPublic() {
+        filtroEstado.activarFiltroEstado(true);
+        return medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO).collect(Collectors.toList());
     }
 
     @Transactional

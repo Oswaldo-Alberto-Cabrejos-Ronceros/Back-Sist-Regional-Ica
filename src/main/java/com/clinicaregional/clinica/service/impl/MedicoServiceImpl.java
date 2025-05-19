@@ -3,6 +3,8 @@ package com.clinicaregional.clinica.service.impl;
 import java.util.stream.Collectors;
 import java.util.List;
 
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -117,19 +119,22 @@ public class MedicoServiceImpl implements MedicoService {
         filtroEstado.activarFiltroEstado(true);
 
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Médico no encontrado con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + id));
 
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
 
-        if (medicoRepository.existsByNumeroColegiatura(dto.getNumeroColegiatura())) {
-            throw new RuntimeException("Ya existe un médico con el número de colegiatura ingresado");
+        if (medicoRepository.existsByNumeroColegiaturaAndIdNot(dto.getNumeroColegiatura(), id)) {
+            throw new DuplicateResourceException("Ya existe un médico con el número de colegiatura ingresado");
         }
-        if (medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
-            throw new RuntimeException("Ya existe un médico con el RNE ingresado");
+
+        if (dto.getNumeroRNE() != null &&
+                medicoRepository.existsByNumeroRNEAndIdNot(dto.getNumeroRNE(), id)) {
+            throw new DuplicateResourceException("Ya existe un médico con el RNE ingresado");
         }
-        if (medicoRepository.existsByUsuario(usuario)) {
-            throw new RuntimeException("Ya existe un médico con el usuario ingresado");
+
+        if (medicoRepository.existsByUsuarioAndIdNot(usuario, id)) {
+            throw new DuplicateResourceException("Ya existe un médico con el usuario ingresado");
         }
 
         medico.setNombres(dto.getNombres());
@@ -148,6 +153,7 @@ public class MedicoServiceImpl implements MedicoService {
         Medico actualizado = medicoRepository.save(medico);
         return medicoMapper.mapToMedicoResponseDTO(actualizado);
     }
+
 
     @Transactional
     @Override

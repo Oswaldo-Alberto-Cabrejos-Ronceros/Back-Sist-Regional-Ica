@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.mapper;
 
+import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
 import org.springframework.stereotype.Component;
 
 import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
@@ -18,6 +19,20 @@ public class MedicoMapper {
                 medico.getDescripcion(), medico.getImagen(),
                 medico.getFechaContratacion(), medico.getTipoContrato(),
                 medico.getTipoMedico(), medico.getUsuario().getId());
+    }
+
+    //para mapear hacia MedicoResponsePublicDTO
+
+    public MedicoResponsePublicDTO mapToMedicoResponsePublicDTO(Medico medico) {
+        return new MedicoResponsePublicDTO(
+                medico.getId(),
+                medico.getNombres(),
+                medico.getApellidos(),
+                medico.getNumeroColegiatura(),
+                medico.getNumeroRNE(),
+                medico.getDescripcion(),
+                medico.getImagen()
+        );
     }
 
     public Medico mapToMedico(MedicoRequestDTO dto, Usuario usuario) {

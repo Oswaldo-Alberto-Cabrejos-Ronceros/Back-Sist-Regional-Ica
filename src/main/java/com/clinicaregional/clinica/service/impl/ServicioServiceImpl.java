@@ -1,4 +1,6 @@
 package com.clinicaregional.clinica.service.impl;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import com.clinicaregional.clinica.dto.request.ServicioRequest;
 import com.clinicaregional.clinica.dto.response.ServicioResponse;
@@ -31,7 +33,7 @@ public class ServicioServiceImpl implements ServicioService {
     public ServicioResponse agregarServicio(ServicioRequest servicioRequest) {
         filtroEstado.activarFiltroEstado(true);
         if(servicioRepository.existsByNombre(servicioRequest.getNombre())) {
-            throw new RuntimeException("Ya existe un servicio con el nombre ingresado");
+            throw new DuplicateResourceException("Ya existe un servicio con el nombre ingresado");
         }
         Servicio servicio = servicioMapper.mapToServicio(servicioRequest);
         Servicio savedServicio = servicioRepository.save(servicio);
@@ -43,7 +45,7 @@ public class ServicioServiceImpl implements ServicioService {
     public void eliminarServicio(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Servicio servicio = servicioRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Servicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
         servicio.setEstado(false);
         servicioRepository.save(servicio);
     }
@@ -53,9 +55,9 @@ public class ServicioServiceImpl implements ServicioService {
     public ServicioResponse actualizarServicio(Long id, ServicioRequest servicioRequest) {
         filtroEstado.activarFiltroEstado(true);
         Servicio servicio = servicioRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Servicio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
         if(servicioRepository.existsByNombre(servicioRequest.getNombre())) {
-            throw new RuntimeException("Ya existe un servicio con el nombre ingresado");
+            throw new DuplicateResourceException("Ya existe un servicio con el nombre ingresado");
         }
         servicio.setNombre(servicioRequest.getNombre());
         servicio.setDescripcion(servicioRequest.getDescripcion());

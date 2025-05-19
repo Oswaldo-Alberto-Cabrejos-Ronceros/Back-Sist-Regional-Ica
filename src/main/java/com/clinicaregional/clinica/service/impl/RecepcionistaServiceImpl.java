@@ -84,17 +84,17 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         UsuarioRequestDTO newUsuario= new UsuarioRequestDTO();
         newUsuario.setCorreo(request.getCorreo());
         newUsuario.setPassword(request.getPassword());
+
         RolDTO rolRecepcinista = new RolDTO();
         rolRecepcinista.setId(3L);//ROL RECEPCIONISTA
         newUsuario.setRol(rolRecepcinista);
 
         UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
-
         Usuario usuario = new Usuario();
         usuario.setId(usuarioDTO.getId());
 
         TipoDocumento tipoDocumento = tipoDocumentoRepository.findByIdAndEstadoIsTrue(request.getTipoDocumentoId())
-                .orElseThrow(() -> new RuntimeException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
 
         Recepcionista recepcionista = Recepcionista.builder()
                 .nombres(request.getNombres())

@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.entity.Rol;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.mapper.RolMapper;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.RolService;
@@ -47,9 +48,11 @@ public class RolServiceImpl implements RolService {
     @Override
     public RolDTO guardar(RolDTO rolDTO) {
         filtroEstado.activarFiltroEstado(true);
+
         if (rolRepository.existsByNombreAndEstadoIsTrue(rolDTO.getNombre())) {
-            throw new IllegalArgumentException("El nombre ya existe");
+            throw new DuplicateResourceException("Ya existe un rol con el nombre ingresado");
         }
+
         Rol rol = rolMapper.mapToRol(rolDTO);
         Rol savedRol = rolRepository.save(rol);
         return rolMapper.mapToRolDTO(savedRol);

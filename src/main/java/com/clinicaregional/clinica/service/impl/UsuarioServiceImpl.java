@@ -119,6 +119,15 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe un usuario con el id: " + id));
 
+        // Verifica si el correo se modificó y si ya existe otro usuario con ese correo
+        boolean correoDuplicado = usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())
+                && !usuario.getCorreo().equalsIgnoreCase(request.getCorreo());
+
+        if (correoDuplicado) {
+            throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
+        }
+
+        usuario.setCorreo(request.getCorreo());
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
 
         Rol rol = rolRepository.findById(request.getRol().getId())

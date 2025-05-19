@@ -4,6 +4,8 @@ import java.util.stream.Collectors;
 import java.util.List;
 
 import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
+import com.clinicaregional.clinica.entity.TipoDocumento;
+import com.clinicaregional.clinica.service.TipoDocumentoService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ public class MedicoServiceImpl implements MedicoService {
     private final MedicoMapper medicoMapper;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
+    private final TipoDocumentoService tipoDocumentoService;
     private final FiltroEstado filtroEstado;
 
     @Autowired
@@ -39,11 +42,13 @@ public class MedicoServiceImpl implements MedicoService {
             MedicoMapper medicoMapper,
             UsuarioRepository usuarioRepository,
             UsuarioService usuarioService,
+            TipoDocumentoService tipoDocumentoService,
             FiltroEstado filtroEstado) {
         this.medicoRepository = medicoRepository;
         this.medicoMapper = medicoMapper;
         this.usuarioRepository = usuarioRepository;
         this.usuarioService = usuarioService;
+        this.tipoDocumentoService = tipoDocumentoService;
         this.filtroEstado = filtroEstado;
     }
 
@@ -85,6 +90,14 @@ public class MedicoServiceImpl implements MedicoService {
             dto.setNumeroRNE(null); // limpiar por si se envió accidentalmente
         }
 
+        //verificamos que exista tipo documento
+        TipoDocumento tipoDocumento = tipoDocumentoService.getTipoDocumentoByIdContext(dto.getTipoDocumentoId())
+                .orElseThrow(() -> new RuntimeException("No se encontró un tipo de documento con el id ingresado"));
+
+        if(medicoRepository.existsByNumeroDocumento(dto.getNumeroDocumento())) {
+            throw new RuntimeException("Ya existe un medico con el numero de documento ingresado");
+        }
+
         if (usuarioRepository.existsByCorreo(dto.getCorreo())) {
             throw new RuntimeException("Ya existe un usuario con el correo ingresado");
         }
@@ -105,6 +118,8 @@ public class MedicoServiceImpl implements MedicoService {
                 .apellidos(dto.getApellidos())
                 .numeroColegiatura(dto.getNumeroColegiatura())
                 .numeroRNE(dto.getNumeroRNE())
+                .tipoDocumento(tipoDocumento)
+                .numeroDocumento(dto.getNumeroDocumento())
                 .telefono(dto.getTelefono())
                 .direccion(dto.getDireccion())
                 .descripcion(dto.getDescripcion())
@@ -130,11 +145,19 @@ public class MedicoServiceImpl implements MedicoService {
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(dto.getUsuarioId())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
 
+        //verificamos que exista tipo documento
+        TipoDocumento tipoDocumento = tipoDocumentoService.getTipoDocumentoByIdContext(dto.getTipoDocumentoId())
+                .orElseThrow(() -> new RuntimeException("No se encontró un tipo de documento con el id ingresado"));
+
+
         if (medicoRepository.existsByNumeroColegiatura(dto.getNumeroColegiatura())) {
             throw new RuntimeException("Ya existe un médico con el número de colegiatura ingresado");
         }
         if (medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
             throw new RuntimeException("Ya existe un médico con el RNE ingresado");
+        }
+        if(medicoRepository.existsByNumeroDocumento(dto.getNumeroDocumento())) {
+            throw new RuntimeException("Ya existe un medico con el numero de documento ingresado");
         }
         if (medicoRepository.existsByUsuario(usuario)) {
             throw new RuntimeException("Ya existe un médico con el usuario ingresado");
@@ -144,6 +167,7 @@ public class MedicoServiceImpl implements MedicoService {
         medico.setApellidos(dto.getApellidos());
         medico.setNumeroColegiatura(dto.getNumeroColegiatura());
         medico.setNumeroRNE(dto.getNumeroRNE());
+        medico.setTipoDocumento(tipoDocumento);
         medico.setTelefono(dto.getTelefono());
         medico.setDireccion(dto.getDireccion());
         medico.setDescripcion(dto.getDescripcion());

@@ -134,43 +134,44 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public void eliminar(Long id) {
         filtroEstado.activarFiltroEstado(true);
+
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No existe un usuario con el id:" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe un usuario con el id: " + id));
 
         usuario.setEstado(false); // Borrado lógico
         usuarioRepository.save(usuario);
+
         switch (usuario.getRol().getNombre()) {
             case "ADMIN":
-                Administrador administrador = administradorRepository.findByUsuario_Id(usuario.getId()).orElseThrow(
-                        () -> new RuntimeException("Administrador no existe con el id de usuario ingresado"));
+                Administrador administrador = administradorRepository.findByUsuario_Id(usuario.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Administrador no existe con el id de usuario ingresado"));
                 administrador.setUsuario(null);
                 administrador.setEstado(false);
                 administradorRepository.save(administrador);
                 break;
             case "PACIENTE":
                 Paciente paciente = pacienteRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new RuntimeException("Paciente no existe con el id de usuario ingresado"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Paciente no existe con el id de usuario ingresado"));
                 paciente.setUsuario(null);
                 paciente.setEstado(false);
                 pacienteRepository.save(paciente);
                 break;
             case "MEDICO":
                 Medico medico = medicoRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new RuntimeException("Medico no existe con el id de usuario ingresado"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Médico no existe con el id de usuario ingresado"));
                 medico.setUsuario(null);
                 medico.setEstado(false);
                 medicoRepository.save(medico);
                 break;
             case "RECEPCIONISTA":
                 Recepcionista recepcionista = recepcionistaRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new RuntimeException("Medico no existe con el id de usuario ingresado"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Recepcionista no existe con el id de usuario ingresado"));
                 recepcionista.setUsuario(null);
                 recepcionista.setEstado(false);
                 recepcionistaRepository.save(recepcionista);
                 break;
             default:
-                throw new IllegalStateException("Rol no manejado: " + usuario.getRol().getNombre());
-
+                throw new BadRequestException("Rol no manejado: " + usuario.getRol().getNombre());
         }
     }
 

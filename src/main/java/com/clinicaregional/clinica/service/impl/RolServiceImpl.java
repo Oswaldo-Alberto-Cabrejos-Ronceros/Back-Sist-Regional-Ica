@@ -84,8 +84,10 @@ public class RolServiceImpl implements RolService {
     @Override
     public void eliminar(Long id) {
         filtroEstado.activarFiltroEstado(true);
+
         Rol rol = rolRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No existe un rol con el id" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe un rol con el id: " + id));
+
         rol.setEstado(false); // borrado lógico
         rolRepository.save(rol);
     }

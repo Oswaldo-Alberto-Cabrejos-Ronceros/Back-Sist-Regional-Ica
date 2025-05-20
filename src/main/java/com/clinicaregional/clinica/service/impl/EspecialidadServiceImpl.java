@@ -62,7 +62,8 @@ public class EspecialidadServiceImpl implements EspecialidadService {
         filtroEstado.activarFiltroEstado(true);
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Especialidad no encontrada con ID: " + id));
-        if (especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
+        if (!especialidad.getNombre().equalsIgnoreCase(especialidadRequest.getNombre()) &&
+                especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
             throw new DuplicateResourceException("Ya existe una especialidad con el nombre ingresado");
         }
         especialidad.setNombre(especialidadRequest.getNombre());

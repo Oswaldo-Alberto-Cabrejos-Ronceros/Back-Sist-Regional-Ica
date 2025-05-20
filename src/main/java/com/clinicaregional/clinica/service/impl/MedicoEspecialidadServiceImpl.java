@@ -38,7 +38,7 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
     public List<MedicoEspecialidadResponse> obtenerTodasRelacionesME() {
         filtroEstado.activarFiltroEstado(true);
         return medicoEspecialidadRepository.findAll().stream()
-                .map(MedicoEspecialidadMapper::toResponse)
+                .map(medicoEspecialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -58,9 +58,9 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
             throw new  DuplicateResourceException("Ya existe esta relación");
         }
 
-        MedicoEspecialidad entity = MedicoEspecialidadMapper.toEntity(request, medico, especialidad);
+        MedicoEspecialidad entity = medicoEspecialidadMapper.toEntity(request, medico, especialidad);
         MedicoEspecialidad saved = medicoEspecialidadRepository.save(entity);
-        return MedicoEspecialidadMapper.toResponse(saved);
+        return medicoEspecialidadMapper.toResponse(saved);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
         entity.setDesdeFecha(request.getDesdeFecha());
 
         MedicoEspecialidad updatedEntity = medicoEspecialidadRepository.save(entity);
-        return MedicoEspecialidadMapper.toResponse(updatedEntity);
+        return medicoEspecialidadMapper.toResponse(updatedEntity);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
         List<MedicoEspecialidad> relaciones = medicoEspecialidadRepository.findByMedicoId(medicoId);
         return relaciones.stream()
-                .map(MedicoEspecialidadMapper::toResponse)
+                .map(medicoEspecialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -110,7 +110,7 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
         List<MedicoEspecialidad> relaciones = medicoEspecialidadRepository.findByEspecialidadId(especialidadId);
         return relaciones.stream()
-                .map(MedicoEspecialidadMapper::toResponse)
+                .map(medicoEspecialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
 }

@@ -13,7 +13,7 @@ import com.clinicaregional.clinica.entity.MedicoEspecialidadId;
 public class MedicoEspecialidadMapper {
 
     // De Request a Entidad
-    public static MedicoEspecialidad toEntity(MedicoEspecialidadRequest request, Medico medico,
+    public MedicoEspecialidad toEntity(MedicoEspecialidadRequest request, Medico medico,
             Especialidad especialidad) {
         MedicoEspecialidad entity = new MedicoEspecialidad();
 
@@ -28,7 +28,7 @@ public class MedicoEspecialidadMapper {
     }
 
     // De Entidad a Response
-    public static MedicoEspecialidadResponse toResponse(MedicoEspecialidad entity) {
+    public  MedicoEspecialidadResponse toResponse(MedicoEspecialidad entity) {
         MedicoEspecialidadResponse response = new MedicoEspecialidadResponse();
         response.setMedicoId(entity.getMedico().getId());
         response.setNombreMedico(entity.getMedico().getNombres() + " " + entity.getMedico().getApellidos()); // Concatenar

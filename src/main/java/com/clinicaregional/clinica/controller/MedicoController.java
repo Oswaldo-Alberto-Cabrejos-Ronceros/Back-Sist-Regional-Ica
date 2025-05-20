@@ -36,17 +36,10 @@ public class MedicoController {
     @PutMapping("/{id}")
     public ResponseEntity<MedicoResponseDTO> actualizar(@PathVariable Long id,
             @RequestBody @Valid MedicoRequestDTO dto) {
-        try {
-            MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto);
-            return ResponseEntity.ok(actualizado);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("no encontrado")) {
-                return ResponseEntity.notFound().build();
-            }
-            throw e;
-        }
+        MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto);
+        return ResponseEntity.ok(actualizado);
     }
-
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         medicoService.eliminarMedico(id);

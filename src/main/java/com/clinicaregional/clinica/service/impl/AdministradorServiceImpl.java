@@ -7,6 +7,8 @@ import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.entity.Administrador;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.AdministradorMapper;
 import com.clinicaregional.clinica.repository.AdministradorRepository;
 import com.clinicaregional.clinica.service.AdministradorService;
@@ -55,7 +57,7 @@ public class AdministradorServiceImpl implements AdministradorService {
     public AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest) {
         filtroEstado.activarFiltroEstado(true);
         if (administradorRepository.existsByNumeroDocumento(registerAdministradorRequest.getAdministrador().getNumeroDocumento())) {
-            throw new RuntimeException("Ya existe un administrador con el numero de documento ingresado");
+            throw new DuplicateResourceException("Ya existe un administrador con el numero de documento ingresado");
         }
 
         // Establecer el rol por defecto (ADMIN)
@@ -74,13 +76,13 @@ public class AdministradorServiceImpl implements AdministradorService {
     @Override
     public AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO) {
         filtroEstado.activarFiltroEstado(true);
-        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
+        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No existe un administrador con el id ingresado"));
 
         if (administradorRepository.existsByNumeroDocumento(administradorDTO.getNumeroDocumento())) {
-            throw new RuntimeException("Ya existe un administrador con el numero de documento ingresado");
+            throw new DuplicateResourceException("Ya existe un administrador con el numero de documento ingresado");
         }
         if (administradorRepository.existsByUsuario_Id(administradorDTO.getUsuarioId())) {
-            throw new RuntimeException("Ya existe un administrador con el usuario ingresado");
+            throw new DuplicateResourceException("Ya existe un administrador con el usuario ingresado");
         }
 
         findAdministrador.setNombres(administradorDTO.getNombres());
@@ -102,7 +104,7 @@ public class AdministradorServiceImpl implements AdministradorService {
     @Override
     public void deleteAdministrador(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe un administrador con el id ingresado"));
+        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No existe un administrador con el id ingresado"));
         findAdministrador.setEstado(false); //borrado logico
         usuarioService.eliminar(findAdministrador.getUsuario().getId());
         findAdministrador.setUsuario(null);

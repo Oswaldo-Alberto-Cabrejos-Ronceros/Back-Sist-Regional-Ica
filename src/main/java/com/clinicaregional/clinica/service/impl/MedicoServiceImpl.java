@@ -114,6 +114,7 @@ public class MedicoServiceImpl implements MedicoService {
         return medicoMapper.mapToMedicoResponseDTO(medicoRepository.save(medico));
     }
 
+
     @Transactional
     @Override
     public MedicoResponseDTO actualizarMedico(Long id, MedicoRequestDTO dto) {
@@ -122,22 +123,45 @@ public class MedicoServiceImpl implements MedicoService {
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + id));
 
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(dto.getUsuarioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
+        Usuario usuario = medico.getUsuario(); // obtener usuario asociado al médico
 
-        if (medicoRepository.existsByNumeroColegiaturaAndIdNot(dto.getNumeroColegiatura(), id)) {
+        // Validar colegiatura si cambió
+        if (!medico.getNumeroColegiatura().equals(dto.getNumeroColegiatura()) &&
+                medicoRepository.existsByNumeroColegiatura(dto.getNumeroColegiatura())) {
             throw new DuplicateResourceException("Ya existe un médico con el número de colegiatura ingresado");
         }
 
-        if (dto.getNumeroRNE() != null &&
-                medicoRepository.existsByNumeroRNEAndIdNot(dto.getNumeroRNE(), id)) {
-            throw new DuplicateResourceException("Ya existe un médico con el RNE ingresado");
+        // Validar RNE si corresponde y cambió
+        if (dto.getTipoMedico().name().equals("ESPECIALISTA")) {
+            if (dto.getNumeroRNE() == null || dto.getNumeroRNE().isBlank()) {
+                throw new BadRequestException("El número RNE es obligatorio para médicos especialistas");
+            }
+            if (!dto.getNumeroRNE().equals(medico.getNumeroRNE()) &&
+                    medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
+                throw new DuplicateResourceException("Ya existe un médico con el RNE ingresado");
+            }
+        } else {
+            dto.setNumeroRNE(null); // limpiar si se envió por error
         }
 
-        if (medicoRepository.existsByUsuarioAndIdNot(usuario, id)) {
+        // Validar si el correo fue modificado y ya existe en otro usuario
+        if (!usuario.getCorreo().equals(dto.getCorreo()) &&
+                usuarioRepository.existsByCorreo(dto.getCorreo())) {
+            throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
+        }
+
+        // Validar si ese correo ya está asignado a otro médico
+        Medico medicoConCorreo = medicoRepository.findByUsuarioCorreo(dto.getCorreo()).orElse(null);
+        if (medicoConCorreo != null && !medicoConCorreo.getId().equals(medico.getId())) {
             throw new DuplicateResourceException("Ya existe un médico con el usuario ingresado");
         }
 
+        // Actualizar datos del usuario
+        usuario.setCorreo(dto.getCorreo());
+        usuario.setPassword(dto.getPassword());
+        usuarioRepository.save(usuario);
+
+        // Actualizar datos del médico
         medico.setNombres(dto.getNombres());
         medico.setApellidos(dto.getApellidos());
         medico.setNumeroColegiatura(dto.getNumeroColegiatura());
@@ -149,11 +173,11 @@ public class MedicoServiceImpl implements MedicoService {
         medico.setFechaContratacion(dto.getFechaContratacion());
         medico.setTipoContrato(dto.getTipoContrato());
         medico.setTipoMedico(dto.getTipoMedico());
-        medico.setUsuario(usuario);
 
         Medico actualizado = medicoRepository.save(medico);
         return medicoMapper.mapToMedicoResponseDTO(actualizado);
     }
+
 
 
     @Transactional

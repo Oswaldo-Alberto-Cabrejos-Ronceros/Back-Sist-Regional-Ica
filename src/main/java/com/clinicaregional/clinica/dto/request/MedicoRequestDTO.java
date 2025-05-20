@@ -55,8 +55,6 @@ public class MedicoRequestDTO {
     @NotNull(message = "El tipo de medico es obligatorio")
     private TipoMedico tipoMedico;
 
-    private Long usuarioId;
-
     @NotBlank(message = "Correo es obligatorio para crear usuario")
     @Email(message = "Debe ser un correo válido")
     private String correo;

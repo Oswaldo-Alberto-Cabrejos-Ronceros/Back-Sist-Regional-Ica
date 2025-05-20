@@ -3,6 +3,8 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.request.EspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 import com.clinicaregional.clinica.entity.Especialidad;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.EspecialidadMapper;
 import com.clinicaregional.clinica.repository.EspecialidadRepository;
 import com.clinicaregional.clinica.service.EspecialidadService;
@@ -47,7 +49,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     public EspecialidadResponse guardarEspecialidad(EspecialidadRequest especialidadRequest) {
         filtroEstado.activarFiltroEstado(true);
         if (especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
-            throw new RuntimeException("Ya existe una especialidad con el nombre ingresado");
+            throw new DuplicateResourceException("Ya existe una especialidad con el nombre ingresado");
         }
         Especialidad especialidad = EspecialidadMapper.toEntity(especialidadRequest);
         Especialidad savedEspecialidad = especialidadRepository.save(especialidad);
@@ -59,9 +61,9 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     public EspecialidadResponse actualizarEspecialidad(Long id, EspecialidadRequest especialidadRequest) {
         filtroEstado.activarFiltroEstado(true);
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Especialidad no encontrada con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Especialidad no encontrada con ID: " + id));
         if (especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
-            throw new RuntimeException("Ya existe una especialidad con el nombre ingresado");
+            throw new DuplicateResourceException("Ya existe una especialidad con el nombre ingresado");
         }
         especialidad.setNombre(especialidadRequest.getNombre());
         especialidad.setDescripcion(especialidadRequest.getDescripcion());
@@ -76,7 +78,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     public void eliminarEspecialidad(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Especialidad no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Especialidad no encontrada"));
         especialidad.setEstado(false); // borrado lógico
         especialidadRepository.save(especialidad);
     }

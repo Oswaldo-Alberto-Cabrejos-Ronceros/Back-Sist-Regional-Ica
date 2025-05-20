@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.CoberturaDTO;
 import com.clinicaregional.clinica.entity.Cobertura;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.CoberturaMapper;
 import com.clinicaregional.clinica.repository.CoberturaRepository;
 import com.clinicaregional.clinica.service.CoberturaService;
@@ -57,7 +58,7 @@ public class CoberturaServiceImpl  implements CoberturaService {
     @Override
     public CoberturaDTO updateCobertura(Long id, CoberturaDTO coberturaDTO) {
         filtroEstado.activarFiltroEstado(true);
-        Cobertura findCobertura = coberturaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe una cobertura con el id: " + id));
+        Cobertura findCobertura = coberturaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No existe una cobertura con el id: " + id));
         if (coberturaRepository.existsByNombre(coberturaDTO.getNombre())) {
             throw new DuplicateResourceException("El nombre del cobertura ya existe");
         }
@@ -71,7 +72,7 @@ public class CoberturaServiceImpl  implements CoberturaService {
     @Override
     public void deleteCobertura(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Cobertura findCobertura = coberturaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No existe una cobertura con el id: " + id));
+        Cobertura findCobertura = coberturaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No existe una cobertura con el id: " + id));
         findCobertura.setEstado(false);
         coberturaRepository.save(findCobertura);
     }

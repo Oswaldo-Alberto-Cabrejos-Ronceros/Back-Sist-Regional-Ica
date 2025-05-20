@@ -86,7 +86,7 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
         MedicoEspecialidadId id = new MedicoEspecialidadId(medicoId, especialidadId);
         MedicoEspecialidad medicoEspecialidad = medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Relación Médico-Especialidad no encontrada para eliminación"));
+                .orElseThrow(() -> new ResourceNotFoundException("Relación Médico-Especialidad no encontrada para eliminación"));
 
         medicoEspecialidad.setEstado(false);
         medicoEspecialidadRepository.save(medicoEspecialidad);

@@ -62,6 +62,7 @@ public class PacienteServiceImpl implements PacienteService {
         filtroEstado.activarFiltroEstado(true);
         return pacienteRepository.findByIdAndEstadoIsTrue(id)
                 .map(pacienteMapper::mapToPacienteDTO);
+                
     }
 
     @Transactional(readOnly = true)

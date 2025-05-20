@@ -27,15 +27,18 @@ public class PacienteController {
 
     @GetMapping("/id/{id}")
     public ResponseEntity<PacienteDTO> getPacienteById(@PathVariable Long id) {
-        return pacienteService.getPacientePorId(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/num-identificacion/{numIdentificacion}")
-    public ResponseEntity<PacienteDTO> getPacienteByNumIdentificacion(@PathVariable String numIdentificacion) {
-        return pacienteService.getPacientePorIdentificacion(numIdentificacion).map(ResponseEntity::ok)
+        return pacienteService.getPacientePorId(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
+    
+    @GetMapping("/num-identificacion/{numIdentificacion}")
+    public ResponseEntity<PacienteDTO> getPacienteByNumIdentificacion(@PathVariable String numIdentificacion) {
+        return pacienteService.getPacientePorIdentificacion(numIdentificacion)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
     @PostMapping
     public ResponseEntity<PacienteDTO> createPaciente(@RequestBody @Valid PacienteDTO pacienteDTO) {
         PacienteDTO savedPaciente = pacienteService.crearPaciente(pacienteDTO);
@@ -45,15 +48,8 @@ public class PacienteController {
     @PutMapping("/{id}")
     public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
             @RequestBody @Valid PacienteDTO pacienteDTO) {
-        try {
-            PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
-            return ResponseEntity.ok(updatedPaciente);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("no encontrado")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
+        return ResponseEntity.ok(updatedPaciente);
     }
 
     @DeleteMapping("/{id}")

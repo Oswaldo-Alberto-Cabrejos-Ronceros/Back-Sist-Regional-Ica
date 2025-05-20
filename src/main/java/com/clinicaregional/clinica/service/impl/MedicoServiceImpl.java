@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
+import com.clinicaregional.clinica.exception.BadRequestException;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,23 +65,23 @@ public class MedicoServiceImpl implements MedicoService {
         filtroEstado.activarFiltroEstado(true);
 
         if (medicoRepository.existsByNumeroColegiatura(dto.getNumeroColegiatura())) {
-            throw new RuntimeException("Ya existe un médico con el número de colegiatura ingresado");
+            throw new DuplicateResourceException("Ya existe un médico con el número de colegiatura ingresado");
         }
 
         // Validar RNE solo si es ESPECIALISTA
         if (dto.getTipoMedico().name().equals("ESPECIALISTA")) {
             if (dto.getNumeroRNE() == null || dto.getNumeroRNE().isBlank()) {
-                throw new RuntimeException("El número RNE es obligatorio para médicos especialistas");
+                throw new BadRequestException("El número RNE es obligatorio para médicos especialistas");
             }
             if (medicoRepository.existsByNumeroRNE(dto.getNumeroRNE())) {
-                throw new RuntimeException("Ya existe un médico con el RNE ingresado");
+                throw new DuplicateResourceException("Ya existe un médico con el RNE ingresado");
             }
         } else {
             dto.setNumeroRNE(null); // limpiar por si se envió accidentalmente
         }
 
         if (usuarioRepository.existsByCorreo(dto.getCorreo())) {
-            throw new RuntimeException("Ya existe un usuario con el correo ingresado");
+            throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
 
         UsuarioRequestDTO newUsuario = new UsuarioRequestDTO();
@@ -160,10 +161,10 @@ public class MedicoServiceImpl implements MedicoService {
     public void eliminarMedico(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Medico no encontrado con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id));
         medico.setEstado(false); // borrado logico
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         usuario.setEstado(false);
         medico.setUsuario(null);
         usuarioRepository.save(usuario);

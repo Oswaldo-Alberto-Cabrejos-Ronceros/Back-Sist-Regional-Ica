@@ -9,7 +9,6 @@ import com.clinicaregional.clinica.mapper.EspecialidadMapper;
 import com.clinicaregional.clinica.repository.EspecialidadRepository;
 import com.clinicaregional.clinica.service.EspecialidadService;
 import com.clinicaregional.clinica.util.FiltroEstado;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +24,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     private final EspecialidadRepository especialidadRepository;
     private final EspecialidadMapper especialidadMapper;
     private final FiltroEstado filtroEstado;
+    
 
     @Transactional(readOnly = true)
     @Override
@@ -32,7 +32,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
         filtroEstado.activarFiltroEstado(true);
         return especialidadRepository.findAll()
                 .stream()
-                .map(EspecialidadMapper::toResponse)
+                .map(especialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -40,8 +40,9 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     @Override
     public Optional<EspecialidadResponse> getEspecialidadById(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        return especialidadRepository.findByIdAndEstadoIsTrue(id)
-                .map(EspecialidadMapper::toResponse);
+        Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe una especialidad con el id " + id));
+        return Optional.of(especialidadMapper.toResponse(especialidad));
     }
 
     @Transactional
@@ -51,9 +52,9 @@ public class EspecialidadServiceImpl implements EspecialidadService {
         if (especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
             throw new DuplicateResourceException("Ya existe una especialidad con el nombre ingresado");
         }
-        Especialidad especialidad = EspecialidadMapper.toEntity(especialidadRequest);
+        Especialidad especialidad = especialidadMapper.toEntity(especialidadRequest);
         Especialidad savedEspecialidad = especialidadRepository.save(especialidad);
-        return EspecialidadMapper.toResponse(savedEspecialidad);
+        return especialidadMapper.toResponse(savedEspecialidad);
     }
 
     @Transactional
@@ -71,7 +72,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
         especialidad.setImagen(especialidadRequest.getImagen());
 
         Especialidad updatedEspecialidad = especialidadRepository.save(especialidad);
-        return EspecialidadMapper.toResponse(updatedEspecialidad);
+        return especialidadMapper.toResponse(updatedEspecialidad);
     }
 
     @Transactional

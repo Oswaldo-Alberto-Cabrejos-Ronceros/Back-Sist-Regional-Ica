@@ -6,6 +6,8 @@ import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.entity.Especialidad;
 import com.clinicaregional.clinica.entity.MedicoEspecialidad;
 import com.clinicaregional.clinica.entity.MedicoEspecialidadId;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.MedicoEspecialidadMapper;
 import com.clinicaregional.clinica.repository.MedicoEspecialidadRepository;
 import com.clinicaregional.clinica.repository.MedicoRepository;
@@ -47,13 +49,13 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId())
                 .orElseThrow(
-                        () -> new EntityNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
+                        () -> new ResourceNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(request.getEspecialidadId())
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Especialidad no encontrada con ID: " + request.getEspecialidadId()));
 
         if (medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)) {
-            throw new EntityExistsException("Ya existe esta relación");
+            throw new  DuplicateResourceException("Ya existe esta relación");
         }
 
         MedicoEspecialidad entity = MedicoEspecialidadMapper.toEntity(request, medico, especialidad);
@@ -69,7 +71,7 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
         MedicoEspecialidadId id = new MedicoEspecialidadId(medicoId, especialidadId);
         MedicoEspecialidad entity = medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Relación no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Relación no encontrada"));
 
         entity.setDesdeFecha(request.getDesdeFecha());
 

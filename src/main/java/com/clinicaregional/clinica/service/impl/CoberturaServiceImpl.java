@@ -17,14 +17,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class CoberturaServiceImpl  implements CoberturaService {
+public class CoberturaServiceImpl implements CoberturaService {
 
     private final CoberturaRepository coberturaRepository;
     private final CoberturaMapper coberturaMapper;
     private final FiltroEstado filtroEstado;
 
     @Autowired
-    public CoberturaServiceImpl(CoberturaRepository coberturaRepository, CoberturaMapper coberturaMapper, FiltroEstado filtroEstado) {
+    public CoberturaServiceImpl(CoberturaRepository coberturaRepository, CoberturaMapper coberturaMapper,
+            FiltroEstado filtroEstado) {
         this.coberturaRepository = coberturaRepository;
         this.coberturaMapper = coberturaMapper;
         this.filtroEstado = filtroEstado;
@@ -34,7 +35,8 @@ public class CoberturaServiceImpl  implements CoberturaService {
     @Override
     public List<CoberturaDTO> listarCoberturas() {
         filtroEstado.activarFiltroEstado(true);
-        return coberturaRepository.findAll().stream().map(coberturaMapper::mapToCoberturaDTO).collect(Collectors.toList());
+        return coberturaRepository.findAll().stream().map(coberturaMapper::mapToCoberturaDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -58,7 +60,8 @@ public class CoberturaServiceImpl  implements CoberturaService {
     @Override
     public CoberturaDTO updateCobertura(Long id, CoberturaDTO coberturaDTO) {
         filtroEstado.activarFiltroEstado(true);
-        Cobertura findCobertura = coberturaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No existe una cobertura con el id: " + id));
+        Cobertura findCobertura = coberturaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe una cobertura con el id: " + id));
         if (coberturaRepository.existsByNombre(coberturaDTO.getNombre())) {
             throw new DuplicateResourceException("El nombre del cobertura ya existe");
         }
@@ -72,7 +75,8 @@ public class CoberturaServiceImpl  implements CoberturaService {
     @Override
     public void deleteCobertura(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Cobertura findCobertura = coberturaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No existe una cobertura con el id: " + id));
+        Cobertura findCobertura = coberturaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe una cobertura con el id: " + id));
         findCobertura.setEstado(false);
         coberturaRepository.save(findCobertura);
     }

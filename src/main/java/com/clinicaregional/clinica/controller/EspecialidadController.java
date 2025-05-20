@@ -41,28 +41,16 @@ public class EspecialidadController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarEspecialidad(@PathVariable Long id, @RequestBody @Valid EspecialidadRequest especialidadRequest) {
-        try {
-            EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException ex) {
-            if (ex.getMessage() != null && ex.getMessage().contains("no encontrada")) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    public ResponseEntity<EspecialidadResponse> actualizarEspecialidad(
+            @PathVariable Long id,
+            @RequestBody @Valid EspecialidadRequest especialidadRequest) {
+        EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest);
+        return ResponseEntity.ok(response);
     }
-
+    
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarEspecialidad(@PathVariable Long id) {
-        try {
-            especialidadService.eliminarEspecialidad(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException ex) {
-            if (ex.getMessage() != null && ex.getMessage().contains("no encontrada")) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    public ResponseEntity<Void> eliminarEspecialidad(@PathVariable Long id) {
+        especialidadService.eliminarEspecialidad(id);
+        return ResponseEntity.noContent().build();
     }
 }

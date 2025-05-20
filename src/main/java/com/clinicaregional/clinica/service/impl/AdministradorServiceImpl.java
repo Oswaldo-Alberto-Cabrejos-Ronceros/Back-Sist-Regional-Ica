@@ -31,7 +31,8 @@ public class AdministradorServiceImpl implements AdministradorService {
     private final FiltroEstado filtroEstado;
 
     @Autowired
-    public AdministradorServiceImpl(AdministradorRepository administradorRepository, AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado) {
+    public AdministradorServiceImpl(AdministradorRepository administradorRepository,
+            AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado) {
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
         this.usuarioService = usuarioService;
@@ -42,7 +43,8 @@ public class AdministradorServiceImpl implements AdministradorService {
     @Override
     public List<AdministradorDTO> listarAdministradores() {
         filtroEstado.activarFiltroEstado(true);
-        return administradorRepository.findAll().stream().map(administradorMapper::mapToAdministradorDTO).collect(Collectors.toList());
+        return administradorRepository.findAll().stream().map(administradorMapper::mapToAdministradorDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -56,7 +58,8 @@ public class AdministradorServiceImpl implements AdministradorService {
     @Override
     public AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest) {
         filtroEstado.activarFiltroEstado(true);
-        if (administradorRepository.existsByNumeroDocumento(registerAdministradorRequest.getAdministrador().getNumeroDocumento())) {
+        if (administradorRepository
+                .existsByNumeroDocumento(registerAdministradorRequest.getAdministrador().getNumeroDocumento())) {
             throw new DuplicateResourceException("Ya existe un administrador con el numero de documento ingresado");
         }
 
@@ -67,7 +70,8 @@ public class AdministradorServiceImpl implements AdministradorService {
 
         registerAdministradorRequest.getAdministrador().setUsuarioId(usuarioGuardado.getId());
 
-        Administrador savedAdministrador = administradorRepository.save(administradorMapper.mapToAdministrador(registerAdministradorRequest.getAdministrador()));
+        Administrador savedAdministrador = administradorRepository
+                .save(administradorMapper.mapToAdministrador(registerAdministradorRequest.getAdministrador()));
 
         return administradorMapper.mapToAdministradorDTO(savedAdministrador);
     }
@@ -76,7 +80,8 @@ public class AdministradorServiceImpl implements AdministradorService {
     @Override
     public AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO) {
         filtroEstado.activarFiltroEstado(true);
-        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No existe un administrador con el id ingresado"));
+        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe un administrador con el id ingresado"));
 
         if (administradorRepository.existsByNumeroDocumento(administradorDTO.getNumeroDocumento())) {
             throw new DuplicateResourceException("Ya existe un administrador con el numero de documento ingresado");
@@ -96,7 +101,8 @@ public class AdministradorServiceImpl implements AdministradorService {
         findAdministrador.setFechaContratacion(administradorDTO.getFechaContratacion());
         Usuario usuario = new Usuario();
         usuario.setId(administradorDTO.getUsuarioId());
-        Administrador updatedAdministrador = administradorRepository.save(administradorMapper.mapToAdministrador(administradorDTO));
+        Administrador updatedAdministrador = administradorRepository
+                .save(administradorMapper.mapToAdministrador(administradorDTO));
         return administradorMapper.mapToAdministradorDTO(updatedAdministrador);
     }
 
@@ -104,8 +110,9 @@ public class AdministradorServiceImpl implements AdministradorService {
     @Override
     public void deleteAdministrador(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No existe un administrador con el id ingresado"));
-        findAdministrador.setEstado(false); //borrado logico
+        Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe un administrador con el id ingresado"));
+        findAdministrador.setEstado(false); // borrado logico
         usuarioService.eliminar(findAdministrador.getUsuario().getId());
         findAdministrador.setUsuario(null);
         administradorRepository.save(findAdministrador);

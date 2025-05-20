@@ -96,21 +96,28 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
     @Transactional(readOnly = true)
     public List<MedicoEspecialidadResponse> obtenerEspecialidadDelMedico(Long medicoId) {
         filtroEstado.activarFiltroEstado(true);
-
+    
         List<MedicoEspecialidad> relaciones = medicoEspecialidadRepository.findByMedicoId(medicoId);
+        if (relaciones.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron especialidades para el médico con ID " + medicoId);
+        }
         return relaciones.stream()
                 .map(medicoEspecialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
-
+    
     @Override
     @Transactional(readOnly = true)
     public List<MedicoEspecialidadResponse> obtenerMedicosPorEspecialidad(Long especialidadId) {
         filtroEstado.activarFiltroEstado(true);
-
+    
         List<MedicoEspecialidad> relaciones = medicoEspecialidadRepository.findByEspecialidadId(especialidadId);
+        if (relaciones.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron médicos para la especialidad con ID " + especialidadId);
+        }
         return relaciones.stream()
                 .map(medicoEspecialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
+    
 }

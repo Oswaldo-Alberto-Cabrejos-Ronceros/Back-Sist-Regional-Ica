@@ -6,6 +6,8 @@ import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.PacienteMapper;
 import com.clinicaregional.clinica.repository.PacienteRepository;
 import com.clinicaregional.clinica.service.PacienteService;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.DuplicateFormatFlagsException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -74,18 +77,18 @@ public class PacienteServiceImpl implements PacienteService {
     public PacienteDTO crearPaciente(PacienteDTO pacienteDTO) {
         filtroEstado.activarFiltroEstado(true);
         if (pacienteRepository.findByNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion()).isPresent()) {
-            throw new RuntimeException("Ya existe un paciente con ese número de identificación");
+            throw new DuplicateResourceException("Ya existe un paciente con ese número de identificación");
         }
 
         TipoDocumento tipoDocumento = tipoDocumentoService.getTipoDocumentoByIdContext(pacienteDTO.getTipoDocumento().getId())
-                .orElseThrow(() -> new RuntimeException("No se encontró un tipo de documento con el id ingresado"));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró un tipo de documento con el id ingresado"));
 
         Paciente paciente = pacienteMapper.mapToPaciente(pacienteDTO);
         paciente.setTipoDocumento(tipoDocumento);
 
         if (paciente.getUsuario() != null) {
             Usuario usuario = usuarioService.obtenerPorIdContenxt(pacienteDTO.getUsuario().getId())
-                    .orElseThrow(() -> new RuntimeException("No se encontró un usuario con el id ingresado"));
+                    .orElseThrow(() -> new ResourceNotFoundException("No se encontró un usuario con el id ingresado"));
             paciente.setUsuario(usuario);
         }
 
@@ -98,10 +101,10 @@ public class PacienteServiceImpl implements PacienteService {
     public PacienteDTO actualizarPaciente(Long id, PacienteDTO pacienteDTO) {
         filtroEstado.activarFiltroEstado(true);
         Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
 
         if (pacienteRepository.findByNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion()).isPresent()) {
-            throw new RuntimeException("Ya existe un paciente con ese número de identificación");
+            throw new DuplicateResourceException("Ya existe un paciente con ese número de identificación");
         }
 
         paciente.setNombres(pacienteDTO.getNombres());
@@ -123,7 +126,7 @@ public class PacienteServiceImpl implements PacienteService {
     @Override
     public void eliminarPaciente(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
         paciente.setEstado(false); //borrado logico
         usuarioService.eliminar(paciente.getUsuario().getId());
         paciente.setUsuario(null);

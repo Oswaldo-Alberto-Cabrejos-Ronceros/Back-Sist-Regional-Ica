@@ -4,6 +4,8 @@ import com.clinicaregional.clinica.dto.AlergiaDTO;
 import com.clinicaregional.clinica.dto.PacienteAlergiaDTO;
 import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.entity.Paciente;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.entity.PacienteAlergia;
 import com.clinicaregional.clinica.mapper.AlergiaMapper;
 import com.clinicaregional.clinica.mapper.PacienteAlergiaMapper;
@@ -62,7 +64,7 @@ public class PacienteAlergiaServiceImpl implements PacienteAlergiaService {
     public List<PacienteAlergiaDTO> listarPacienteAlergiasPorPaciente(Long id) {
         filtroEstado.activarFiltroEstado(true);
         PacienteDTO findPaciente = pacienteService.getPacientePorId(id)
-                .orElseThrow(() -> new RuntimeException("No se encontró el paciente con id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró el paciente con id: " + id));
         Paciente paciente = pacienteMapper.mapToPaciente(findPaciente);
         return pacienteAlergiaRepository.findByPaciente(paciente)
                 .stream()
@@ -81,15 +83,15 @@ public class PacienteAlergiaServiceImpl implements PacienteAlergiaService {
     public PacienteAlergiaDTO createPacienteAlergia(PacienteAlergiaDTO pacienteAlergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
         PacienteDTO pacienteDTO = pacienteService.getPacientePorId(pacienteAlergiaDTO.getPacienteId())
-                .orElseThrow(() -> new RuntimeException("No se encontró paciente con el id ingresado"));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró paciente con el id ingresado"));
 
         AlergiaDTO alergiaDTO = alergiaService.getAlergiaPorId(pacienteAlergiaDTO.getAlergia().getId())
-                .orElseThrow(() -> new RuntimeException("No se encontró alergia con el id ingresado"));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró alergia con el id ingresado"));
 
         if (pacienteAlergiaRepository.existsByPacienteAndAlergia(
                 pacienteMapper.mapToPaciente(pacienteDTO),
                 alergiaMapper.mapToAlergia(alergiaDTO))) {
-            throw new RuntimeException("Paciente Alergia ya existe");
+            throw new DuplicateResourceException("Paciente Alergia ya existe");
         }
 
         pacienteAlergiaDTO.setAlergia(alergiaDTO);
@@ -103,7 +105,7 @@ public class PacienteAlergiaServiceImpl implements PacienteAlergiaService {
     public PacienteAlergiaDTO updatePacienteAlergia(Long id, PacienteAlergiaDTO pacienteAlergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
         PacienteAlergia pacienteAlergia = pacienteAlergiaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No se encontró alergia paciente con el id ingresado"));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró alergia paciente con el id ingresado"));
 
         pacienteAlergia.setGravedad(pacienteAlergiaDTO.getGravedad());
         PacienteAlergia updatedPacienteAlergia = pacienteAlergiaRepository.save(pacienteAlergia);
@@ -114,7 +116,7 @@ public class PacienteAlergiaServiceImpl implements PacienteAlergiaService {
     public void deletePacienteAlergia(Long id) {
         filtroEstado.activarFiltroEstado(true);
         PacienteAlergia pacienteAlergia = pacienteAlergiaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No se encontró alergia paciente con el id ingresado"));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró alergia paciente con el id ingresado"));
         pacienteAlergia.setEstado(false); // Borrado lógico
         pacienteAlergiaRepository.save(pacienteAlergia);
     }

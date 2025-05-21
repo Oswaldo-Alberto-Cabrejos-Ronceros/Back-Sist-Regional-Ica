@@ -60,7 +60,7 @@ class MedicoControllerTest {
                                 LocalDateTime.now(), TipoContrato.FIJO, TipoMedico.ESPECIALISTA, null);
 
                 medicoRequestDTO = new MedicoRequestDTO(
-                                "Juan", "Pérez", null, null,
+                                // "Juan", "Pérez", null, null,
                                 "987654321", "Calle Salud 123", "Cardiólogo general", "imagen.jpg",
                                 LocalDateTime.now(), TipoContrato.FIJO, TipoMedico.ESPECIALISTA, null, "juanperez@gmail.com", "Password123");
         }

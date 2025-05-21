@@ -30,7 +30,7 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
-    
+
     @Autowired
     public SecurityConfig(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -40,12 +40,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider)
             throws Exception {
         http.authenticationProvider(authenticationProvider);
-        return http.csrf(csrf -> csrf.disable()) // corregido: era crsf
+        return http.csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(httpRequest -> {
                     httpRequest.requestMatchers(
-                         "/api/auth/**",
+                            "/api/auth/**",
                             "/api/**",
                             "/swagger-ui/**",
                             "/v3/api-docs/**",
@@ -77,7 +77,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider(AuthenticationService authenticationService,
-            UserDetailsServiceImpl userDetailsServiceImpl) {
+                                                         UserDetailsServiceImpl userDetailsServiceImpl) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder());
         provider.setUserDetailsService(userDetailsServiceImpl::loadUserByUsername);
@@ -92,7 +92,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173\", \"https://localhost:5173", "https://clinica-regional-ica.vercel.app/"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
         configuration.setAllowCredentials(true);

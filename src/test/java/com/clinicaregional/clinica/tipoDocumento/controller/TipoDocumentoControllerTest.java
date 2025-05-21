@@ -26,117 +26,119 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = TipoDocumentoController.class,
-        excludeAutoConfiguration = {
+@WebMvcTest(controllers = TipoDocumentoController.class, excludeAutoConfiguration = {
                 SecurityAutoConfiguration.class,
                 SecurityFilterAutoConfiguration.class
-        },
-        excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { com.clinicaregional.clinica.security.JwtAuthFilter.class, com.clinicaregional.clinica.security.JwtUtil.class })
-        })
+}, excludeFilters = {
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+                                com.clinicaregional.clinica.security.JwtAuthFilter.class,
+                                com.clinicaregional.clinica.security.JwtUtil.class })
+})
 class TipoDocumentoControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockitoBean
-    private TipoDocumentoService tipoDocumentoService;
+        @MockitoBean
+        private TipoDocumentoService tipoDocumentoService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    private TipoDocumentoDTO tipoDocumentoDTO;
+        private TipoDocumentoDTO tipoDocumentoDTO;
 
-    @BeforeEach
-    void setUp() {
-        tipoDocumentoDTO = TipoDocumentoDTO.builder()
-                .id(1L)
-                .nombre("DNI")
-                .descripcion("Documento Nacional de Identidad")
-                .build();
-    }
+        @BeforeEach
+        void setUp() {
+                tipoDocumentoDTO = TipoDocumentoDTO.builder()
+                                .id(1L)
+                                .nombre("DNI")
+                                .descripcion("Documento Nacional de Identidad")
+                                .build();
+        }
 
-    @Test
-    void listarTiposDocumento_exitoso() throws Exception {
-        // Arrange
-        when(tipoDocumentoService.listarTipoDocumento()).thenReturn(List.of(tipoDocumentoDTO));
+        @Test
+        void listarTiposDocumento_exitoso() throws Exception {
+                // Arrange
+                when(tipoDocumentoService.listarTipoDocumento()).thenReturn(List.of(tipoDocumentoDTO));
 
-        // Act
-        var response = mockMvc.perform(get("/api/tipos-documentos"));
+                // Act
+                var response = mockMvc.perform(get("/api/tipos-documentos"));
 
-        // Assert
-        response.andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].nombre").value("DNI"));
-    }
+                // Assert
+                response.andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$[0].nombre").value("DNI"));
+        }
 
-    @Test
-    void obtenerTipoDocumentoPorId_existente() throws Exception {
-        // Arrange
-        when(tipoDocumentoService.getTipoDocumentoById(1L)).thenReturn(Optional.of(tipoDocumentoDTO));
+        @Test
+        void obtenerTipoDocumentoPorId_existente() throws Exception {
+                // Arrange
+                when(tipoDocumentoService.getTipoDocumentoById(1L)).thenReturn(Optional.of(tipoDocumentoDTO));
 
-        // Act
-        var response = mockMvc.perform(get("/api/tipos-documentos/1"));
+                // Act
+                var response = mockMvc.perform(get("/api/tipos-documentos/1"));
 
-        // Assert
-        response.andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.nombre").value("DNI"));
-    }
+                // Assert
+                response.andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.nombre").value("DNI"));
+        }
 
-    @Test
-    void obtenerTipoDocumentoPorId_noExistente() throws Exception {
-        // Arrange
-        when(tipoDocumentoService.getTipoDocumentoById(99L)).thenReturn(Optional.empty());
+        @Test
+        void obtenerTipoDocumentoPorId_noExistente() throws Exception {
+                // Arrange
+                when(tipoDocumentoService.getTipoDocumentoById(99L)).thenReturn(Optional.empty());
 
-        // Act
-        var response = mockMvc.perform(get("/api/tipos-documentos/99"));
+                // Act
+                var response = mockMvc.perform(get("/api/tipos-documentos/99"));
 
-        // Assert
-        response.andExpect(status().isNotFound());
-    }
+                // Assert
+                response.andExpect(status().isNotFound());
+        }
 
-    @Test
-    void crearTipoDocumento_exitoso() throws Exception {
-        // Arrange
-        when(tipoDocumentoService.createTipoDocumento(any(TipoDocumentoDTO.class))).thenReturn(tipoDocumentoDTO);
+        @Test
+        void crearTipoDocumento_exitoso() throws Exception {
+                // Arrange
+                when(tipoDocumentoService.createTipoDocumento(any(TipoDocumentoDTO.class)))
+                                .thenReturn(tipoDocumentoDTO);
 
-        // Act
-        var response = mockMvc.perform(post("/api/tipos-documentos")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(tipoDocumentoDTO)));
+                // Act
+                var response = mockMvc.perform(post("/api/tipos-documentos")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(tipoDocumentoDTO)));
 
-        // Assert
-        response.andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.nombre").value("DNI"));
-    }
+                // Assert
+                response.andExpect(status().isCreated())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.nombre").value("DNI"));
+        }
 
-    @Test
-    void actualizarTipoDocumento_exitoso() throws Exception {
-        // Arrange
-        when(tipoDocumentoService.updateTipoDocumento(eq(1L), any(TipoDocumentoDTO.class))).thenReturn(tipoDocumentoDTO);
+        @Test
+        void actualizarTipoDocumento_exitoso() throws Exception {
+                // Arrange
+                when(tipoDocumentoService.updateTipoDocumento(eq(1L), any(TipoDocumentoDTO.class)))
+                                .thenReturn(tipoDocumentoDTO);
 
-        // Act
-        var response = mockMvc.perform(put("/api/tipos-documentos/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(tipoDocumentoDTO)));
+                // Act
+                var response = mockMvc.perform(put("/api/tipos-documentos/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(tipoDocumentoDTO)));
 
-        // Assert
-        response.andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.nombre").value("DNI"));
-    }
+                // Assert
+                response.andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.nombre").value("DNI"));
+        }
 
-    @Test
-    void eliminarTipoDocumento_exitoso() throws Exception {
-        // Arrange
-        doNothing().when(tipoDocumentoService).deleteTipoDocumento(1L);
+        @Test
+        void eliminarTipoDocumento_exitoso() throws Exception {
+                // Arrange
+                doNothing().when(tipoDocumentoService).deleteTipoDocumento(1L);
 
-        // Act
-        var response = mockMvc.perform(delete("/api/tipos-documentos/1"));
+                // Act
+                var response = mockMvc.perform(delete("/api/tipos-documentos/1"));
 
-        // Assert
-        response.andExpect(status().isNoContent());
-    }
+                // Assert
+                response.andExpect(status().isNoContent());
+        }
 }

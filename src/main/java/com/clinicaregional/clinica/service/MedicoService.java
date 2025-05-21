@@ -12,6 +12,8 @@ public interface MedicoService {
 
         List<MedicoResponsePublicDTO> obtenerMedicosPublic();
 
+        MedicoResponseDTO obtenerMedicoPorId(Long id);
+
         MedicoResponseDTO actualizarMedico(Long id, MedicoRequestDTO dto);
 
         MedicoResponseDTO guardarMedico(MedicoRequestDTO dto);

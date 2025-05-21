@@ -19,6 +19,7 @@ import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
 import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.MedicoMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.MedicoService;
@@ -67,6 +68,14 @@ public class MedicoServiceImpl implements MedicoService {
     public List<MedicoResponsePublicDTO> obtenerMedicosPublic() {
         filtroEstado.activarFiltroEstado(true);
         return medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public MedicoResponseDTO obtenerMedicoPorId(Long id) {
+        filtroEstado.activarFiltroEstado(true);
+        return medicoMapper.mapToMedicoResponseDTO(medicoRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id)));
     }
 
     @Transactional

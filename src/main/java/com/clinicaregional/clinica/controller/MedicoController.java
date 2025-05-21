@@ -34,6 +34,11 @@ public class MedicoController {
         return ResponseEntity.ok(medicoService.obtenerMedicosPublic());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<MedicoResponseDTO> obtenerMedicoPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(medicoService.obtenerMedicoPorId(id));
+    }
+
     @PostMapping
     public ResponseEntity<MedicoResponseDTO> crear(@RequestBody @Valid MedicoRequestDTO dto) {
         MedicoResponseDTO creado = medicoService.guardarMedico(dto);

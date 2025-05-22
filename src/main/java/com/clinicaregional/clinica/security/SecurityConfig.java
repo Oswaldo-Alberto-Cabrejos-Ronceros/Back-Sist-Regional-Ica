@@ -96,6 +96,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "https://localhost:5173",
                 "https://clinica-regional-ica.vercel.app",
+                "http://clinica-regional-ica-git-qa-alyri03s-projects.vercel.app",
+                "https://clinica-regional-ica-git-develop-alyri03s-projects.vercel.app",
                 "https://backend-dev-desarrollo.up.railway.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));

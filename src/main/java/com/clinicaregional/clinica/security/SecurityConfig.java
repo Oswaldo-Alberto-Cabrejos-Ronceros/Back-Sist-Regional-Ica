@@ -77,7 +77,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider(AuthenticationService authenticationService,
-            UserDetailsServiceImpl userDetailsServiceImpl) {
+                                                         UserDetailsServiceImpl userDetailsServiceImpl) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder());
         provider.setUserDetailsService(userDetailsServiceImpl::loadUserByUsername);
@@ -98,7 +98,9 @@ public class SecurityConfig {
                 "https://clinica-regional-ica.vercel.app",
                 "http://clinica-regional-ica-git-qa-alyri03s-projects.vercel.app",
                 "https://clinica-regional-ica-git-develop-alyri03s-projects.vercel.app",
-                "https://backend-dev-desarrollo.up.railway.app"));
+                "https://backend-dev-desarrollo.up.railway.app",
+                "https://luminous-flow-staging-qa.up.railway.app",
+                "https://back-sist-regional-ica-production.up.railway.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
         configuration.setAllowCredentials(true);

@@ -3,6 +3,8 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.AlergiaDTO;
 import com.clinicaregional.clinica.entity.Alergia;
 import com.clinicaregional.clinica.enums.TipoAlergia;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.AlergiaMapper;
 import com.clinicaregional.clinica.repository.AlergiaRepository;
 import com.clinicaregional.clinica.service.AlergiaService;
@@ -54,7 +56,7 @@ public class AlergiaServiceImpl implements AlergiaService {
     public Optional<AlergiaDTO> getAlergiaPorId(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No existe una alergia con el id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe una alergia con el id " + id));
         return Optional.of(alergiaMapper.mapToAlergiaDTO(alergia));
     }
 
@@ -63,7 +65,7 @@ public class AlergiaServiceImpl implements AlergiaService {
     public AlergiaDTO crearAlergia(AlergiaDTO alergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
         if (alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())) {
-            throw new RuntimeException("El nombre ya existe");
+            throw new DuplicateResourceException("El nombre ya existe");
         }
         Alergia alergia = alergiaMapper.mapToAlergia(alergiaDTO);
         Alergia alergiaSaved = alergiaRepository.save(alergia);
@@ -75,9 +77,9 @@ public class AlergiaServiceImpl implements AlergiaService {
     public AlergiaDTO updateAlergia(Long id, AlergiaDTO alergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
         Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No existe una alergia con el id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe una alergia con el id " + id));
         if (alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())) {
-            throw new RuntimeException("El nombre ya existe");
+            throw new DuplicateResourceException("El nombre ya existe");
         }
         alergia.setNombre(alergiaDTO.getNombre());
         alergia.setTipoAlergia(alergiaDTO.getTipoAlergia());
@@ -90,7 +92,7 @@ public class AlergiaServiceImpl implements AlergiaService {
     public void eliminarAlergia(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("No existe una alergia con el id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe una alergia con el id " + id));
         alergia.setEstado(false); // Borrado lógico
         alergiaRepository.save(alergia);
     }

@@ -29,6 +29,16 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
     private final MedicoRepository medicoRepository;
     private final EspecialidadRepository especialidadRepository;
     private final FiltroEstado filtroEstado;
+    private final MedicoEspecialidadMapper medicoEspecialidadMapper;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MedicoEspecialidadResponse> obtenerTodasRelacionesME() {
+        filtroEstado.activarFiltroEstado(true);
+        return medicoEspecialidadRepository.findAll().stream()
+                .map(MedicoEspecialidadMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional
@@ -36,9 +46,11 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
         filtroEstado.activarFiltroEstado(true);
 
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId())
-                .orElseThrow(() -> new EntityNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(request.getEspecialidadId())
-                .orElseThrow(() -> new EntityNotFoundException("Especialidad no encontrada con ID: " + request.getEspecialidadId()));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Especialidad no encontrada con ID: " + request.getEspecialidadId()));
 
         if (medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)) {
             throw new EntityExistsException("Ya existe esta relación");
@@ -51,7 +63,8 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
     @Override
     @Transactional
-    public MedicoEspecialidadResponse actualizarRelacionME(Long medicoId, Long especialidadId, MedicoEspecialidadRequest request) {
+    public MedicoEspecialidadResponse actualizarRelacionME(Long medicoId, Long especialidadId,
+            MedicoEspecialidadRequest request) {
         filtroEstado.activarFiltroEstado(true);
 
         MedicoEspecialidadId id = new MedicoEspecialidadId(medicoId, especialidadId);

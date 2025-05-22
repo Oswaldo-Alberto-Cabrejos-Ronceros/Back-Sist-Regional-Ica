@@ -1,3 +1,4 @@
+
 package com.clinicaregional.clinica.entity;
 
 import java.time.LocalDate;

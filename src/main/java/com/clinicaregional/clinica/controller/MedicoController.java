@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
 import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
+import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
 import com.clinicaregional.clinica.service.MedicoService;
 
 import jakarta.validation.Valid;
@@ -25,6 +26,17 @@ public class MedicoController {
     @GetMapping
     public ResponseEntity<List<MedicoResponseDTO>> obtenerTodos() {
         return ResponseEntity.ok(medicoService.obtenerMedicos());
+    }
+
+    //para obtener datos publicos de los medicos
+    @GetMapping("/public")
+    public ResponseEntity<List<MedicoResponsePublicDTO>> obtenerTodosPublico(){
+        return ResponseEntity.ok(medicoService.obtenerMedicosPublic());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MedicoResponseDTO> obtenerMedicoPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(medicoService.obtenerMedicoPorId(id));
     }
 
     @PostMapping

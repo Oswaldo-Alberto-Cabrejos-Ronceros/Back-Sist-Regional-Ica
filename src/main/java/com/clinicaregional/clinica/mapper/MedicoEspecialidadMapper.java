@@ -19,7 +19,7 @@ public class MedicoEspecialidadMapper {
 
         // Construir el ID compuesto
         MedicoEspecialidadId id = new MedicoEspecialidadId(medico.getId(), especialidad.getId());
-        entity.setId(id); 
+        entity.setId(id);
 
         entity.setMedico(medico);
         entity.setEspecialidad(especialidad);
@@ -35,6 +35,10 @@ public class MedicoEspecialidadMapper {
                                                                                                              // nombres
                                                                                                              // y
                                                                                                              // apellidos
+        //Nuevos campos
+        response.setNumeroColegiatura(entity.getMedico().getNumeroColegiatura());
+        response.setNumeroRNE(entity.getMedico().getNumeroRNE());
+
         response.setEspecialidadId(entity.getEspecialidad().getId());
         response.setNombreEspecialidad(entity.getEspecialidad().getNombre()); // Igual aquí
         response.setDesdeFecha(entity.getDesdeFecha());

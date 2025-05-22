@@ -24,6 +24,11 @@ public class MedicoEspecialidadController {
         return medicoEspecialidadService.registrarRelacionME(request);
     }
 
+    @GetMapping
+    public List<MedicoEspecialidadResponse> obtenerTodasRelacionesME() {
+        return medicoEspecialidadService.obtenerTodasRelacionesME();
+    }
+
     @PutMapping("/{medicoId}/{especialidadId}")
     public ResponseEntity<MedicoEspecialidadResponse> actualizarRelacionME(@PathVariable Long medicoId,
             @PathVariable Long especialidadId,

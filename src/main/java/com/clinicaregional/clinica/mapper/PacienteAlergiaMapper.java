@@ -17,12 +17,15 @@ public class PacienteAlergiaMapper {
     }
 
     public PacienteAlergiaDTO mapToPacienteAlergiaDTO(PacienteAlergia pacienteAlergia) {
-        return new PacienteAlergiaDTO(pacienteAlergia.getId(), pacienteAlergia.getPaciente().getId(), alergiaMapper.mapToAlergiaDTO(pacienteAlergia.getAlergia()), pacienteAlergia.getGravedad());
+        return new PacienteAlergiaDTO(pacienteAlergia.getId(),
+                pacienteAlergia.getPaciente().getId(),
+                alergiaMapper.mapToAlergiaDTO(pacienteAlergia.getAlergia()), pacienteAlergia.getGravedad());
     }
 
     public PacienteAlergia mapToPacienteAlergia(PacienteAlergiaDTO pacienteAlergiaDTO) {
         Paciente paciente = new Paciente();
-        paciente.setId(paciente.getId());
-        return new PacienteAlergia(pacienteAlergiaDTO.getId(), paciente, alergiaMapper.mapToAlergia(pacienteAlergiaDTO.getAlergia()), pacienteAlergiaDTO.getGravedad());
+        paciente.setId(pacienteAlergiaDTO.getPacienteId());
+        return new PacienteAlergia(pacienteAlergiaDTO.getId(), paciente,
+                alergiaMapper.mapToAlergia(pacienteAlergiaDTO.getAlergia()), pacienteAlergiaDTO.getGravedad());
     }
 }

@@ -31,6 +31,12 @@ public class MedicoRequestDTO {
     @Pattern(regexp = "\\d{9}", message = "El numero RNE solo debe contener numeros y 9 digitos")
     private String numeroRNE;
 
+    @NotNull(message = "Tipo de documento id es obligatorio")
+    private Long tipoDocumentoId;
+
+    @NotBlank(message = "El número de identificacion es obligatoria")
+    private String numeroDocumento;
+
     @NotBlank(message = "El telefono es obligatorio")
     @Pattern(regexp = "\\d{9}", message = "El telefono solo debe contener numeros y 9 digitos")
     private String telefono;

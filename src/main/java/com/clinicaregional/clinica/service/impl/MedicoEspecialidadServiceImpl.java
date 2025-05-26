@@ -6,6 +6,8 @@ import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.entity.Especialidad;
 import com.clinicaregional.clinica.entity.MedicoEspecialidad;
 import com.clinicaregional.clinica.entity.MedicoEspecialidadId;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.MedicoEspecialidadMapper;
 import com.clinicaregional.clinica.repository.MedicoEspecialidadRepository;
 import com.clinicaregional.clinica.repository.MedicoRepository;
@@ -36,7 +38,7 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
     public List<MedicoEspecialidadResponse> obtenerTodasRelacionesME() {
         filtroEstado.activarFiltroEstado(true);
         return medicoEspecialidadRepository.findAll().stream()
-                .map(MedicoEspecialidadMapper::toResponse)
+                .map(medicoEspecialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -47,18 +49,18 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId())
                 .orElseThrow(
-                        () -> new EntityNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
+                        () -> new ResourceNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(request.getEspecialidadId())
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "Especialidad no encontrada con ID: " + request.getEspecialidadId()));
 
         if (medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)) {
-            throw new EntityExistsException("Ya existe esta relación");
+            throw new  DuplicateResourceException("Ya existe esta relación");
         }
 
-        MedicoEspecialidad entity = MedicoEspecialidadMapper.toEntity(request, medico, especialidad);
+        MedicoEspecialidad entity = medicoEspecialidadMapper.toEntity(request, medico, especialidad);
         MedicoEspecialidad saved = medicoEspecialidadRepository.save(entity);
-        return MedicoEspecialidadMapper.toResponse(saved);
+        return medicoEspecialidadMapper.toResponse(saved);
     }
 
     @Override
@@ -69,12 +71,12 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
         MedicoEspecialidadId id = new MedicoEspecialidadId(medicoId, especialidadId);
         MedicoEspecialidad entity = medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Relación no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Relación no encontrada"));
 
         entity.setDesdeFecha(request.getDesdeFecha());
 
         MedicoEspecialidad updatedEntity = medicoEspecialidadRepository.save(entity);
-        return MedicoEspecialidadMapper.toResponse(updatedEntity);
+        return medicoEspecialidadMapper.toResponse(updatedEntity);
     }
 
     @Override
@@ -84,7 +86,7 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
 
         MedicoEspecialidadId id = new MedicoEspecialidadId(medicoId, especialidadId);
         MedicoEspecialidad medicoEspecialidad = medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new RuntimeException("Relación Médico-Especialidad no encontrada para eliminación"));
+                .orElseThrow(() -> new ResourceNotFoundException("Relación Médico-Especialidad no encontrada para eliminación"));
 
         medicoEspecialidad.setEstado(false);
         medicoEspecialidadRepository.save(medicoEspecialidad);
@@ -94,21 +96,28 @@ public class MedicoEspecialidadServiceImpl implements MedicoEspecialidadService 
     @Transactional(readOnly = true)
     public List<MedicoEspecialidadResponse> obtenerEspecialidadDelMedico(Long medicoId) {
         filtroEstado.activarFiltroEstado(true);
-
+    
         List<MedicoEspecialidad> relaciones = medicoEspecialidadRepository.findByMedicoId(medicoId);
+        if (relaciones.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron especialidades para el médico con ID " + medicoId);
+        }
         return relaciones.stream()
-                .map(MedicoEspecialidadMapper::toResponse)
+                .map(medicoEspecialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
-
+    
     @Override
     @Transactional(readOnly = true)
     public List<MedicoEspecialidadResponse> obtenerMedicosPorEspecialidad(Long especialidadId) {
         filtroEstado.activarFiltroEstado(true);
-
+    
         List<MedicoEspecialidad> relaciones = medicoEspecialidadRepository.findByEspecialidadId(especialidadId);
+        if (relaciones.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron médicos para la especialidad con ID " + especialidadId);
+        }
         return relaciones.stream()
-                .map(MedicoEspecialidadMapper::toResponse)
+                .map(medicoEspecialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
+    
 }

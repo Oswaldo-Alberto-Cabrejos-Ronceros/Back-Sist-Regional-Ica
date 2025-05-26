@@ -12,4 +12,8 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {
     boolean existsByNumeroDocumento(String numeroDocumento);
     boolean existsByUsuario(Usuario usuario);
     Optional<Medico> findByUsuario_Id(Long id);
+    Optional<Medico> findByUsuarioCorreo(String correo);
+    boolean existsByNumeroColegiaturaAndIdNot(String numeroColegiatura, Long id);
+    boolean existsByNumeroRNEAndIdNot(String numeroRNE, Long id);
+    boolean existsByUsuarioAndIdNot(Usuario usuario, Long id);
 }

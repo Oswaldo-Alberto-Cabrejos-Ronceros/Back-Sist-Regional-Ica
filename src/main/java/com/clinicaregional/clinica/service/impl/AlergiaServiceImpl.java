@@ -76,16 +76,22 @@ public class AlergiaServiceImpl implements AlergiaService {
     @Override
     public AlergiaDTO updateAlergia(Long id, AlergiaDTO alergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
+
         Alergia alergia = alergiaRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe una alergia con el id " + id));
-        if (alergiaRepository.existsByNombreAndEstadoIsTrue(alergiaDTO.getNombre())) {
-            throw new DuplicateResourceException("El nombre ya existe");
+
+        if (alergiaRepository.existsByNombreAndEstadoIsTrueAndIdNot(alergiaDTO.getNombre(), id)) {
+            throw new DuplicateResourceException("Ya existe una alergia con el nombre ingresado");
         }
+
         alergia.setNombre(alergiaDTO.getNombre());
         alergia.setTipoAlergia(alergiaDTO.getTipoAlergia());
+
         Alergia updatedAlergia = alergiaRepository.save(alergia);
         return alergiaMapper.mapToAlergiaDTO(updatedAlergia);
     }
+
+
 
     @Transactional
     @Override

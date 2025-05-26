@@ -30,31 +30,38 @@ public class MedicoEspecialidadController {
     }
 
     @PutMapping("/{medicoId}/{especialidadId}")
-    public ResponseEntity<MedicoEspecialidadResponse> actualizarRelacionME(@PathVariable Long medicoId,
+    public ResponseEntity<MedicoEspecialidadResponse> actualizarRelacionME(
+            @PathVariable Long medicoId,
             @PathVariable Long especialidadId,
             @RequestBody @Valid MedicoEspecialidadRequest request) {
-        try {
-            MedicoEspecialidadResponse response = medicoEspecialidadService.actualizarRelacionME(medicoId,
-                    especialidadId, request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+    
+        MedicoEspecialidadResponse response = medicoEspecialidadService.actualizarRelacionME(medicoId, especialidadId, request);
+        return ResponseEntity.ok(response);
     }
-
+    
     @DeleteMapping("/{medicoId}/{especialidadId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminarRelacionME(@PathVariable Long medicoId, @PathVariable Long especialidadId) {
         medicoEspecialidadService.eliminarRelacionME(medicoId, especialidadId);
     }
+    
 
     @GetMapping("/medico/{medicoId}")
-    public List<MedicoEspecialidadResponse> obtenerEspecialidadDelMedico(@PathVariable Long medicoId) {
-        return medicoEspecialidadService.obtenerEspecialidadDelMedico(medicoId);
+    public ResponseEntity<List<MedicoEspecialidadResponse>> obtenerEspecialidadDelMedico(@PathVariable Long medicoId) {
+        List<MedicoEspecialidadResponse> especialidades = medicoEspecialidadService.obtenerEspecialidadDelMedico(medicoId);
+        if (especialidades.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(especialidades);
     }
-
+    
     @GetMapping("/especialidad/{especialidadId}")
-    public List<MedicoEspecialidadResponse> obtenerMedicosPorEspecialidad(@PathVariable Long especialidadId) {
-        return medicoEspecialidadService.obtenerMedicosPorEspecialidad(especialidadId);
+    public ResponseEntity<List<MedicoEspecialidadResponse>> obtenerMedicosPorEspecialidad(@PathVariable Long especialidadId) {
+        List<MedicoEspecialidadResponse> medicos = medicoEspecialidadService.obtenerMedicosPorEspecialidad(especialidadId);
+        if (medicos.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(medicos);
     }
+    
 }

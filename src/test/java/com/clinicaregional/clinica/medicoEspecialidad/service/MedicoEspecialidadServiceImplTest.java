@@ -1,183 +1,162 @@
-// package com.clinicaregional.clinica.medicoEspecialidad.service;
+package com.clinicaregional.clinica.medicoEspecialidad.service;
 
-// import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
-// import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
-// import com.clinicaregional.clinica.entity.Especialidad;
-// import com.clinicaregional.clinica.entity.Medico;
-// import com.clinicaregional.clinica.entity.MedicoEspecialidad;
-// import com.clinicaregional.clinica.entity.MedicoEspecialidadId;
-// import com.clinicaregional.clinica.mapper.MedicoEspecialidadMapper;
-// import com.clinicaregional.clinica.repository.MedicoEspecialidadRepository;
-// import com.clinicaregional.clinica.repository.MedicoRepository;
-// import com.clinicaregional.clinica.repository.EspecialidadRepository;
-// import com.clinicaregional.clinica.service.impl.MedicoEspecialidadServiceImpl;
-// import com.clinicaregional.clinica.util.FiltroEstado;
-// import jakarta.persistence.EntityExistsException;
-// import jakarta.persistence.EntityNotFoundException;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.MockitoAnnotations;
+import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
+import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
+import com.clinicaregional.clinica.entity.*;
+import com.clinicaregional.clinica.enums.TipoContrato;
+import com.clinicaregional.clinica.enums.TipoMedico;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
+import com.clinicaregional.clinica.mapper.MedicoEspecialidadMapper;
+import com.clinicaregional.clinica.repository.*;
+import com.clinicaregional.clinica.service.impl.MedicoEspecialidadServiceImpl;
+import com.clinicaregional.clinica.util.FiltroEstado;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-// import java.time.LocalDate;
-// import java.util.List;
-// import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
-// import static org.assertj.core.api.Assertions.assertThat;
-// import static org.junit.jupiter.api.Assertions.assertThrows;
-// import static org.mockito.ArgumentMatchers.any;
-// import static org.mockito.ArgumentMatchers.eq;
-// import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-// class MedicoEspecialidadServiceImplTest {
+class MedicoEspecialidadServiceImplTest {
 
-//     @Mock
-//     private MedicoEspecialidadRepository medicoEspecialidadRepository;
+    @Mock
+    private MedicoEspecialidadRepository medicoEspecialidadRepository;
+    @Mock
+    private MedicoRepository medicoRepository;
+    @Mock
+    private EspecialidadRepository especialidadRepository;
+    @Mock
+    private FiltroEstado filtroEstado;
+    @Mock
+    private MedicoEspecialidadMapper mapper;
 
-//     @Mock
-//     private MedicoRepository medicoRepository;
+    @InjectMocks
+    private MedicoEspecialidadServiceImpl service;
 
-//     @Mock
-//     private EspecialidadRepository especialidadRepository;
+    private MedicoEspecialidadRequest request;
+    private Medico medico;
+    private Especialidad especialidad;
+    private MedicoEspecialidad relacion;
 
-//     @Mock
-//     private FiltroEstado filtroEstado;
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-//     @InjectMocks
-//     private MedicoEspecialidadServiceImpl medicoEspecialidadService;
+        request = new MedicoEspecialidadRequest(1L, 2L, LocalDate.now());
+        medico = Medico.builder().id(1L).nombres("Luis").apellidos("Ramirez").numeroColegiatura("12345678901")
+                .numeroRNE("987654321").tipoMedico(TipoMedico.ESPECIALISTA).estado(true).build();
+        especialidad = Especialidad.builder().id(2L).nombre("Cardiología").estado(true).build();
+        relacion = new MedicoEspecialidad(new MedicoEspecialidadId(1L, 2L), LocalDate.now(), medico, especialidad);
+    }
 
-//     private MedicoEspecialidadRequest request;
-//     private MedicoEspecialidad entity;
-//     private MedicoEspecialidadResponse response;
+    @Test
+    @DisplayName("Registrar relación nueva correctamente")
+    void registrarRelacionME_nuevaDebeRetornarDTO() {
+        when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
+        when(especialidadRepository.findByIdAndEstadoIsTrue(2L)).thenReturn(Optional.of(especialidad));
+        when(medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)).thenReturn(false);
+        when(mapper.toEntity(request, medico, especialidad)).thenReturn(relacion);
+        when(medicoEspecialidadRepository.save(any())).thenReturn(relacion);
+        when(mapper.toResponse(any())).thenReturn(new MedicoEspecialidadResponse(1L, "Luis Ramirez", "12345678901",
+                "987654321", 2L, "Cardiología", LocalDate.now()));
 
-//     private Medico medico;
-//     private Especialidad especialidad;
+        MedicoEspecialidadResponse result = service.registrarRelacionME(request);
+        assertThat(result.getNombreMedico()).isEqualTo("Luis Ramirez");
+    }
 
-//     @BeforeEach
-//     void setUp() {
-//         MockitoAnnotations.openMocks(this);
+    @Test
+    @DisplayName("Registrar relación existente debe lanzar excepción")
+    void registrarRelacionME_existenteDebeLanzarExcepcion() {
+        when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
+        when(especialidadRepository.findByIdAndEstadoIsTrue(2L)).thenReturn(Optional.of(especialidad));
+        when(medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)).thenReturn(true);
 
-//         medico = new Medico();
-//         medico.setId(1L);
+        assertThrows(DuplicateResourceException.class, () -> service.registrarRelacionME(request));
+    }
 
-//         especialidad = new Especialidad();
-//         especialidad.setId(2L);
+    @Test
+    @DisplayName("Actualizar relación existente correctamente")
+    void actualizarRelacionME_existenteDebeActualizarFecha() {
+        when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(any())).thenReturn(Optional.of(relacion));
+        when(medicoEspecialidadRepository.save(any())).thenReturn(relacion);
+        when(mapper.toResponse(any())).thenReturn(new MedicoEspecialidadResponse(1L, "Luis Ramirez", "12345678901",
+                "987654321", 2L, "Cardiología", LocalDate.now()));
 
-//         request = new MedicoEspecialidadRequest(1L, 2L, LocalDate.now());
-//         entity = MedicoEspecialidadMapper.toEntity(request, medico, especialidad);
-//         response = MedicoEspecialidadMapper.toResponse(entity);
-//     }
+        MedicoEspecialidadResponse response = service.actualizarRelacionME(1L, 2L, request);
+        assertThat(response.getMedicoId()).isEqualTo(1L);
+    }
 
-//     @Test
-//     @DisplayName("Registrar nueva relación Médico-Especialidad")
-//     void registrarRelacionME() {
-//         // Arrange
-//         when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
-//         when(especialidadRepository.findByIdAndEstadoIsTrue(2L)).thenReturn(Optional.of(especialidad));
-//         when(medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)).thenReturn(false);
-//         when(medicoEspecialidadRepository.save(any())).thenReturn(entity);
+    @Test
+    @DisplayName("Actualizar relación inexistente debe lanzar excepción")
+    void actualizarRelacionME_inexistenteDebeLanzarExcepcion() {
+        when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(any())).thenReturn(Optional.empty());
 
-//         // Act
-//         MedicoEspecialidadResponse resultado = medicoEspecialidadService.registrarRelacionME(request);
+        assertThrows(ResourceNotFoundException.class, () -> service.actualizarRelacionME(1L, 2L, request));
+    }
 
-//         // Assert
-//         assertThat(resultado).isNotNull();
-//         verify(medicoEspecialidadRepository, times(1)).save(any());
-//     }
+    @Test
+    @DisplayName("Eliminar relación existente debe actualizar estado")
+    void eliminarRelacionME_existenteDebeActualizarEstado() {
+        when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(any())).thenReturn(Optional.of(relacion));
 
-//     @Test
-//     @DisplayName("Registrar relación existente debe lanzar EntityExistsException")
-//     void registrarRelacionME_existente() {
-//         // Arrange
-//         when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
-//         when(especialidadRepository.findByIdAndEstadoIsTrue(2L)).thenReturn(Optional.of(especialidad));
-//         when(medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)).thenReturn(true);
+        service.eliminarRelacionME(1L, 2L);
 
-//         // Act & Assert
-//         assertThrows(EntityExistsException.class, () -> medicoEspecialidadService.registrarRelacionME(request));
-//         verify(medicoEspecialidadRepository, never()).save(any());
-//     }
+        verify(medicoEspecialidadRepository).save(any());
+        assertThat(relacion.getEstado()).isFalse();
+    }
 
-//     @Test
-//     @DisplayName("Actualizar relación Médico-Especialidad existente")
-//     void actualizarRelacionME() {
-//         // Arrange
-//         MedicoEspecialidadId id = new MedicoEspecialidadId(1L, 2L);
-//         when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)).thenReturn(Optional.of(entity));
-//         when(medicoEspecialidadRepository.save(any())).thenReturn(entity);
+    @Test
+    @DisplayName("Eliminar relación inexistente debe lanzar excepción")
+    void eliminarRelacionME_inexistenteDebeLanzarExcepcion() {
+        when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(any())).thenReturn(Optional.empty());
 
-//         // Act
-//         MedicoEspecialidadResponse resultado = medicoEspecialidadService.actualizarRelacionME(1L, 2L, request);
+        assertThrows(ResourceNotFoundException.class, () -> service.eliminarRelacionME(1L, 2L));
+    }
 
-//         // Assert
-//         assertThat(resultado).isNotNull();
-//         verify(medicoEspecialidadRepository, times(1)).save(any());
-//     }
+    @Test
+    @DisplayName("Obtener especialidades de médico con resultados")
+    void obtenerEspecialidadDelMedico_conResultados() {
+        when(medicoEspecialidadRepository.findByMedicoId(1L)).thenReturn(List.of(relacion));
+        when(mapper.toResponse(any())).thenReturn(new MedicoEspecialidadResponse());
 
-//     @Test
-//     @DisplayName("Actualizar relación inexistente debe lanzar RuntimeException")
-//     void actualizarRelacionME_inexistente() {
-//         // Arrange
-//         MedicoEspecialidadId id = new MedicoEspecialidadId(1L, 2L);
-//         when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)).thenReturn(Optional.empty());
+        List<MedicoEspecialidadResponse> result = service.obtenerEspecialidadDelMedico(1L);
+        assertThat(result).hasSize(1);
+    }
 
-//         // Act & Assert
-//         assertThrows(RuntimeException.class, () -> medicoEspecialidadService.actualizarRelacionME(1L, 2L, request));
-//     }
+    @Test
+    @DisplayName("Obtener especialidades de médico sin resultados debe lanzar excepción")
+    void obtenerEspecialidadDelMedico_sinResultadosDebeLanzarExcepcion() {
+        when(medicoEspecialidadRepository.findByMedicoId(1L)).thenReturn(List.of());
 
-//     @Test
-//     @DisplayName("Eliminar relación Médico-Especialidad existente")
-//     void eliminarRelacionME() {
-//         // Arrange
-//         MedicoEspecialidadId id = new MedicoEspecialidadId(1L, 2L);
-//         when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)).thenReturn(Optional.of(entity));
+        assertThrows(ResourceNotFoundException.class, () -> service.obtenerEspecialidadDelMedico(1L));
+    }
 
-//         // Act
-//         medicoEspecialidadService.eliminarRelacionME(1L, 2L);
+    @Test
+    @DisplayName("Obtener médicos por especialidad con resultados")
+    void obtenerMedicosPorEspecialidad_conResultados() {
+        when(medicoEspecialidadRepository.findByEspecialidadId(2L)).thenReturn(List.of(relacion));
+        when(mapper.toResponse(any())).thenReturn(new MedicoEspecialidadResponse());
 
-//         // Assert
-//         assertThat(entity.getEstado()).isFalse();
-//         verify(medicoEspecialidadRepository, times(1)).save(entity);
-//     }
+        List<MedicoEspecialidadResponse> result = service.obtenerMedicosPorEspecialidad(2L);
+        assertThat(result).hasSize(1);
+    }
 
-//     @Test
-//     @DisplayName("Eliminar relación inexistente debe lanzar RuntimeException")
-//     void eliminarRelacionME_inexistente() {
-//         // Arrange
-//         MedicoEspecialidadId id = new MedicoEspecialidadId(1L, 2L);
-//         when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)).thenReturn(Optional.empty());
+    @Test
+    @DisplayName("Obtener médicos por especialidad sin resultados debe lanzar excepción")
+    void obtenerMedicosPorEspecialidad_sinResultadosDebeLanzarExcepcion() {
+        when(medicoEspecialidadRepository.findByEspecialidadId(2L)).thenReturn(List.of());
 
-//         // Act & Assert
-//         assertThrows(RuntimeException.class, () -> medicoEspecialidadService.eliminarRelacionME(1L, 2L));
-//     }
-
-//     @Test
-//     @DisplayName("Obtener especialidades de un médico")
-//     void obtenerEspecialidadDelMedico() {
-//         // Arrange
-//         when(medicoEspecialidadRepository.findByMedicoId(1L)).thenReturn(List.of(entity));
-
-//         // Act
-//         List<MedicoEspecialidadResponse> resultado = medicoEspecialidadService.obtenerEspecialidadDelMedico(1L);
-
-//         // Assert
-//         assertThat(resultado).isNotEmpty();
-//         verify(medicoEspecialidadRepository, times(1)).findByMedicoId(1L);
-//     }
-
-//     @Test
-//     @DisplayName("Obtener médicos de una especialidad")
-//     void obtenerMedicosPorEspecialidad() {
-//         // Arrange
-//         when(medicoEspecialidadRepository.findByEspecialidadId(2L)).thenReturn(List.of(entity));
-
-//         // Act
-//         List<MedicoEspecialidadResponse> resultado = medicoEspecialidadService.obtenerMedicosPorEspecialidad(2L);
-
-//         // Assert
-//         assertThat(resultado).isNotEmpty();
-//         verify(medicoEspecialidadRepository, times(1)).findByEspecialidadId(2L);
-//     }
-// }
+        assertThrows(ResourceNotFoundException.class, () -> service.obtenerMedicosPorEspecialidad(2L));
+    }
+}

@@ -1,215 +1,136 @@
-// package com.clinicaregional.clinica.medicoEspecialidad.repository;
+package com.clinicaregional.clinica.medicoEspecialidad.repository;
 
-// import com.clinicaregional.clinica.entity.*;
-// import com.clinicaregional.clinica.enums.TipoContrato;
-// import com.clinicaregional.clinica.enums.TipoMedico;
-// import com.clinicaregional.clinica.repository.EspecialidadRepository;
-// import com.clinicaregional.clinica.repository.MedicoEspecialidadRepository;
-// import com.clinicaregional.clinica.repository.MedicoRepository;
-// import com.clinicaregional.clinica.repository.UsuarioRepository;
-// import org.hibernate.Filter;
-// import org.hibernate.Session;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-// import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import com.clinicaregional.clinica.entity.*;
+import com.clinicaregional.clinica.enums.TipoContrato;
+import com.clinicaregional.clinica.enums.TipoMedico;
+import com.clinicaregional.clinica.repository.EspecialidadRepository;
+import com.clinicaregional.clinica.repository.MedicoEspecialidadRepository;
+import com.clinicaregional.clinica.repository.MedicoRepository;
+import com.clinicaregional.clinica.repository.RolRepository;
+import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
+import com.clinicaregional.clinica.repository.UsuarioRepository;
 
-// import java.time.LocalDate;
-// import java.time.LocalDateTime;
-// import java.util.List;
-// import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-// import static org.assertj.core.api.Assertions.assertThat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
-// @DataJpaTest
-// class MedicoEspecialidadRepositoryTest {
+import static org.assertj.core.api.Assertions.*;
 
-//     @Autowired
-//     private MedicoEspecialidadRepository medicoEspecialidadRepository;
+@DataJpaTest
+class MedicoEspecialidadRepositoryTest {
 
-//     @Autowired
-//     private MedicoRepository medicoRepository;
+    @Autowired
+    private MedicoEspecialidadRepository medicoEspecialidadRepository;
+    @Autowired
+    private MedicoRepository medicoRepository;
+    @Autowired
+    private EspecialidadRepository especialidadRepository;
+    @Autowired
+    private TipoDocumentoRepository tipoDocumentoRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    @Autowired
+    private RolRepository rolRepository;
 
-//     @Autowired
-//     private EspecialidadRepository especialidadRepository;
+    private Medico medico;
+    private Especialidad especialidad;
 
-//     @Autowired
-//     private UsuarioRepository usuarioRepository;
+    @BeforeEach
+    void setUp() {
+        // Guardar TipoDocumento
+        TipoDocumento tipoDocumento = new TipoDocumento();
+        tipoDocumento.setNombre("DNI");
+        tipoDocumento.setDescripcion("Documento Nacional");
+        tipoDocumento.setEstado(true);
+        tipoDocumento = tipoDocumentoRepository.save(tipoDocumento);
 
-//     @Autowired
-//     private TestEntityManager entityManager;
+        Rol rol = new Rol();
+        rol.setNombre("ROLE_MEDICO");
+        rol.setDescripcion("Rol para médicos");
+        rol.setEstado(true);
+        rol = rolRepository.save(rol);
 
-//     private Rol rol;
+        // Guardar Usuario
+        Usuario usuario = new Usuario();
+        usuario.setCorreo("medico@example.com");
+        usuario.setPassword("securepass");
+        usuario.setRol(rol);
+        usuario.setEstado(true);                                                                        
+        usuario = usuarioRepository.save(usuario);
 
-//     @BeforeEach
-//     void setUp() {
-//         Session session = entityManager.getEntityManager().unwrap(Session.class);
-//         Filter filter = session.enableFilter("estadoActivo");
-//         filter.setParameter("estado", true);
+        // Guardar Especialidad
+        especialidad = new Especialidad();
+        especialidad.setNombre("Cardiología");
+        especialidad.setDescripcion("Especialidad del corazón");
+        especialidad.setImagen("cardio.png");
+        especialidad.setEstado(true);
+        especialidad = especialidadRepository.save(especialidad);
 
-//         rol = Rol.builder()
-//                 .nombre("ROLE_MEDICO")
-//                 .descripcion("Rol para médicos")
-//                 .estado(true)
-//                 .build();
-//         entityManager.persist(rol);
-//     }
+        // Guardar Medico
+        medico = new Medico();
+        medico.setNombres("Luis");
+        medico.setApellidos("Ramirez");
+        medico.setNumeroColegiatura("12345678901");
+        medico.setNumeroRNE("987654321");
+        medico.setNumeroDocumento("76543210");
+        medico.setTelefono("987654321");
+        medico.setDireccion("Calle Falsa 123");
+        medico.setDescripcion("Médico general");
+        medico.setImagen("luis.png");
+        medico.setFechaContratacion(LocalDateTime.now());
+        medico.setTipoContrato(TipoContrato.FIJO);
+        medico.setTipoMedico(TipoMedico.ESPECIALISTA);
+        medico.setTipoDocumento(tipoDocumento);
+        medico.setUsuario(usuario);
+        medico.setEstado(true);
+        medico = medicoRepository.save(medico);
 
-//     @Test
-//     @DisplayName("Guardar relación médico-especialidad activa y buscar por ID")
-//     void guardarRelacionMedicoEspecialidad_conEstadoTrue_debeEncontrarsePorId() {
-//         // Arrange
-//         Medico medico = crearMedico("Juan");
-//         Especialidad especialidad = crearEspecialidad("Cardiología");
+        // Guardar relación
+        MedicoEspecialidad me = new MedicoEspecialidad();
+        me.setId(new MedicoEspecialidadId(medico.getId(), especialidad.getId()));
+        me.setMedico(medico);
+        me.setEspecialidad(especialidad);
+        me.setDesdeFecha(LocalDate.now());
+        me.setEstado(true);
 
-//         MedicoEspecialidad relacion = MedicoEspecialidad.builder()
-//                 .id(new MedicoEspecialidadId(medico.getId(), especialidad.getId()))
-//                 .medico(medico)
-//                 .especialidad(especialidad)
-//                 .desdeFecha(LocalDate.now())
-//                 .estado(true)
-//                 .build();
+        medicoEspecialidadRepository.save(me);
+    }
 
-//         entityManager.persistAndFlush(relacion);
+    @Test
+    @DisplayName("Buscar relación por ID y estado debe retornar relación")
+    void findByIdAndEstadoIsTrue_debeRetornarRelacion() {
+        MedicoEspecialidadId id = new MedicoEspecialidadId(medico.getId(), especialidad.getId());
+        Optional<MedicoEspecialidad> resultado = medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id);
 
-//         // Act
-//         Optional<MedicoEspecialidad> resultado = medicoEspecialidadRepository.findByIdAndEstadoIsTrue(relacion.getId());
+        assertThat(resultado).isPresent();
+        assertThat(resultado.get().getMedico().getNombres()).isEqualTo("Luis");
+    }
 
-//         // Assert
-//         assertThat(resultado).isPresent();
-//         assertThat(resultado.get().getMedico().getNombres()).isEqualTo("Juan");
-//         assertThat(resultado.get().getEspecialidad().getNombre()).isEqualTo("Cardiología");
-//     }
+    @Test
+    @DisplayName("Buscar relaciones por ID de médico")
+    void findByMedicoId_debeRetornarLista() {
+        List<MedicoEspecialidad> resultado = medicoEspecialidadRepository.findByMedicoId(medico.getId());
+        assertThat(resultado).hasSize(1);
+    }
 
-//     @Test
-//     @DisplayName("Verificar existencia de relación médico-especialidad activa")
-//     void existsByMedicoAndEspecialidad_debeRetornarTrueSiExiste() {
-//         // Arrange
-//         Medico medico = crearMedico("Pedro");
-//         Especialidad especialidad = crearEspecialidad("Dermatología");
+    @Test
+    @DisplayName("Buscar relaciones por ID de especialidad")
+    void findByEspecialidadId_debeRetornarLista() {
+        List<MedicoEspecialidad> resultado = medicoEspecialidadRepository.findByEspecialidadId(especialidad.getId());
+        assertThat(resultado).hasSize(1);
+    }
 
-//         MedicoEspecialidad relacion = MedicoEspecialidad.builder()
-//                 .id(new MedicoEspecialidadId(medico.getId(), especialidad.getId()))
-//                 .medico(medico)
-//                 .especialidad(especialidad)
-//                 .desdeFecha(LocalDate.now())
-//                 .estado(true)
-//                 .build();
-
-//         entityManager.persistAndFlush(relacion);
-
-//         // Act
-//         boolean existe = medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad);
-
-//         // Assert
-//         assertThat(existe).isTrue();
-//     }
-
-//     @Test
-//     @DisplayName("Buscar todas las especialidades de un médico")
-//     void findByMedicoId_debeRetornarListaDeEspecialidades() {
-//         // Arrange
-//         Medico medico = crearMedico("Luis");
-//         Especialidad especialidad1 = crearEspecialidad("Neurología");
-//         Especialidad especialidad2 = crearEspecialidad("Pediatría");
-
-//         entityManager.persistAndFlush(
-//                 MedicoEspecialidad.builder()
-//                         .id(new MedicoEspecialidadId(medico.getId(), especialidad1.getId()))
-//                         .medico(medico)
-//                         .especialidad(especialidad1)
-//                         .desdeFecha(LocalDate.now())
-//                         .estado(true)
-//                         .build());
-
-//         entityManager.persistAndFlush(
-//                 MedicoEspecialidad.builder()
-//                         .id(new MedicoEspecialidadId(medico.getId(), especialidad2.getId()))
-//                         .medico(medico)
-//                         .especialidad(especialidad2)
-//                         .desdeFecha(LocalDate.now())
-//                         .estado(true)
-//                         .build());
-
-//         // Act
-//         List<MedicoEspecialidad> relaciones = medicoEspecialidadRepository.findByMedicoId(medico.getId());
-
-//         // Assert
-//         assertThat(relaciones).hasSize(2);
-//     }
-
-//     @Test
-//     @DisplayName("Buscar todos los médicos de una especialidad")
-//     void findByEspecialidadId_debeRetornarListaDeMedicos() {
-//         // Arrange
-//         Especialidad especialidad = crearEspecialidad("Ginecología");
-//         Medico medico1 = crearMedico("Ana");
-//         Medico medico2 = crearMedico("Carlos");
-
-//         entityManager.persistAndFlush(
-//                 MedicoEspecialidad.builder()
-//                         .id(new MedicoEspecialidadId(medico1.getId(), especialidad.getId()))
-//                         .medico(medico1)
-//                         .especialidad(especialidad)
-//                         .desdeFecha(LocalDate.now())
-//                         .estado(true)
-//                         .build());
-
-//         entityManager.persistAndFlush(
-//                 MedicoEspecialidad.builder()
-//                         .id(new MedicoEspecialidadId(medico2.getId(), especialidad.getId()))
-//                         .medico(medico2)
-//                         .especialidad(especialidad)
-//                         .desdeFecha(LocalDate.now())
-//                         .estado(true)
-//                         .build());
-
-//         // Act
-//         List<MedicoEspecialidad> relaciones = medicoEspecialidadRepository.findByEspecialidadId(especialidad.getId());
-
-//         // Assert
-//         assertThat(relaciones).hasSize(2);
-//     }
-
-//     // Métodos auxiliares
-//     private Medico crearMedico(String nombre) {
-//         Usuario nuevoUsuario = Usuario.builder()
-//                 .correo(nombre.toLowerCase() + "@gmail.com")
-//                 .password("passwordSeguro123")
-//                 .rol(rol)
-//                 .estado(true)
-//                 .build();
-//         entityManager.persist(nuevoUsuario);
-
-//         Medico medico = Medico.builder()
-//                 .nombres(nombre)
-//                 .apellidos("Pérez")
-//                 .numeroColegiatura("12345678901")
-//                 .numeroRNE("123456789")
-//                 .telefono("987654321")
-//                 .direccion("Av. Salud 123")
-//                 .descripcion("Especialista en " + nombre)
-//                 .imagen("foto.jpg")
-//                 .fechaContratacion(LocalDateTime.now())
-//                 .tipoContrato(TipoContrato.FIJO)
-//                 .tipoMedico(TipoMedico.ESPECIALISTA)
-//                 .usuario(nuevoUsuario)
-//                 .estado(true)
-//                 .build();
-//         entityManager.persist(medico);
-//         return medico;
-//     }
-
-//     private Especialidad crearEspecialidad(String nombre) {
-//         Especialidad especialidad = Especialidad.builder()
-//                 .nombre(nombre)
-//                 .descripcion("Especialidad de " + nombre)
-//                 .imagen("imagen_" + nombre.toLowerCase() + ".jpg")
-//                 .estado(true)
-//                 .build();
-//         entityManager.persist(especialidad);
-//         return especialidad;
-//     }
-// }
+    @Test
+    @DisplayName("Validar existencia por médico y especialidad")
+    void existsByMedicoAndEspecialidad_debeRetornarTrue() {
+        boolean existe = medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad);
+        assertThat(existe).isTrue();
+    }
+}

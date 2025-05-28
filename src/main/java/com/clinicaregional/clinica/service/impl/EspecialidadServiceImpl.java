@@ -3,11 +3,12 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.request.EspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 import com.clinicaregional.clinica.entity.Especialidad;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.EspecialidadMapper;
 import com.clinicaregional.clinica.repository.EspecialidadRepository;
 import com.clinicaregional.clinica.service.EspecialidadService;
 import com.clinicaregional.clinica.util.FiltroEstado;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     private final EspecialidadRepository especialidadRepository;
     private final EspecialidadMapper especialidadMapper;
     private final FiltroEstado filtroEstado;
+    
 
     @Transactional(readOnly = true)
     @Override
@@ -30,7 +32,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
         filtroEstado.activarFiltroEstado(true);
         return especialidadRepository.findAll()
                 .stream()
-                .map(EspecialidadMapper::toResponse)
+                .map(especialidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -38,8 +40,9 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     @Override
     public Optional<EspecialidadResponse> getEspecialidadById(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        return especialidadRepository.findByIdAndEstadoIsTrue(id)
-                .map(EspecialidadMapper::toResponse);
+        Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe una especialidad con el id " + id));
+        return Optional.of(especialidadMapper.toResponse(especialidad));
     }
 
     @Transactional
@@ -47,11 +50,11 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     public EspecialidadResponse guardarEspecialidad(EspecialidadRequest especialidadRequest) {
         filtroEstado.activarFiltroEstado(true);
         if (especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
-            throw new RuntimeException("Ya existe una especialidad con el nombre ingresado");
+            throw new DuplicateResourceException("Ya existe una especialidad con el nombre ingresado");
         }
-        Especialidad especialidad = EspecialidadMapper.toEntity(especialidadRequest);
+        Especialidad especialidad = especialidadMapper.toEntity(especialidadRequest);
         Especialidad savedEspecialidad = especialidadRepository.save(especialidad);
-        return EspecialidadMapper.toResponse(savedEspecialidad);
+        return especialidadMapper.toResponse(savedEspecialidad);
     }
 
     @Transactional
@@ -59,16 +62,17 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     public EspecialidadResponse actualizarEspecialidad(Long id, EspecialidadRequest especialidadRequest) {
         filtroEstado.activarFiltroEstado(true);
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Especialidad no encontrada con ID: " + id));
-        if (especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
-            throw new RuntimeException("Ya existe una especialidad con el nombre ingresado");
+                .orElseThrow(() -> new ResourceNotFoundException("Especialidad no encontrada con ID: " + id));
+        if (!especialidad.getNombre().equalsIgnoreCase(especialidadRequest.getNombre()) &&
+                especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
+            throw new DuplicateResourceException("Ya existe una especialidad con el nombre ingresado");
         }
         especialidad.setNombre(especialidadRequest.getNombre());
         especialidad.setDescripcion(especialidadRequest.getDescripcion());
         especialidad.setImagen(especialidadRequest.getImagen());
 
         Especialidad updatedEspecialidad = especialidadRepository.save(especialidad);
-        return EspecialidadMapper.toResponse(updatedEspecialidad);
+        return especialidadMapper.toResponse(updatedEspecialidad);
     }
 
     @Transactional
@@ -76,7 +80,7 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     public void eliminarEspecialidad(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Especialidad no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Especialidad no encontrada"));
         especialidad.setEstado(false); // borrado lógico
         especialidadRepository.save(especialidad);
     }

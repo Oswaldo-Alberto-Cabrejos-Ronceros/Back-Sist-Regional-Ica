@@ -40,6 +40,12 @@
 	<dependencies>
 
 		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.6</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
@@ -71,11 +77,11 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Dependecia para Swagger UI -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.3.0</version>
-		</dependency>
+		</dependency> -->
 
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>

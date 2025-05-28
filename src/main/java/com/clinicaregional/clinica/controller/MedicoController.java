@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
 import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
+import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
 import com.clinicaregional.clinica.service.MedicoService;
 
 import jakarta.validation.Valid;
@@ -27,6 +28,17 @@ public class MedicoController {
         return ResponseEntity.ok(medicoService.obtenerMedicos());
     }
 
+    //para obtener datos publicos de los medicos
+    @GetMapping("/public")
+    public ResponseEntity<List<MedicoResponsePublicDTO>> obtenerTodosPublico(){
+        return ResponseEntity.ok(medicoService.obtenerMedicosPublic());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MedicoResponseDTO> obtenerMedicoPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(medicoService.obtenerMedicoPorId(id));
+    }
+
     @PostMapping
     public ResponseEntity<MedicoResponseDTO> crear(@RequestBody @Valid MedicoRequestDTO dto) {
         MedicoResponseDTO creado = medicoService.guardarMedico(dto);
@@ -36,17 +48,10 @@ public class MedicoController {
     @PutMapping("/{id}")
     public ResponseEntity<MedicoResponseDTO> actualizar(@PathVariable Long id,
             @RequestBody @Valid MedicoRequestDTO dto) {
-        try {
-            MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto);
-            return ResponseEntity.ok(actualizado);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("no encontrado")) {
-                return ResponseEntity.notFound().build();
-            }
-            throw e;
-        }
+        MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto);
+        return ResponseEntity.ok(actualizado);
     }
-
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         medicoService.eliminarMedico(id);

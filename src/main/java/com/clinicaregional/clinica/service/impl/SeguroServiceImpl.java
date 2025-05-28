@@ -3,6 +3,9 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.entity.Seguro;
 import com.clinicaregional.clinica.enums.EstadoSeguro;
+import com.clinicaregional.clinica.exception.BadRequestException;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.SeguroMapper;
 import com.clinicaregional.clinica.repository.SeguroRepository;
 import com.clinicaregional.clinica.service.SeguroService;
@@ -51,12 +54,13 @@ public class SeguroServiceImpl implements SeguroService {
     @Transactional
     @Override
     public SeguroDTO createSeguro(SeguroDTO seguroDTO) {
-        filtroEstado.activarFiltroEstado(true);;
-        if (seguroRepository.existsByNombre(seguroDTO.getNombre())) {
-            throw new RuntimeException("El nombre ya existe");
-        }
-        Seguro seguro = seguroMapper.mapToSeguro(seguroDTO);
+        filtroEstado.activarFiltroEstado(true);
 
+        if (seguroRepository.existsByNombre(seguroDTO.getNombre())) {
+            throw new DuplicateResourceException("El nombre ya existe");
+        }
+
+        Seguro seguro = seguroMapper.mapToSeguro(seguroDTO);
         Seguro savedSeguro = seguroRepository.save(seguro);
         return seguroMapper.mapToSeguroDTO(savedSeguro);
     }
@@ -65,14 +69,22 @@ public class SeguroServiceImpl implements SeguroService {
     @Override
     public SeguroDTO updateSeguro(Long id, SeguroDTO seguroDTO) {
         filtroEstado.activarFiltroEstado(true);
-        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No se encontro el seguro con el id: " + id));
-        if (seguroRepository.existsByNombre(seguroDTO.getNombre())) {
-            throw new RuntimeException("El nombre ya existe");
+
+        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró el seguro con el id: " + id));
+
+        boolean nombreDuplicado = seguroRepository.existsByNombreAndEstadoIsTrue(seguroDTO.getNombre()) &&
+                !findSeguro.getNombre().equalsIgnoreCase(seguroDTO.getNombre());
+
+        if (nombreDuplicado) {
+            throw new DuplicateResourceException("Ya existe un seguro con el nombre ingresado");
         }
+
         findSeguro.setNombre(seguroDTO.getNombre());
         findSeguro.setDescripcion(seguroDTO.getDescripcion());
         findSeguro.setImagenUrl(seguroDTO.getImagenUrl());
         findSeguro.setEstadoSeguro(seguroDTO.getEstadoSeguro());
+
         Seguro updatedSeguro = seguroRepository.save(findSeguro);
         return seguroMapper.mapToSeguroDTO(updatedSeguro);
     }
@@ -81,9 +93,9 @@ public class SeguroServiceImpl implements SeguroService {
     @Override
     public SeguroDTO updateEstadoSeguro(Long id, EstadoSeguro estadoSeguro) {
         filtroEstado.activarFiltroEstado(true);
-        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No se encontro el seguro con el id: " + id));
+        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro el seguro con el id: " + id));
         if (estadoSeguro.equals(findSeguro.getEstadoSeguro())) {
-            throw new RuntimeException("El estado seguro es el mismo");
+            throw new BadRequestException("El estado seguro es el mismo");
         }
         findSeguro.setEstadoSeguro(estadoSeguro);
         Seguro updatedSeguro = seguroRepository.save(findSeguro);
@@ -94,7 +106,7 @@ public class SeguroServiceImpl implements SeguroService {
     @Override
     public void deleteSeguro(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("No se encontro el seguro con el id: " + id));
+        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro el seguro con el id: " + id));
         findSeguro.setEstado(false);
         seguroRepository.save(findSeguro);
     }

@@ -32,12 +32,13 @@ public class AuthenticationController {
     }
 
     //funcion para agregar cookie a la respuesta
-    private void addCokkie(HttpServletResponse response,String name, String value){
+    private void addCokkie(HttpServletResponse response,String name, String value,int duration){
         Cookie cookie = new Cookie(name,value);
         cookie.setHttpOnly(true);
-        cookie.setAttribute("SameSite", "Lax");
-        cookie.setSecure(false); //en produccion ira en true al trabajar en https
+        cookie.setAttribute("SameSite", "None");
+        cookie.setSecure(true); //en produccion ira en true al trabajar en https
         cookie.setPath("/");
+        cookie.setMaxAge(duration);
         response.addCookie(cookie);
     }
 
@@ -45,8 +46,8 @@ public class AuthenticationController {
     private void deleteCokkie(HttpServletResponse response,String name){
         Cookie cookie = new Cookie(name,"");
         cookie.setHttpOnly(true);
-        cookie.setAttribute("SameSite", "Lax");
-        cookie.setSecure(false); //en produccion ira en true al trabajar en https
+        cookie.setAttribute("SameSite", "None");
+        cookie.setSecure(true); //en produccion ira en true al trabajar en https
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
@@ -56,8 +57,8 @@ public class AuthenticationController {
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         try {
             AuthenticationResponseDTO authenticationResponseDTO = authenticationService.authenticateUser(loginRequestDTO);
-            addCokkie(response, "jwtToken", authenticationResponseDTO.getJwtToken());
-            addCokkie(response, "refreshToken", authenticationResponseDTO.getRefreshToken());
+            addCokkie(response, "jwtToken", authenticationResponseDTO.getJwtToken(),3600);
+            addCokkie(response, "refreshToken", authenticationResponseDTO.getRefreshToken(),432000);
             AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
             return ResponseEntity.ok(responseToSend);
         } catch (RuntimeException e) {
@@ -80,7 +81,7 @@ public class AuthenticationController {
 
         try {
             String newAccessToken = authenticationService.refreshToken(refreshToken.get().getValue());
-            addCokkie(response, "jwtToken", newAccessToken);
+            addCokkie(response, "jwtToken", newAccessToken,3600);
             return ResponseEntity.ok(Map.of("Message", "Token refrescado correctamente"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
@@ -91,8 +92,8 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponseDTO> registerPaciente(@RequestBody @Valid RegisterRequest registerRequest, HttpServletResponse response) {
         AuthenticationResponseDTO authenticationResponseDTO = authenticationService.registerPaciente(registerRequest);
         //configuramos cookies httponly
-        addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken());
-        addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken());
+        addCokkie(response,"jwtToken",authenticationResponseDTO.getJwtToken(),3600);
+        addCokkie(response,"refreshToken",authenticationResponseDTO.getRefreshToken(),432000);
         AuthenticationResponseDTO responseToSend = new AuthenticationResponseDTO(authenticationResponseDTO.getUsuarioId(), authenticationResponseDTO.getRole());
         return ResponseEntity.status(HttpStatus.CREATED).body(responseToSend);
     }

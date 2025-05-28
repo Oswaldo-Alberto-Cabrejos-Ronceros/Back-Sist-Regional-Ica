@@ -9,7 +9,7 @@ import com.clinicaregional.clinica.entity.Especialidad;
 @Component
 public class EspecialidadMapper {
     
-    public static Especialidad toEntity(EspecialidadRequest request) {
+    public Especialidad toEntity(EspecialidadRequest request) {
         Especialidad especialidad = new Especialidad();
         especialidad.setNombre(request.getNombre());
         especialidad.setDescripcion(request.getDescripcion());
@@ -17,7 +17,7 @@ public class EspecialidadMapper {
         return especialidad;
     }
 
-    public static EspecialidadResponse toResponse(Especialidad especialidad) {
+    public EspecialidadResponse toResponse(Especialidad especialidad) {
         EspecialidadResponse response = new EspecialidadResponse();
         response.setId(especialidad.getId());
         response.setNombre(especialidad.getNombre());

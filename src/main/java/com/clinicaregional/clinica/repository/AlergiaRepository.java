@@ -11,4 +11,5 @@ public interface AlergiaRepository extends JpaRepository<Alergia, Long> {
     boolean existsByNombreAndEstadoIsTrue(String nombre);
     Optional<Alergia> findByIdAndEstadoIsTrue(Long id);
     List<Alergia> findByTipoAlergia(TipoAlergia tipoAlergia);
+    boolean existsByNombreAndEstadoIsTrueAndIdNot(String nombre, Long id);
 }

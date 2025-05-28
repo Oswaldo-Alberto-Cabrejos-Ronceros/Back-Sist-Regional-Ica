@@ -9,6 +9,11 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {
     Optional<Medico> findByIdAndEstadoIsTrue(Long id);
     boolean existsByNumeroColegiatura(String numeroColegiatura);
     boolean existsByNumeroRNE(String numeroRNE);
+    boolean existsByNumeroDocumento(String numeroDocumento);
     boolean existsByUsuario(Usuario usuario);
     Optional<Medico> findByUsuario_Id(Long id);
+    Optional<Medico> findByUsuarioCorreo(String correo);
+    boolean existsByNumeroColegiaturaAndIdNot(String numeroColegiatura, Long id);
+    boolean existsByNumeroRNEAndIdNot(String numeroRNE, Long id);
+    boolean existsByUsuarioAndIdNot(Usuario usuario, Long id);
 }

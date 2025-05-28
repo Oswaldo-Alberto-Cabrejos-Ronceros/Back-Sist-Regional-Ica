@@ -9,4 +9,5 @@ public interface SeguroRepository extends JpaRepository<Seguro, Long> {
     Optional<Seguro> findByIdAndEstadoIsTrue(Long id);
     boolean existsByNombre(String nombre);
     Optional<Seguro> findByNombre(String nombre);
+    boolean existsByNombreAndEstadoIsTrue(String nombre);
 }

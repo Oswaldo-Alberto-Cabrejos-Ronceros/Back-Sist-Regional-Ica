@@ -21,6 +21,8 @@ public class MedicoResponseDTO {
     private String apellidos;
     private String numeroColegiatura;
     private String numeroRNE;
+    private Long tipoDocumentoId;
+    private String numeroDocumento;
     private String telefono;
     private String direccion;
     private String descripcion;

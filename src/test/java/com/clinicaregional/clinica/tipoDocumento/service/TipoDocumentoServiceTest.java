@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.tipoDocumento.service;
 
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.entity.TipoDocumento;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.mapper.TipoDocumentoMapper;
 import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
 import com.clinicaregional.clinica.service.impl.TipoDocumentoServiceImpl;
@@ -123,7 +124,7 @@ class TipoDocumentoServiceTest {
 
         // Act & Assert
         assertThatThrownBy(() -> tipoDocumentoService.createTipoDocumento(tipoDocumentoDTO))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DuplicateResourceException.class)
                 .hasMessageContaining("El tipo de documento ya existe en el sistema");
     }
 

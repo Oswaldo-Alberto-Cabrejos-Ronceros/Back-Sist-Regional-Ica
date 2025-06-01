@@ -3,10 +3,11 @@ package com.clinicaregional.clinica.especialidades.service;
 import com.clinicaregional.clinica.dto.request.EspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 import com.clinicaregional.clinica.entity.Especialidad;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
+import com.clinicaregional.clinica.mapper.EspecialidadMapper;
 import com.clinicaregional.clinica.repository.EspecialidadRepository;
 import com.clinicaregional.clinica.service.impl.EspecialidadServiceImpl;
 import com.clinicaregional.clinica.util.FiltroEstado;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -31,13 +31,14 @@ class EspecialidadServiceTest {
     @Mock
     private FiltroEstado filtroEstado;
 
+    @Mock
+    private EspecialidadMapper especialidadMapper;
+
     @InjectMocks
     private EspecialidadServiceImpl especialidadService;
 
     private Especialidad especialidad;
     private EspecialidadRequest especialidadRequest;
-
-    @Mock
     private EspecialidadResponse especialidadResponse;
 
     @BeforeEach
@@ -51,59 +52,52 @@ class EspecialidadServiceTest {
                 .build();
 
         especialidadRequest = new EspecialidadRequest(
-                "Cardiología", "Corazón y sistema circulatorio", "cardiologia.png"
-        );
+                "Cardiología", "Corazón y sistema circulatorio", "cardiologia.png");
 
         especialidadResponse = new EspecialidadResponse(
-                1L, "Cardiología", "Corazón y sistema circulatorio", "cardiologia.png"
-        );
+                1L, "Cardiología", "Corazón y sistema circulatorio", "cardiologia.png");
 
         doNothing().when(filtroEstado).activarFiltroEstado(true);
     }
 
     @Test
     void listarEspecialidades_exitoso() {
-        // Arrange
         when(especialidadRepository.findAll()).thenReturn(List.of(especialidad));
+        when(especialidadMapper.toResponse(any())).thenReturn(especialidadResponse);
 
-        // Act
         List<EspecialidadResponse> especialidades = especialidadService.listarEspecialidades();
 
-        // Assert
         assertThat(especialidades).hasSize(1);
         assertThat(especialidades.get(0).getNombre()).isEqualTo("Cardiología");
     }
 
     @Test
     void getEspecialidadById_existente() {
-        // Arrange
         when(especialidadRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(especialidad));
+        when(especialidadMapper.toResponse(any())).thenReturn(especialidadResponse);
 
-        // Act
         Optional<EspecialidadResponse> result = especialidadService.getEspecialidadById(1L);
 
-        // Assert
         assertThat(result).isPresent();
         assertThat(result.get().getNombre()).isEqualTo("Cardiología");
     }
 
     @Test
     void getEspecialidadById_noExistente() {
-        // Arrange
         when(especialidadRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
-        // Act
-        Optional<EspecialidadResponse> result = especialidadService.getEspecialidadById(99L);
-
-        // Assert
-        assertThat(result).isEmpty();
+        assertThatThrownBy(() -> especialidadService.getEspecialidadById(99L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("No existe una especialidad con el id");
     }
 
     @Test
     void guardarEspecialidad_exitoso() {
         // Arrange
         when(especialidadRepository.existsByNombre(any())).thenReturn(false);
-        when(especialidadRepository.save(any(Especialidad.class))).thenReturn(especialidad);
+        when(especialidadMapper.toEntity(any(EspecialidadRequest.class))).thenReturn(especialidad);
+        when(especialidadRepository.save(especialidad)).thenReturn(especialidad);
+        when(especialidadMapper.toResponse(especialidad)).thenReturn(especialidadResponse);
 
         // Act
         EspecialidadResponse response = especialidadService.guardarEspecialidad(especialidadRequest);
@@ -115,10 +109,8 @@ class EspecialidadServiceTest {
 
     @Test
     void guardarEspecialidad_nombreExistente_deberiaLanzarExcepcion() {
-        // Arrange
         when(especialidadRepository.existsByNombre(any())).thenReturn(true);
 
-        // Act & Assert
         assertThatThrownBy(() -> especialidadService.guardarEspecialidad(especialidadRequest))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Ya existe una especialidad con el nombre ingresado");
@@ -126,32 +118,26 @@ class EspecialidadServiceTest {
 
     @Test
     void actualizarEspecialidad_exitoso() {
-        // Arrange
         when(especialidadRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(especialidad));
-        when(especialidadRepository.existsByNombre(any())).thenReturn(false);
         when(especialidadRepository.save(any(Especialidad.class))).thenReturn(especialidad);
+        when(especialidadMapper.toResponse(any())).thenReturn(especialidadResponse);
 
-        // Act
         EspecialidadResponse response = especialidadService.actualizarEspecialidad(1L, especialidadRequest);
 
-        // Assert
         assertThat(response.getNombre()).isEqualTo("Cardiología");
     }
 
     @Test
     void actualizarEspecialidad_noExistente_deberiaLanzarExcepcion() {
-        // Arrange
         when(especialidadRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThatThrownBy(() -> especialidadService.actualizarEspecialidad(99L, especialidadRequest))
-                .isInstanceOf(EntityNotFoundException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Especialidad no encontrada");
     }
 
     @Test
     void eliminarEspecialidad_exitoso() {
-        // Arrange
         Especialidad especialidadExistente = Especialidad.builder()
                 .id(1L)
                 .nombre("Cardiología")
@@ -162,10 +148,8 @@ class EspecialidadServiceTest {
 
         when(especialidadRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(especialidadExistente));
 
-        // Act
         especialidadService.eliminarEspecialidad(1L);
 
-        // Assert
         assertThat(especialidadExistente.getEstado()).isFalse();
         verify(especialidadRepository, times(1)).save(especialidadExistente);
     }

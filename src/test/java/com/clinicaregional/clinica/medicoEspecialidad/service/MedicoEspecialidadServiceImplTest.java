@@ -3,7 +3,6 @@ package com.clinicaregional.clinica.medicoEspecialidad.service;
 import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
 import com.clinicaregional.clinica.entity.*;
-import com.clinicaregional.clinica.enums.TipoContrato;
 import com.clinicaregional.clinica.enums.TipoMedico;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
@@ -19,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

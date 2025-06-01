@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.especialidades.controller;
 import com.clinicaregional.clinica.controller.EspecialidadController;
 import com.clinicaregional.clinica.dto.request.EspecialidadRequest;
 import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.security.JwtAuthFilter;
 import com.clinicaregional.clinica.security.JwtUtil;
 import com.clinicaregional.clinica.service.EspecialidadService;
@@ -143,7 +144,7 @@ class EspecialidadControllerTest {
         void actualizarEspecialidad_noExistente() throws Exception {
                 // Arrange
                 when(especialidadService.actualizarEspecialidad(eq(99L), any(EspecialidadRequest.class)))
-                                .thenThrow(new RuntimeException("Especialidad no encontrada"));
+                                .thenThrow(new ResourceNotFoundException("Especialidad no encontrada"));
 
                 // Act & Assert
                 mockMvc.perform(put("/api/especialidades/99")

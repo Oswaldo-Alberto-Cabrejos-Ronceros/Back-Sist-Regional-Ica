@@ -3,11 +3,11 @@ package com.clinicaregional.clinica.servicios.service;
 import com.clinicaregional.clinica.dto.request.ServicioRequest;
 import com.clinicaregional.clinica.dto.response.ServicioResponse;
 import com.clinicaregional.clinica.entity.Servicio;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.ServicioMapper;
 import com.clinicaregional.clinica.repository.ServicioRepository;
 import com.clinicaregional.clinica.service.impl.ServicioServiceImpl;
 import com.clinicaregional.clinica.util.FiltroEstado;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,8 @@ class ServicioServiceImplTest {
                 .descripcion("Atiende problemas del corazón")
                 .imagenUrl("cardio.jpg")
                 .build();
-        ServicioResponse response = new ServicioResponse(1L, "Cardiología", "Atiende problemas del corazón", "cardio.jpg");
+        ServicioResponse response = new ServicioResponse(1L, "Cardiología", "Atiende problemas del corazón",
+                "cardio.jpg");
 
         when(servicioRepository.existsByNombre("Cardiología")).thenReturn(false);
         when(servicioMapper.mapToServicio(request)).thenReturn(servicio);
@@ -89,8 +90,10 @@ class ServicioServiceImplTest {
     @DisplayName("Actualizar servicio correctamente")
     void actualizarServicio_existente_debeRetornarActualizado() {
         ServicioRequest request = new ServicioRequest("Pediatría", "Niños", "pediatria.jpg");
-        Servicio existente = Servicio.builder().id(1L).nombre("Antiguo").descripcion("Antigua desc").estado(true).build();
-        Servicio actualizado = Servicio.builder().id(1L).nombre("Pediatría").descripcion("Niños").imagenUrl("pediatria.jpg").estado(true).build();
+        Servicio existente = Servicio.builder().id(1L).nombre("Antiguo").descripcion("Antigua desc").estado(true)
+                .build();
+        Servicio actualizado = Servicio.builder().id(1L).nombre("Pediatría").descripcion("Niños")
+                .imagenUrl("pediatria.jpg").estado(true).build();
         ServicioResponse response = new ServicioResponse(1L, "Pediatría", "Niños", "pediatria.jpg");
 
         when(servicioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(existente));
@@ -109,7 +112,7 @@ class ServicioServiceImplTest {
         ServicioRequest request = new ServicioRequest("Nuevo", "desc", "img.jpg");
         when(servicioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> servicioService.actualizarServicio(99L, request));
+        assertThrows(ResourceNotFoundException.class, () -> servicioService.actualizarServicio(99L, request));
     }
 
     @Test
@@ -144,6 +147,7 @@ class ServicioServiceImplTest {
     void eliminarServicio_inexistente_debeLanzarExcepcion() {
         when(servicioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> servicioService.eliminarServicio(99L));
+        assertThrows(ResourceNotFoundException.class, () -> servicioService.eliminarServicio(99L));
     }
+
 }

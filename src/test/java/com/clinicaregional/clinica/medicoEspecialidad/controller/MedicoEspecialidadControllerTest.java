@@ -29,88 +29,90 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = MedicoEspecialidadController.class, excludeAutoConfiguration = {
-        SecurityAutoConfiguration.class,
-        SecurityFilterAutoConfiguration.class
+                SecurityAutoConfiguration.class,
+                SecurityFilterAutoConfiguration.class
 }, excludeFilters = {
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { JwtAuthFilter.class, JwtUtil.class })
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = { JwtAuthFilter.class,
+                                JwtUtil.class })
 })
 class MedicoEspecialidadControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @MockitoBean
-    private MedicoEspecialidadService medicoEspecialidadService;
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private MockMvc mockMvc;
+        @MockitoBean
+        private MedicoEspecialidadService medicoEspecialidadService;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    private MedicoEspecialidadRequest request;
-    private MedicoEspecialidadResponse response;
+        private MedicoEspecialidadRequest request;
+        private MedicoEspecialidadResponse response;
 
-    @BeforeEach
-    void setUp() {
-        request = new MedicoEspecialidadRequest(1L, 2L, LocalDate.now());
-        response = new MedicoEspecialidadResponse(1L, "Luis Ramirez", "12345678901", "987654321", 2L, "Cardiologia",
-                LocalDate.now());
-    }
+        @BeforeEach
+        void setUp() {
+                request = new MedicoEspecialidadRequest(1L, 2L, LocalDate.now());
+                response = new MedicoEspecialidadResponse(1L, "Luis Ramirez", "12345678901", "987654321", 2L,
+                                "Cardiologia",
+                                LocalDate.now());
+        }
 
-    @Test
-    @DisplayName("Registrar relación médico-especialidad debe retornar 201")
-    void registrarRelacionME() throws Exception {
-        when(medicoEspecialidadService.registrarRelacionME(any())).thenReturn(response);
+        @Test
+        @DisplayName("Registrar relación médico-especialidad debe retornar 201")
+        void registrarRelacionME() throws Exception {
+                when(medicoEspecialidadService.registrarRelacionME(any())).thenReturn(response);
 
-        mockMvc.perform(post("/api/medico-especialidad")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.medicoId").value(1));
-    }
+                mockMvc.perform(post("/api/medico-especialidad")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.medicoId").value(1));
+        }
 
-    @Test
-    @DisplayName("Obtener todas las relaciones debe retornar 200")
-    void obtenerTodasRelaciones() throws Exception {
-        when(medicoEspecialidadService.obtenerTodasRelacionesME()).thenReturn(List.of(response));
+        @Test
+        @DisplayName("Obtener todas las relaciones debe retornar 200")
+        void obtenerTodasRelaciones() throws Exception {
+                when(medicoEspecialidadService.obtenerTodasRelacionesME()).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/api/medico-especialidad"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].medicoId").value(1));
-    }
+                mockMvc.perform(get("/api/medico-especialidad"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].medicoId").value(1));
+        }
 
-    @Test
-    @DisplayName("Actualizar relación debe retornar 200")
-    void actualizarRelacionME() throws Exception {
-        when(medicoEspecialidadService.actualizarRelacionME(any(), any(), any())).thenReturn(response);
+        @Test
+        @DisplayName("Actualizar relación debe retornar 200")
+        void actualizarRelacionME() throws Exception {
+                when(medicoEspecialidadService.actualizarRelacionME(any(), any(), any())).thenReturn(response);
 
-        mockMvc.perform(put("/api/medico-especialidad/1/2")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.especialidadId").value(2));
-    }
+                mockMvc.perform(put("/api/medico-especialidad/1/2")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.especialidadId").value(2));
+        }
 
-    @Test
-    @DisplayName("Eliminar relación debe retornar 204")
-    void eliminarRelacionME() throws Exception {
-        mockMvc.perform(delete("/api/medico-especialidad/1/2"))
-                .andExpect(status().isNoContent());
-    }
+        @Test
+        @DisplayName("Eliminar relación debe retornar 204")
+        void eliminarRelacionME() throws Exception {
+                mockMvc.perform(delete("/api/medico-especialidad/1/2"))
+                                .andExpect(status().isNoContent());
+        }
 
-    @Test
-    @DisplayName("Obtener especialidades por médico debe retornar 200")
-    void obtenerEspecialidadDelMedico() throws Exception {
-        when(medicoEspecialidadService.obtenerEspecialidadDelMedico(1L)).thenReturn(List.of(response));
+        @Test
+        @DisplayName("Obtener especialidades por médico debe retornar 200")
+        void obtenerEspecialidadDelMedico() throws Exception {
+                when(medicoEspecialidadService.obtenerEspecialidadDelMedico(1L)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/api/medico-especialidad/medico/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].medicoId").value(1));
-    }
+                mockMvc.perform(get("/api/medico-especialidad/medico/1"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].medicoId").value(1));
+        }
 
-    @Test
-    @DisplayName("Obtener médicos por especialidad debe retornar 200")
-    void obtenerMedicosPorEspecialidad() throws Exception {
-        when(medicoEspecialidadService.obtenerMedicosPorEspecialidad(2L)).thenReturn(List.of(response));
+        @Test
+        @DisplayName("Obtener médicos por especialidad debe retornar 200")
+        void obtenerMedicosPorEspecialidad() throws Exception {
+                when(medicoEspecialidadService.obtenerMedicosPorEspecialidad(2L)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/api/medico-especialidad/especialidad/2"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].especialidadId").value(2));
-    }
+                mockMvc.perform(get("/api/medico-especialidad/especialidad/2"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].especialidadId").value(2));
+        }
 }

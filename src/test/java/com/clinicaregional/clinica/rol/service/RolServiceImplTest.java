@@ -2,6 +2,8 @@ package com.clinicaregional.clinica.rol.service;
 
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.entity.Rol;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.RolMapper;
 import com.clinicaregional.clinica.repository.RolRepository;
 import com.clinicaregional.clinica.service.impl.RolServiceImpl;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -96,8 +99,8 @@ class RolServiceImplTest {
         when(rolRepository.existsByNombreAndEstadoIsTrue("PACIENTE")).thenReturn(true);
 
         assertThatThrownBy(() -> rolService.guardar(rolDTO))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("El nombre ya existe");
+                .isInstanceOf(DuplicateResourceException.class)
+                .hasMessageContaining("Ya existe un rol con el nombre ingresado");
     }
 
     @Test
@@ -117,7 +120,7 @@ class RolServiceImplTest {
         when(rolRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> rolService.actualizar(99L, rolDTO))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("No existe un rol con el id");
     }
 

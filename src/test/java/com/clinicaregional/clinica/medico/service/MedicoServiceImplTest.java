@@ -1,11 +1,9 @@
 package com.clinicaregional.clinica.medico.service;
 
-import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
-import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
 import com.clinicaregional.clinica.entity.*;
 import com.clinicaregional.clinica.enums.TipoContrato;
 import com.clinicaregional.clinica.enums.TipoMedico;

@@ -3,9 +3,7 @@ package com.clinicaregional.clinica.recepcionista.service;
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.entity.Recepcionista;
-import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
-import com.clinicaregional.clinica.enums.TurnoTrabajo;
 import com.clinicaregional.clinica.mapper.RecepcionistaMapper;
 import com.clinicaregional.clinica.repository.RecepcionistaRepository;
 import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
@@ -20,13 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class RecepcionistaServiceTest {

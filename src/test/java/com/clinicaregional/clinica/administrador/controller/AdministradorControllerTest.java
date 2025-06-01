@@ -3,7 +3,6 @@ package com.clinicaregional.clinica.administrador.controller;
 import com.clinicaregional.clinica.controller.AdministradorController;
 import com.clinicaregional.clinica.dto.AdministradorDTO;
 import com.clinicaregional.clinica.dto.RolDTO;
-import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.security.JwtAuthFilter;

@@ -3,6 +3,8 @@ package com.clinicaregional.clinica.alergia.service;
 import com.clinicaregional.clinica.dto.AlergiaDTO;
 import com.clinicaregional.clinica.entity.Alergia;
 import com.clinicaregional.clinica.enums.TipoAlergia;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.AlergiaMapper;
 import com.clinicaregional.clinica.repository.AlergiaRepository;
 import com.clinicaregional.clinica.service.impl.AlergiaServiceImpl;
@@ -16,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 import java.util.Optional;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -101,8 +104,7 @@ class AlergiaServiceImplTest {
                         .nombre("Polen")
                         .tipoAlergia(TipoAlergia.AMBIENTAL)
                         .estado(true)
-                        .build()
-        );
+                        .build());
         when(alergiaMapper.mapToAlergiaDTO(any())).thenReturn(new AlergiaDTO(1L, "Polen", TipoAlergia.AMBIENTAL));
 
         // Act
@@ -121,7 +123,7 @@ class AlergiaServiceImplTest {
         when(alergiaRepository.existsByNombreAndEstadoIsTrue("Polvo")).thenReturn(true);
 
         // Act + Assert
-        assertThrows(RuntimeException.class, () -> alergiaService.crearAlergia(dtoEntrada));
+        assertThrows(DuplicateResourceException.class, () -> alergiaService.crearAlergia(dtoEntrada));
     }
 
     @Test
@@ -177,9 +179,8 @@ class AlergiaServiceImplTest {
         when(alergiaRepository.existsByNombreAndEstadoIsTrue("Polvo")).thenReturn(true);
 
         // Act + Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> alergiaService.crearAlergia(dtoEntrada)
-        );
+        DuplicateResourceException exception = assertThrows(DuplicateResourceException.class,
+                () -> alergiaService.crearAlergia(dtoEntrada));
         assertThat(exception.getMessage()).isEqualTo("El nombre ya existe");
     }
 
@@ -190,9 +191,8 @@ class AlergiaServiceImplTest {
         when(alergiaRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
         // Act + Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> alergiaService.getAlergiaPorId(99L)
-        );
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> alergiaService.getAlergiaPorId(99L));
         assertThat(exception.getMessage()).contains("No existe una alergia con el id");
     }
 
@@ -204,9 +204,8 @@ class AlergiaServiceImplTest {
         AlergiaDTO nuevoDTO = new AlergiaDTO(99L, "NuevoNombre", TipoAlergia.AMBIENTAL);
 
         // Act + Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> alergiaService.updateAlergia(99L, nuevoDTO)
-        );
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> alergiaService.updateAlergia(99L, nuevoDTO));
         assertThat(exception.getMessage()).contains("No existe una alergia con el id");
     }
 
@@ -221,15 +220,14 @@ class AlergiaServiceImplTest {
                 .estado(true)
                 .build();
         when(alergiaRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(alergiaExistente));
-        when(alergiaRepository.existsByNombreAndEstadoIsTrue("NuevoNombre")).thenReturn(true);
+        when(alergiaRepository.existsByNombreAndEstadoIsTrueAndIdNot("NuevoNombre", 1L)).thenReturn(true);
 
         AlergiaDTO nuevoDTO = new AlergiaDTO(1L, "NuevoNombre", TipoAlergia.AMBIENTAL);
 
         // Act + Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> alergiaService.updateAlergia(1L, nuevoDTO)
-        );
-        assertThat(exception.getMessage()).isEqualTo("El nombre ya existe");
+        DuplicateResourceException exception = assertThrows(DuplicateResourceException.class,
+                () -> alergiaService.updateAlergia(1L, nuevoDTO));
+        assertThat(exception.getMessage()).isEqualTo("Ya existe una alergia con el nombre ingresado");
     }
 
     @Test
@@ -239,9 +237,8 @@ class AlergiaServiceImplTest {
         when(alergiaRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
         // Act + Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> alergiaService.eliminarAlergia(99L)
-        );
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> alergiaService.eliminarAlergia(99L));
         assertThat(exception.getMessage()).contains("No existe una alergia con el id");
     }
 }

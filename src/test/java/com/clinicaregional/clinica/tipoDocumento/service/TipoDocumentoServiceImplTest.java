@@ -2,6 +2,8 @@ package com.clinicaregional.clinica.tipoDocumento.service;
 
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.entity.TipoDocumento;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.TipoDocumentoMapper;
 import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
 import com.clinicaregional.clinica.service.impl.TipoDocumentoServiceImpl;
@@ -103,11 +105,11 @@ class TipoDocumentoServiceImplTest {
     }
 
     @Test
-    void createTipoDocumento_nombreExistente_debeLanzarExcepcion() {
+    void createTipoDocumento_nombreExistente_debeLanzarDuplicateExcepcion() {
         when(tipoDocumentoRepository.existsByNombreAndEstadoIsTrue("DNI")).thenReturn(true);
 
         assertThatThrownBy(() -> tipoDocumentoService.createTipoDocumento(tipoDocumentoDTO))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(DuplicateResourceException.class)
                 .hasMessageContaining("El tipo de documento ya existe en el sistema");
     }
 
@@ -124,11 +126,11 @@ class TipoDocumentoServiceImplTest {
     }
 
     @Test
-    void updateTipoDocumento_noExistente_debeLanzarExcepcion() {
+    void updateTipoDocumento_noExistente_debeLanzarResourceNotFoundExcepcion() {
         when(tipoDocumentoRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> tipoDocumentoService.updateTipoDocumento(99L, tipoDocumentoDTO))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("No existe un tipo de documento con el id");
     }
 

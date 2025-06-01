@@ -3,10 +3,11 @@ package com.clinicaregional.clinica.usuarios.service;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
 import com.clinicaregional.clinica.dto.RolDTO;
-import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.exception.BadRequestException;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.repository.AdministradorRepository;
@@ -107,7 +108,7 @@ class UsuarioServiceImplTest {
                 when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(true);
 
                 assertThatThrownBy(() -> usuarioService.guardar(request))
-                                .isInstanceOf(IllegalStateException.class)
+                                .isInstanceOf(DuplicateResourceException.class)
                                 .hasMessage("Ya existe un usuario con el correo ingresado");
         }
 
@@ -164,7 +165,7 @@ class UsuarioServiceImplTest {
                 when(rolRepository.findById(99L)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> usuarioService.guardar(request))
-                                .isInstanceOf(IllegalStateException.class)
+                                .isInstanceOf(BadRequestException.class)
                                 .hasMessage("El rol especificado no existe");
         }
 
@@ -216,7 +217,7 @@ class UsuarioServiceImplTest {
                 when(rolRepository.findById(99L)).thenReturn(Optional.empty());
 
                 assertThatThrownBy(() -> usuarioService.actualizar(1L, request))
-                                .isInstanceOf(IllegalStateException.class)
+                                .isInstanceOf(BadRequestException.class)
                                 .hasMessage("El rol especificado no existe");
         }
 

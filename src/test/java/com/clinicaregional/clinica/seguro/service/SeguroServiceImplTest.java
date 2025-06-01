@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.seguro.service;
 import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.entity.Seguro;
 import com.clinicaregional.clinica.enums.EstadoSeguro;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.mapper.SeguroMapper;
 import com.clinicaregional.clinica.repository.SeguroRepository;
 import com.clinicaregional.clinica.service.impl.SeguroServiceImpl;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class SeguroServiceImplTest {
@@ -146,11 +148,22 @@ class SeguroServiceImplTest {
     @DisplayName("Actualizar seguro con nombre duplicado lanza excepción")
     void updateSeguro_nombreDuplicado() {
         // Arrange
+        seguro = Seguro.builder()
+                .id(1L)
+                .nombre("PACIFICO")
+                .descripcion("Descripción")
+                .estado(true)
+                .estadoSeguro(EstadoSeguro.ACTIVO)
+                .build();
+
+        seguroDTO = new SeguroDTO(1L, "RIMAC", "Nuevo nombre duplicado", "imagen.jpg", EstadoSeguro.ACTIVO);
+
         when(seguroRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(seguro));
-        when(seguroRepository.existsByNombre("RIMAC")).thenReturn(true);
+        when(seguroRepository.existsByNombreAndEstadoIsTrue("RIMAC")).thenReturn(true);
+        doNothing().when(filtroEstado).activarFiltroEstado(true);
 
         // Act + Assert
-        assertThrows(RuntimeException.class, () -> seguroService.updateSeguro(1L, seguroDTO));
+        assertThrows(DuplicateResourceException.class, () -> seguroService.updateSeguro(1L, seguroDTO));
     }
 
     @Test

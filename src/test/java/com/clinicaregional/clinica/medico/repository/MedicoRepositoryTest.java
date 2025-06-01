@@ -1,205 +1,191 @@
-// package com.clinicaregional.clinica.medico.repository;
+package com.clinicaregional.clinica.medico.repository;
 
-// import com.clinicaregional.clinica.entity.Medico;
-// import com.clinicaregional.clinica.entity.Rol;
-// import com.clinicaregional.clinica.entity.Usuario;
-// import com.clinicaregional.clinica.enums.TipoContrato;
-// import com.clinicaregional.clinica.enums.TipoMedico;
-// import com.clinicaregional.clinica.repository.MedicoRepository;
-// import com.clinicaregional.clinica.repository.RolRepository;
-// import com.clinicaregional.clinica.repository.UsuarioRepository;
-// import org.hibernate.Filter;
-// import org.hibernate.Session;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-// import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import com.clinicaregional.clinica.entity.Medico;
+import com.clinicaregional.clinica.entity.Rol;
+import com.clinicaregional.clinica.entity.TipoDocumento;
+import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.enums.TipoContrato;
+import com.clinicaregional.clinica.enums.TipoMedico;
+import com.clinicaregional.clinica.repository.MedicoRepository;
 
-// import java.time.LocalDateTime;
-// import java.util.List;
-// import java.util.Optional;
+import org.hibernate.Filter;
+import org.hibernate.Session;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-// import static org.assertj.core.api.Assertions.assertThat;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
-// @DataJpaTest
-// class MedicoRepositoryTest {
+import static org.assertj.core.api.Assertions.assertThat;
 
-//     @Autowired
-//     private MedicoRepository medicoRepository;
+@DataJpaTest
+class MedicoRepositoryTest {
 
-//     @Autowired
-//     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private MedicoRepository medicoRepository;
 
-//     @Autowired
-//     private RolRepository rolRepository;
+    @Autowired
+    private TestEntityManager entityManager;
 
-//     @Autowired
-//     private TestEntityManager entityManager;
+    private Usuario usuario;
+    private TipoDocumento tipoDocumento;
 
-//     private Usuario usuario;
+    @BeforeEach
+    void setup() {
+        Session session = entityManager.getEntityManager().unwrap(Session.class);
+        Filter filter = session.enableFilter("estadoActivo");
+        filter.setParameter("estado", true);
 
-//     @BeforeEach
-//     void activarFiltroEstado() {
-//         Session session = entityManager.getEntityManager().unwrap(Session.class);
-//         Filter filter = session.enableFilter("estadoActivo");
-//         filter.setParameter("estado", true);
+        // Crear rol y usuario
+        Rol rol = Rol.builder()
+                .nombre("MEDICO")
+                .descripcion("Rol médico")
+                .estado(true)
+                .build();
+        entityManager.persist(rol);
 
-//         // Crear un rol para el usuario
-//         Rol rol = new Rol();
-//         rol.setNombre("ROLE_MEDICO");
-//         rol.setDescripcion("Rol médico para pruebas");
-//         rol.setEstado(true);
-//         entityManager.persist(rol);
+        usuario = Usuario.builder()
+                .correo("medico@correo.com")
+                .password("securepass")
+                .rol(rol)
+                .estado(true)
+                .build();
+        entityManager.persist(usuario);
 
-//         usuario = new Usuario();
-//         usuario.setCorreo("medico@example.com");
-//         usuario.setPassword("passwordSeguro");
-//         usuario.setEstado(true);
-//         usuario.setRol(rol); // SOLUCION: asignar el rol
-//         entityManager.persist(usuario);
-//     }
+        // Crear tipo documento
+        tipoDocumento = new TipoDocumento();
+        tipoDocumento.setNombre("DNI");
+        tipoDocumento.setEstado(true);
+        entityManager.persist(tipoDocumento);
+    }
 
-//     @Test
-//     @DisplayName("Guardar médico con estado activo y buscar por ID")
-//     void guardarMedico_conEstadoTrue_debeEncontrarloPorId() {
-//         // Arrange
-//         Medico medico = crearMedico(true);
-//         medicoRepository.save(medico);
-//         entityManager.flush();
-//         entityManager.clear();
+    @Test
+    @DisplayName("Debe guardar y encontrar médico activo por ID")
+    void guardarYBuscarMedicoActivoPorId() {
+        // Arrange
+        Medico medico = Medico.builder()
+                .nombres("Juan")
+                .apellidos("Pérez")
+                .numeroColegiatura("12345678901")
+                .numeroRNE("987654321")
+                .tipoDocumento(tipoDocumento)
+                .numeroDocumento("70856984")
+                .telefono("999888777")
+                .direccion("Av. Salud 123")
+                .descripcion("Médico general")
+                .imagen("foto.png")
+                .fechaContratacion(LocalDateTime.of(2023, 5, 20, 10, 30))
+                .tipoContrato(TipoContrato.FIJO)
+                .tipoMedico(TipoMedico.GENERAL)
+                .usuario(usuario)
+                .estado(true)
+                .build();
 
-//         // Act
-//         Optional<Medico> encontrado = medicoRepository.findByIdAndEstadoIsTrue(medico.getId());
+        Medico guardado = medicoRepository.save(medico);
 
-//         // Assert
-//         assertThat(encontrado).isPresent();
-//         assertThat(encontrado.get().getNombres()).isEqualTo("Juan");
-//     }
+        // Act
+        Optional<Medico> encontrado = medicoRepository.findByIdAndEstadoIsTrue(guardado.getId());
 
-//     @Test
-//     @DisplayName("Guardar médico con estado inactivo y no encontrarlo por ID")
-//     void guardarMedico_conEstadoFalse_noDebeEncontrarloPorId() {
-//         // Arrange
-//         Medico medico = crearMedico(false);
-//         medicoRepository.save(medico);
-//         entityManager.flush();
-//         entityManager.clear();
+        // Assert
+        assertThat(encontrado).isPresent();
+        assertThat(encontrado.get().getNumeroColegiatura()).isEqualTo("12345678901");
+    }
 
-//         // Act
-//         Optional<Medico> encontrado = medicoRepository.findByIdAndEstadoIsTrue(medico.getId());
+    @Test
+    @DisplayName("No debe retornar médico si está inactivo")
+    void noRetornarMedicoInactivo() {
+        // Arrange
+        Medico medico = Medico.builder()
+                .nombres("Ana")
+                .apellidos("Martínez")
+                .numeroColegiatura("11122233344")
+                .numeroRNE("999888777")
+                .tipoDocumento(tipoDocumento)
+                .numeroDocumento("70856985")
+                .telefono("911222333")
+                .direccion("Calle Salud 456")
+                .descripcion("Especialista")
+                .imagen("foto2.png")
+                .fechaContratacion(LocalDateTime.now())
+                .tipoContrato(TipoContrato.FIJO)
+                .tipoMedico(TipoMedico.ESPECIALISTA)
+                .usuario(usuario)
+                .estado(false)
+                .build();
 
-//         // Assert
-//         assertThat(encontrado).isEmpty();
-//     }
+        Medico guardado = medicoRepository.save(medico);
 
-//     @Test
-//     @DisplayName("Listar médicos debe retornar solo los activos")
-//     void listarMedicos_debeRetornarSoloActivos() {
-//         // Arrange
-//         Medico activo = crearMedico(true);
+        // Act
+        Optional<Medico> encontrado = medicoRepository.findByIdAndEstadoIsTrue(guardado.getId());
 
-//         // Crear otro usuario para el segundo médico
-//         Usuario usuario2 = new Usuario();
-//         usuario2.setCorreo("medico2@example.com");
-//         usuario2.setPassword("passwordSeguro2");
-//         usuario2.setRol(usuario.getRol()); // usa el mismo rol
-//         usuario2.setEstado(true);
-//         entityManager.persist(usuario2);
+        // Assert
+        assertThat(encontrado).isEmpty();
+    }
 
-//         Medico inactivo = Medico.builder()
-//                 .nombres("Pedro")
-//                 .apellidos("Gonzalez")
-//                 .numeroColegiatura("98765432101")
-//                 .numeroRNE("987654321")
-//                 .telefono("123456789")
-//                 .direccion("Av. Secundaria 456")
-//                 .descripcion("Médico general inactivo")
-//                 .imagen("foto2.jpg")
-//                 .fechaContratacion(LocalDateTime.now())
-//                 .tipoContrato(TipoContrato.NOCTURNO)
-//                 .tipoMedico(TipoMedico.PRACTICANTE)
-//                 .usuario(usuario2)
-//                 .estado(false)
-//                 .build();
+    @Test
+    @DisplayName("Debe verificar existencia por número de colegiatura")
+    void existePorNumeroColegiatura() {
+        // Arrange
+        Medico medico = Medico.builder()
+                .nombres("Pedro")
+                .apellidos("Gonzales")
+                .numeroColegiatura("12345678912")
+                .numeroRNE("555666777")
+                .tipoDocumento(tipoDocumento)
+                .numeroDocumento("12345678")
+                .telefono("999777888")
+                .direccion("Pasaje Médico 789")
+                .descripcion("Traumatólogo")
+                .imagen("foto3.png")
+                .fechaContratacion(LocalDateTime.now())
+                .tipoContrato(TipoContrato.FIJO)
+                .tipoMedico(TipoMedico.ESPECIALISTA)
+                .usuario(usuario)
+                .estado(true)
+                .build();
 
-//         medicoRepository.save(activo);
-//         medicoRepository.save(inactivo);
-//         entityManager.flush();
-//         entityManager.clear();
+        medicoRepository.save(medico);
 
-//         // Act
-//         List<Medico> medicos = medicoRepository.findAll();
+        // Act
+        boolean existe = medicoRepository.existsByNumeroColegiatura("12345678912");
 
-//         // Assert
-//         assertThat(medicos).allMatch(m -> Boolean.TRUE.equals(m.getEstado()));
-//     }
+        // Assert
+        assertThat(existe).isTrue();
+    }
 
-//     @Test
-//     @DisplayName("Verificar existencia por número de colegiatura")
-//     void existsByNumeroColegiatura() {
-//         // Arrange
-//         Medico medico = crearMedico(true);
-//         medicoRepository.save(medico);
-//         entityManager.flush();
-//         entityManager.clear();
+    @Test
+    @DisplayName("Debe encontrar médico por ID de usuario")
+    void buscarMedicoPorUsuarioId() {
+        // Arrange
+        Medico medico = Medico.builder()
+                .nombres("Luis")
+                .apellidos("Vallejos")
+                .numeroColegiatura("98765432100")
+                .numeroRNE("111999888")
+                .tipoDocumento(tipoDocumento)
+                .numeroDocumento("98765432")
+                .telefono("988776655")
+                .direccion("Av. Central 456")
+                .descripcion("Pediatra")
+                .imagen("foto4.png")
+                .fechaContratacion(LocalDateTime.now())
+                .tipoContrato(TipoContrato.FIJO)
+                .tipoMedico(TipoMedico.GENERAL)
+                .usuario(usuario)
+                .estado(true)
+                .build();
 
-//         // Act
-//         boolean existe = medicoRepository.existsByNumeroColegiatura(medico.getNumeroColegiatura());
+        medicoRepository.save(medico);
 
-//         // Assert
-//         assertThat(existe).isTrue();
-//     }
+        // Act
+        Optional<Medico> encontrado = medicoRepository.findByUsuario_Id(usuario.getId());
 
-//     @Test
-//     @DisplayName("Verificar existencia por número de RNE")
-//     void existsByNumeroRNE() {
-//         // Arrange
-//         Medico medico = crearMedico(true);
-//         medicoRepository.save(medico);
-//         entityManager.flush();
-//         entityManager.clear();
-
-//         // Act
-//         boolean existe = medicoRepository.existsByNumeroRNE(medico.getNumeroRNE());
-
-//         // Assert
-//         assertThat(existe).isTrue();
-//     }
-
-//     @Test
-//     @DisplayName("Verificar existencia por usuario")
-//     void existsByUsuario() {
-//         // Arrange
-//         Medico medico = crearMedico(true);
-//         medicoRepository.save(medico);
-//         entityManager.flush();
-//         entityManager.clear();
-
-//         // Act
-//         boolean existe = medicoRepository.existsByUsuario(usuario);
-
-//         // Assert
-//         assertThat(existe).isTrue();
-//     }
-
-//     // Método auxiliar
-//     private Medico crearMedico(boolean estado) {
-//         return Medico.builder()
-//                 .nombres("Juan")
-//                 .apellidos("Pérez")
-//                 .numeroColegiatura("12345678901")
-//                 .numeroRNE("123456789")
-//                 .telefono("987654321")
-//                 .direccion("Av. Principal 123")
-//                 .descripcion("Especialista en Medicina General")
-//                 .imagen("foto.jpg")
-//                 .fechaContratacion(LocalDateTime.now())
-//                 .tipoContrato(TipoContrato.FIJO)
-//                 .tipoMedico(TipoMedico.GENERAL)
-//                 .usuario(usuario)
-//                 .estado(estado)
-//                 .build();
-//     }
-// }
+        // Assert
+        assertThat(encontrado).isPresent();
+        assertThat(encontrado.get().getNombres()).isEqualTo("Luis");
+    }
+}

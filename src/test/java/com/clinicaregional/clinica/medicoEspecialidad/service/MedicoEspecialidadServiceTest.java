@@ -1,107 +1,146 @@
-// package com.clinicaregional.clinica.medicoEspecialidad.service;
+package com.clinicaregional.clinica.medicoEspecialidad.service;
 
-// import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
-// import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
-// import com.clinicaregional.clinica.service.MedicoEspecialidadService;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.Mock;
-// import org.mockito.MockitoAnnotations;
+import com.clinicaregional.clinica.dto.request.MedicoEspecialidadRequest;
+import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
+import com.clinicaregional.clinica.entity.*;
+import com.clinicaregional.clinica.enums.TipoContrato;
+import com.clinicaregional.clinica.enums.TipoMedico;
+import com.clinicaregional.clinica.exception.DuplicateResourceException;
+import com.clinicaregional.clinica.mapper.MedicoEspecialidadMapper;
+import com.clinicaregional.clinica.repository.*;
+import com.clinicaregional.clinica.service.impl.MedicoEspecialidadServiceImpl;
+import com.clinicaregional.clinica.util.FiltroEstado;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-// import java.time.LocalDate;
-// import java.util.List;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
-// import static org.assertj.core.api.Assertions.assertThat;
-// import static org.mockito.ArgumentMatchers.any;
-// import static org.mockito.ArgumentMatchers.eq;
-// import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// class MedicoEspecialidadServiceTest {
+class MedicoEspecialidadServiceTest {
 
-//     @Mock
-//     private MedicoEspecialidadService medicoEspecialidadService;
+    @Mock private MedicoEspecialidadRepository medicoEspecialidadRepository;
+    @Mock private MedicoRepository medicoRepository;
+    @Mock private EspecialidadRepository especialidadRepository;
+    @Mock private FiltroEstado filtroEstado;
+    @Mock private MedicoEspecialidadMapper mapper;
 
-//     private MedicoEspecialidadRequest medicoEspecialidadRequest;
-//     private MedicoEspecialidadResponse medicoEspecialidadResponse;
+    @InjectMocks private MedicoEspecialidadServiceImpl service;
 
-//     @BeforeEach
-//     void setUp() {
-//         MockitoAnnotations.openMocks(this);
-//         medicoEspecialidadRequest = new MedicoEspecialidadRequest(1L, 2L, LocalDate.now());
-//         medicoEspecialidadResponse = new MedicoEspecialidadResponse(1L, "Juan Pérez", "12345678901", "987654321", 2L,
-//                 "Cardiología", LocalDate.now());
-//     }
+    private Medico medico;
+    private Especialidad especialidad;
+    private MedicoEspecialidadRequest request;
+    private MedicoEspecialidad relacion;
 
-//     @Test
-//     @DisplayName("Registrar nueva relación Médico-Especialidad")
-//     void registrarRelacionME() {
-//         when(medicoEspecialidadService.registrarRelacionME(any())).thenReturn(medicoEspecialidadResponse);
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-//         MedicoEspecialidadResponse resultado = medicoEspecialidadService.registrarRelacionME(medicoEspecialidadRequest);
+        medico = Medico.builder()
+                .id(1L)
+                .nombres("Luis")
+                .apellidos("Ramirez")
+                .numeroColegiatura("12345678901")
+                .numeroRNE("987654321")
+                .tipoContrato(TipoContrato.FIJO)
+                .tipoMedico(TipoMedico.ESPECIALISTA)
+                .estado(true)
+                .build();
 
-//         assertThat(resultado).isNotNull();
-//         assertThat(resultado.getNumeroColegiatura()).isEqualTo("12345678901");
-//         assertThat(resultado.getNumeroRNE()).isEqualTo("987654321");
-//         verify(medicoEspecialidadService, times(1)).registrarRelacionME(any());
-//     }
+        especialidad = Especialidad.builder()
+                .id(1L)
+                .nombre("Cardiología")
+                .estado(true)
+                .build();
 
-//     @Test
-//     @DisplayName("Actualizar relación Médico-Especialidad existente")
-//     void actualizarRelacionME() {
-//         // Arrange
-//         when(medicoEspecialidadService.actualizarRelacionME(eq(1L), eq(2L), any()))
-//                 .thenReturn(medicoEspecialidadResponse);
+        request = new MedicoEspecialidadRequest(1L, 1L, LocalDate.now());
 
-//         // Act
-//         MedicoEspecialidadResponse resultado = medicoEspecialidadService.actualizarRelacionME(1L, 2L,
-//                 medicoEspecialidadRequest);
+        relacion = new MedicoEspecialidad();
+        relacion.setId(new MedicoEspecialidadId(1L, 1L));
+        relacion.setMedico(medico);
+        relacion.setEspecialidad(especialidad);
+        relacion.setDesdeFecha(LocalDate.now());
+        relacion.setEstado(true);
+    }
 
-//         // Assert
-//         assertThat(resultado).isNotNull();
-//         verify(medicoEspecialidadService, times(1)).actualizarRelacionME(eq(1L), eq(2L), any());
-//     }
+    @Test
+    @DisplayName("Registrar nueva relación exitosamente")
+    void registrarRelacionME_exitoso() {
+        when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
+        when(especialidadRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(especialidad));
+        when(medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)).thenReturn(false);
+        when(medicoEspecialidadRepository.save(any())).thenReturn(relacion);
+        when(mapper.toEntity(request, medico, especialidad)).thenReturn(relacion);
+        when(mapper.toResponse(relacion)).thenReturn(new MedicoEspecialidadResponse(1L, "Luis Ramirez", "12345678901", "987654321", 1L, "Cardiología", request.getDesdeFecha()));
 
-//     @Test
-//     @DisplayName("Eliminar relación Médico-Especialidad")
-//     void eliminarRelacionME() {
-//         // Arrange
-//         doNothing().when(medicoEspecialidadService).eliminarRelacionME(1L, 2L);
+        MedicoEspecialidadResponse result = service.registrarRelacionME(request);
 
-//         // Act
-//         medicoEspecialidadService.eliminarRelacionME(1L, 2L);
+        assertThat(result.getMedicoId()).isEqualTo(1L);
+        assertThat(result.getNombreMedico()).isEqualTo("Luis Ramirez");
+    }
 
-//         // Assert
-//         verify(medicoEspecialidadService, times(1)).eliminarRelacionME(1L, 2L);
-//     }
+    @Test
+    @DisplayName("Registrar relación existente debe lanzar excepción")
+    void registrarRelacionME_duplicada_debeLanzarExcepcion() {
+        when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
+        when(especialidadRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(especialidad));
+        when(medicoEspecialidadRepository.existsByMedicoAndEspecialidad(medico, especialidad)).thenReturn(true);
 
-//     @Test
-//     @DisplayName("Obtener especialidades de un médico")
-//     void obtenerEspecialidadDelMedico() {
-//         // Arrange
-//         when(medicoEspecialidadService.obtenerEspecialidadDelMedico(1L))
-//                 .thenReturn(List.of(medicoEspecialidadResponse));
+        assertThatThrownBy(() -> service.registrarRelacionME(request))
+                .isInstanceOf(DuplicateResourceException.class);
+    }
 
-//         // Act
-//         List<MedicoEspecialidadResponse> resultado = medicoEspecialidadService.obtenerEspecialidadDelMedico(1L);
+    @Test
+    @DisplayName("Actualizar relación existente")
+    void actualizarRelacionME_exitoso() {
+        MedicoEspecialidadId id = new MedicoEspecialidadId(1L, 1L);
+        when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)).thenReturn(Optional.of(relacion));
+        when(medicoEspecialidadRepository.save(any())).thenReturn(relacion);
+        when(mapper.toResponse(any())).thenReturn(new MedicoEspecialidadResponse(1L, "Luis Ramirez", "12345678901", "987654321", 1L, "Cardiología", request.getDesdeFecha()));
 
-//         // Assert
-//         assertThat(resultado).isNotEmpty();
-//         verify(medicoEspecialidadService, times(1)).obtenerEspecialidadDelMedico(1L);
-//     }
+        MedicoEspecialidadResponse result = service.actualizarRelacionME(1L, 1L, request);
 
-//     @Test
-//     @DisplayName("Obtener médicos de una especialidad")
-//     void obtenerMedicosPorEspecialidad() {
-//         // Arrange
-//         when(medicoEspecialidadService.obtenerMedicosPorEspecialidad(2L))
-//                 .thenReturn(List.of(medicoEspecialidadResponse));
+        assertThat(result.getDesdeFecha()).isEqualTo(request.getDesdeFecha());
+    }
 
-//         // Act
-//         List<MedicoEspecialidadResponse> resultado = medicoEspecialidadService.obtenerMedicosPorEspecialidad(2L);
+    @Test
+    @DisplayName("Eliminar relación debe cambiar estado")
+    void eliminarRelacionME_debeActualizarEstado() {
+        MedicoEspecialidadId id = new MedicoEspecialidadId(1L, 1L);
+        when(medicoEspecialidadRepository.findByIdAndEstadoIsTrue(id)).thenReturn(Optional.of(relacion));
 
-//         // Assert
-//         assertThat(resultado).isNotEmpty();
-//         verify(medicoEspecialidadService, times(1)).obtenerMedicosPorEspecialidad(2L);
-//     }
-// }
+        service.eliminarRelacionME(1L, 1L);
+
+        assertThat(relacion.getEstado()).isFalse();
+        verify(medicoEspecialidadRepository).save(relacion);
+    }
+
+    @Test
+    @DisplayName("Obtener especialidades de un médico")
+    void obtenerEspecialidadDelMedico_debeRetornarLista() {
+        when(medicoEspecialidadRepository.findByMedicoId(1L)).thenReturn(List.of(relacion));
+        when(mapper.toResponse(any())).thenReturn(new MedicoEspecialidadResponse());
+
+        List<MedicoEspecialidadResponse> resultado = service.obtenerEspecialidadDelMedico(1L);
+
+        assertThat(resultado).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("Obtener médicos de una especialidad")
+    void obtenerMedicosPorEspecialidad_debeRetornarLista() {
+        when(medicoEspecialidadRepository.findByEspecialidadId(1L)).thenReturn(List.of(relacion));
+        when(mapper.toResponse(any())).thenReturn(new MedicoEspecialidadResponse());
+
+        List<MedicoEspecialidadResponse> resultado = service.obtenerMedicosPorEspecialidad(1L);
+
+        assertThat(resultado).hasSize(1);
+    }
+}

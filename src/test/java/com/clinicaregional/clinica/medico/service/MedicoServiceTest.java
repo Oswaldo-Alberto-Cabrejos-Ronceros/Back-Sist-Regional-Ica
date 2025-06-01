@@ -1,166 +1,178 @@
-// package com.clinicaregional.clinica.medico.service;
+package com.clinicaregional.clinica.medico.service;
 
-// import com.clinicaregional.clinica.dto.UsuarioDTO;
-// import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
-// import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
-// import com.clinicaregional.clinica.entity.Medico;
-// import com.clinicaregional.clinica.entity.Usuario;
-// import com.clinicaregional.clinica.enums.TipoContrato;
-// import com.clinicaregional.clinica.enums.TipoMedico;
-// import com.clinicaregional.clinica.mapper.MedicoMapper;
-// import com.clinicaregional.clinica.repository.MedicoRepository;
-// import com.clinicaregional.clinica.repository.UsuarioRepository;
-// import com.clinicaregional.clinica.service.UsuarioService;
-// import com.clinicaregional.clinica.service.impl.MedicoServiceImpl;
-// import com.clinicaregional.clinica.util.FiltroEstado;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.MockitoAnnotations;
+import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
+import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
+import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
+import com.clinicaregional.clinica.entity.*;
+import com.clinicaregional.clinica.enums.TipoContrato;
+import com.clinicaregional.clinica.enums.TipoMedico;
+import com.clinicaregional.clinica.mapper.MedicoMapper;
+import com.clinicaregional.clinica.repository.MedicoRepository;
+import com.clinicaregional.clinica.repository.UsuarioRepository;
+import com.clinicaregional.clinica.service.TipoDocumentoService;
+import com.clinicaregional.clinica.service.UsuarioService;
+import com.clinicaregional.clinica.service.impl.MedicoServiceImpl;
+import com.clinicaregional.clinica.util.FiltroEstado;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.*;
+import java.time.LocalDateTime;
+import java.util.*;
 
-// import java.time.LocalDateTime;
-// import java.util.List;
-// import java.util.Optional;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// import static org.assertj.core.api.Assertions.assertThat;
-// import static org.junit.jupiter.api.Assertions.assertThrows;
-// import static org.mockito.Mockito.*;
+class MedicoServiceTest {
 
-// class MedicoServiceTest {
+    @Mock private MedicoRepository medicoRepository;
+    @Mock private UsuarioRepository usuarioRepository;
+    @Mock private UsuarioService usuarioService;
+    @Mock private TipoDocumentoService tipoDocumentoService;
+    @Mock private MedicoMapper medicoMapper;
+    @Mock private FiltroEstado filtroEstado;
 
-//     @Mock
-//     private MedicoRepository medicoRepository;
+    @InjectMocks private MedicoServiceImpl medicoService;
 
-//     @Mock
-//     private UsuarioRepository usuarioRepository;
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
-//     @Mock
-//     private UsuarioService usuarioService;
+    @Test
+    void guardarMedico_debeRetornarDTO() {
+        MedicoRequestDTO requestDTO = new MedicoRequestDTO();
+        requestDTO.setNombres("Juan");
+        requestDTO.setApellidos("Perez");
+        requestDTO.setNumeroColegiatura("12345678901");
+        requestDTO.setNumeroRNE("987654321");
+        requestDTO.setTipoDocumentoId(1L);
+        requestDTO.setNumeroDocumento("12345678");
+        requestDTO.setTelefono("987654321");
+        requestDTO.setDireccion("Calle Falsa 123");
+        requestDTO.setDescripcion("Traumatólogo");
+        requestDTO.setImagen("foto.png");
+        requestDTO.setFechaContratacion(LocalDateTime.now());
+        requestDTO.setTipoContrato(TipoContrato.FIJO);
+        requestDTO.setTipoMedico(TipoMedico.ESPECIALISTA);
+        requestDTO.setCorreo("juan@example.com");
+        requestDTO.setPassword("password");
 
-//     @Mock
-//     private MedicoMapper medicoMapper;
+        TipoDocumento tipoDocumento = new TipoDocumento();
+        tipoDocumento.setId(1L);
+        tipoDocumento.setNombre("DNI");
 
-//     @Mock
-//     private FiltroEstado filtroEstado;
+        UsuarioDTO usuarioDTO = new UsuarioDTO();
+        usuarioDTO.setId(1L);
+        usuarioDTO.setCorreo("juan@example.com");
+        usuarioDTO.setRol(new RolDTO(4L, "MEDICO", ""));
 
-//     @InjectMocks
-//     private MedicoServiceImpl medicoService;
+        Rol rol = Rol.builder()
+                .id(4L)
+                .nombre("MEDICO")
+                .descripcion("medico")
+                .estado(true)
+                .build();
 
-//     private Usuario usuario;
-//     private UsuarioDTO usuarioDTO;
-//     private Medico medico;
-//     private MedicoRequestDTO medicoRequestDTO;
-//     private MedicoResponseDTO medicoResponseDTO;
+        Usuario usuario = Usuario.builder()
+                .id(1L)
+                .correo("juan@example.com")
+                .password("pAss114")
+                .rol(rol)
+                .estado(true)
+                .build();
 
-//     @BeforeEach
-//     void setUp() {
-//         MockitoAnnotations.openMocks(this);
+        Medico medico = Medico.builder()
+                .id(10L)
+                .nombres("Juan")
+                .usuario(usuario)
+                .estado(true)
+                .build();
 
-//         usuario = new Usuario();
-//         usuario.setId(1L);
-//         usuario.setCorreo("medico@gmail.com");
-//         usuario.setPassword("password");
-//         usuario.setEstado(true);
+        MedicoResponseDTO responseDTO = new MedicoResponseDTO();
+        responseDTO.setId(10L);
+        responseDTO.setNombres("Juan");
 
-//         usuarioDTO = new UsuarioDTO();
-//         usuarioDTO.setId(1L);
-//         usuarioDTO.setCorreo("medico@gmail.com");
+        when(tipoDocumentoService.getTipoDocumentoByIdContext(1L)).thenReturn(Optional.of(tipoDocumento));
+        when(usuarioRepository.existsByCorreo("juan@example.com")).thenReturn(false);
+        when(medicoRepository.existsByNumeroColegiatura("12345678901")).thenReturn(false);
+        when(medicoRepository.existsByNumeroRNE("987654321")).thenReturn(false);
+        when(medicoRepository.existsByNumeroDocumento("12345678")).thenReturn(false);
+        when(usuarioService.guardar(any(UsuarioRequestDTO.class))).thenReturn(usuarioDTO);
+        when(medicoRepository.save(any(Medico.class))).thenReturn(medico);
+        when(medicoMapper.mapToMedicoResponseDTO(any(Medico.class))).thenReturn(responseDTO);
 
-//         medico = Medico.builder()
-//                 .id(1L)
-//                 .nombres("Juan")
-//                 .apellidos("Perez")
-//                 .numeroColegiatura("12345678901")
-//                 .numeroRNE("987654321")
-//                 .telefono("999999999")
-//                 .direccion("Calle Salud 123")
-//                 .descripcion("Cardiologo especializado")
-//                 .imagen("imagen.jpg")
-//                 .fechaContratacion(LocalDateTime.now())
-//                 .tipoContrato(TipoContrato.FIJO)
-//                 .tipoMedico(TipoMedico.ESPECIALISTA)
-//                 .usuario(usuario)
-//                 .estado(true)
-//                 .build();
+        MedicoResponseDTO result = medicoService.guardarMedico(requestDTO);
 
-//         medicoRequestDTO = new MedicoRequestDTO(
-//                 "Juan", "Perez", "12345678901", "987654321",
-//                 "999999999", "Calle Salud 123", "Cardiologo especializado", "imagen.jpg",
-//                 LocalDateTime.now(), TipoContrato.FIJO, TipoMedico.ESPECIALISTA, 1L,
-//                 "juanPerez@gmail.com", "Password123"
-//         );
+        assertThat(result).isNotNull();
+        assertThat(result.getNombres()).isEqualTo("Juan");
+        verify(medicoRepository).save(any(Medico.class));
+    }
 
-//         medicoResponseDTO = new MedicoResponseDTO(
-//                 1L, "Juan", "Perez", "12345678901", "987654321",
-//                 "999999999", "Calle Salud 123", "Cardiologo especializado", "imagen.jpg",
-//                 LocalDateTime.now(), TipoContrato.FIJO, TipoMedico.ESPECIALISTA, usuario.getId()
-//         );
-//     }
+    @Test
+    void obtenerMedicos_debeRetornarLista() {
+        Medico medico = Medico.builder().id(1L).nombres("Carlos").estado(true).build();
+        MedicoResponseDTO dto = new MedicoResponseDTO(); dto.setId(1L); dto.setNombres("Carlos");
+        when(medicoRepository.findAll()).thenReturn(List.of(medico));
+        when(medicoMapper.mapToMedicoResponseDTO(medico)).thenReturn(dto);
 
-//     @Test
-//     @DisplayName("Listar todos los médicos activos")
-//     void obtenerMedicos_debeRetornarLista() {
-//         when(medicoRepository.findAll()).thenReturn(List.of(medico));
-//         when(medicoMapper.mapToMedicoResponseDTO(any())).thenReturn(medicoResponseDTO);
+        List<MedicoResponseDTO> lista = medicoService.obtenerMedicos();
 
-//         List<MedicoResponseDTO> resultado = medicoService.obtenerMedicos();
+        assertThat(lista).hasSize(1);
+        assertThat(lista.get(0).getNombres()).isEqualTo("Carlos");
+    }
 
-//         assertThat(resultado).hasSize(1);
-//         assertThat(resultado.get(0).getNombres()).isEqualTo("Juan");
-//     }
+    @Test
+    void obtenerMedicosPublic_debeRetornarLista() {
+        Medico medico = Medico.builder().id(1L).nombres("Eva").estado(true).build();
+        MedicoResponsePublicDTO dto = new MedicoResponsePublicDTO(); dto.setId(1L); dto.setNombres("Eva");
+        when(medicoRepository.findAll()).thenReturn(List.of(medico));
+        when(medicoMapper.mapToMedicoResponsePublicDTO(medico)).thenReturn(dto);
 
-//     @Test
-//     @DisplayName("Guardar nuevo médico correctamente")
-//     void guardarMedico_nuevo_debeRetornarDTO() {
-//         when(medicoRepository.existsByNumeroColegiatura(any())).thenReturn(false);
-//         when(medicoRepository.existsByNumeroRNE(any())).thenReturn(false);
-//         when(usuarioRepository.existsByCorreo(any())).thenReturn(false);
-//         when(usuarioService.guardar(any())).thenReturn(usuarioDTO);
-//         when(medicoRepository.save(any())).thenReturn(medico);
-//         when(medicoMapper.mapToMedicoResponseDTO(any())).thenReturn(medicoResponseDTO);
+        List<MedicoResponsePublicDTO> lista = medicoService.obtenerMedicosPublic();
 
-//         MedicoResponseDTO resultado = medicoService.guardarMedico(medicoRequestDTO);
+        assertThat(lista).hasSize(1);
+        assertThat(lista.get(0).getNombres()).isEqualTo("Eva");
+    }
 
-//         assertThat(resultado).isNotNull();
-//         assertThat(resultado.getNombres()).isEqualTo("Juan");
-//     }
+    @Test
+    void obtenerMedicoPorId_idNoExiste_debeLanzarExcepcion() {
+        when(medicoRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
-//     @Test
-//     @DisplayName("Guardar médico existente por colegiatura debe lanzar excepción")
-//     void guardarMedico_existenteColegialura_debeLanzarExcepcion() {
-//         when(medicoRepository.existsByNumeroColegiatura(any())).thenReturn(true);
+        assertThatThrownBy(() -> medicoService.obtenerMedicoPorId(99L))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Medico no encontrado");
+    }
 
-//         assertThrows(RuntimeException.class, () -> medicoService.guardarMedico(medicoRequestDTO));
-//     }
+    @Test
+    void actualizarMedico_idNoExiste_debeLanzarExcepcion() {
+        when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.empty());
 
-//     @Test
-//     @DisplayName("Actualizar médico existente correctamente")
-//     void actualizarMedico_existente_debeActualizar() {
-//         when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
-//         when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
-//         when(medicoRepository.existsByNumeroColegiatura(any())).thenReturn(false);
-//         when(medicoRepository.existsByNumeroRNE(any())).thenReturn(false);
-//         when(medicoRepository.existsByUsuario(any())).thenReturn(false);
-//         when(medicoRepository.save(any())).thenReturn(medico);
-//         when(medicoMapper.mapToMedicoResponseDTO(any())).thenReturn(medicoResponseDTO);
+        assertThatThrownBy(() -> medicoService.actualizarMedico(1L, new MedicoRequestDTO()))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Médico no encontrado");
+    }
 
-//         MedicoResponseDTO resultado = medicoService.actualizarMedico(1L, medicoRequestDTO);
+    @Test
+    void eliminarMedico_idNoExiste_debeLanzarExcepcion() {
+        when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.empty());
 
-//         assertThat(resultado.getId()).isEqualTo(1L);
-//     }
+        assertThatThrownBy(() -> medicoService.eliminarMedico(1L))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Medico no encontrado");
+    }
 
-//     @Test
-//     @DisplayName("Eliminar médico debe cambiar su estado a false")
-//     void eliminarMedico_existente_debeActualizarEstado() {
-//         when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
-//         when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
+    @Test
+    void eliminarMedico_usuarioNoExiste_debeLanzarExcepcion() {
+        Medico medico = Medico.builder().id(1L).estado(true)
+            .usuario(Usuario.builder().id(2L).estado(true).build()).build();
+        when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
+        when(usuarioRepository.findByIdAndEstadoIsTrue(2L)).thenReturn(Optional.empty());
 
-//         medicoService.eliminarMedico(1L);
-
-//         assertThat(medico.getEstado()).isFalse();
-//         verify(medicoRepository, times(1)).save(medico);
-//         verify(usuarioRepository, times(1)).save(usuario);
-//     }
-// }
+        assertThatThrownBy(() -> medicoService.eliminarMedico(1L))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("Usuario no encontrado");
+    }
+}

@@ -21,7 +21,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "disponibilidades")
 @Filter(name = "estadoActivo", condition = "estado = :estado")
-public class Disponibilidad {
+public class Disponibilidad extends EntidadConEstado{
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name = "disponibilidad_id")
@@ -35,11 +35,8 @@ public class Disponibilidad {
 
     private String notas;
 
-    @OneToMany
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
     private Medico medico;
-
-    @Column(nullable = false)
-    private Boolean estado = true;
 
 }

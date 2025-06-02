@@ -12,6 +12,10 @@ public interface DisponibilidadService {
 
     List<DisponibilidadResponse> listar();
 
+    //para obtener las disponibilidades de un medico
+
+    List<DisponibilidadResponse> listarPorMedicoId(Long medicoId);
+
     DisponibilidadResponse actualizar(Long id, DisponibilidadRequest request);
 
     void eliminar(Long id);

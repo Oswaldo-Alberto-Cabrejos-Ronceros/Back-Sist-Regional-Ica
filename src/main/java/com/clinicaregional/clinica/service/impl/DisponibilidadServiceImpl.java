@@ -5,6 +5,7 @@ import com.clinicaregional.clinica.dto.response.DisponibilidadResponse;
 import com.clinicaregional.clinica.entity.Disponibilidad;
 import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
+import com.clinicaregional.clinica.mapper.DisponibilidadMapper;
 import com.clinicaregional.clinica.repository.DisponibilidadRepository;
 import com.clinicaregional.clinica.repository.MedicoRepository;
 import com.clinicaregional.clinica.service.DisponibilidadService;
@@ -24,24 +25,20 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
     private final DisponibilidadRepository disponibilidadRepository;
     private final MedicoRepository medicoRepository;
     private final FiltroEstado filtroEstado;
+    private final DisponibilidadMapper disponibilidadMapper;
 
     @Transactional
     @Override
     public DisponibilidadResponse registrar(DisponibilidadRequest request) {
-        Medico medico = medicoRepository.findById(request.getMedicoId())
+        filtroEstado.activarFiltroEstado(true);
+        medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
 
-        Disponibilidad disponibilidad = new Disponibilidad();
-        disponibilidad.setDiaSemana(request.getDiaSemana());
-        disponibilidad.setHoraInicio(request.getHoraInicio());
-        disponibilidad.setHoraFin(request.getHoraFin());
-        disponibilidad.setNotas(request.getNotas());
-        disponibilidad.setMedico(medico);
-        disponibilidad.setEstado(true); // activamos la disponibilidad
+        Disponibilidad disponibilidad = disponibilidadMapper.toEntity(request);
 
         Disponibilidad guardada = disponibilidadRepository.save(disponibilidad);
 
-        return mapToResponse(guardada);
+        return disponibilidadMapper.toResponse(guardada);
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +47,7 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
         filtroEstado.activarFiltroEstado(true);
         Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada con ID: " + id));
-        return mapToResponse(disponibilidad);
+        return disponibilidadMapper.toResponse(disponibilidad);
     }
 
     @Transactional(readOnly = true)
@@ -58,7 +55,7 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
     public List<DisponibilidadResponse> listar() {
         filtroEstado.activarFiltroEstado(true);
         return disponibilidadRepository.findAll().stream()
-                .map(this::mapToResponse)
+                .map(disponibilidadMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -70,7 +67,7 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
                 .orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada con ID: " + id));
 
         if (!disponibilidad.getMedico().getId().equals(request.getMedicoId())) {
-            Medico nuevoMedico = medicoRepository.findById(request.getMedicoId())
+            Medico nuevoMedico = medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId())
                     .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
             disponibilidad.setMedico(nuevoMedico);
         }
@@ -82,7 +79,7 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
 
         Disponibilidad actualizada = disponibilidadRepository.save(disponibilidad);
 
-        return mapToResponse(actualizada);
+        return disponibilidadMapper.toResponse(actualizada);
     }
 
 
@@ -96,15 +93,4 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
         disponibilidadRepository.save(disponibilidad);
     }
 
-    private DisponibilidadResponse mapToResponse(Disponibilidad d) {
-        String nombreMedico = d.getMedico().getNombres() + " " + d.getMedico().getApellidos();
-        return new DisponibilidadResponse(
-                d.getId(),
-                d.getDiaSemana(),
-                d.getHoraInicio(),
-                d.getHoraFin(),
-                d.getNotas(),
-                nombreMedico
-        );
-    }
 }

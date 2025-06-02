@@ -23,6 +23,7 @@ public class DisponibilidadRequest {
     @NotNull(message = "La hora de fin es obligatoria")
     private LocalTime horaFin;
     private String notas;
+    @NotNull(message = "El id del medico es obligatorio")
     private Long medicoId;
 
 }

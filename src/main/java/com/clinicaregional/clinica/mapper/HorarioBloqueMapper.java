@@ -8,8 +8,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class HorarioBloqueMapper {
 
-    public HorarioBloque toEntity(HorarioBloqueRequest request, Medico medico, Cita cita, Disponibilidad disponibilidad) {
+    public HorarioBloque toEntity(HorarioBloqueRequest request) {
         HorarioBloque bloque = new HorarioBloque();
+        //medico
+        Medico medico = new Medico();
+        //cita
+        Cita cita = new Cita();
+        cita.setId(request.getCitaId());
+        //disponibilidad
+        Disponibilidad disponibilidad = new Disponibilidad();
+        disponibilidad.setId(request.getDisponibilidadId());
+        medico.setId(request.getMedicoId());
         bloque.setNombre(request.getNombre());
         bloque.setFecha(request.getFecha());
         bloque.setHoraInicio(request.getHoraInicio());

@@ -31,8 +31,7 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
     @Override
     public DisponibilidadResponse registrar(DisponibilidadRequest request) {
         filtroEstado.activarFiltroEstado(true);
-        medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
+        medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId()).orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
 
         Disponibilidad disponibilidad = disponibilidadMapper.toEntity(request);
 
@@ -45,8 +44,7 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
     @Override
     public DisponibilidadResponse obtenerPorId(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada con ID: " + id));
+        Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada con ID: " + id));
         return disponibilidadMapper.toResponse(disponibilidad);
     }
 
@@ -54,21 +52,24 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
     @Override
     public List<DisponibilidadResponse> listar() {
         filtroEstado.activarFiltroEstado(true);
-        return disponibilidadRepository.findAll().stream()
-                .map(disponibilidadMapper::toResponse)
-                .collect(Collectors.toList());
+        return disponibilidadRepository.findAll().stream().map(disponibilidadMapper::toResponse).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<DisponibilidadResponse> listarPorMedicoId(Long medicoId) {
+        filtroEstado.activarFiltroEstado(true);
+        return disponibilidadRepository.findAllByMedicoId(medicoId).stream().map(disponibilidadMapper::toResponse).collect(Collectors.toList());
     }
 
     @Transactional
     @Override
     public DisponibilidadResponse actualizar(Long id, DisponibilidadRequest request) {
         filtroEstado.activarFiltroEstado(true);
-        Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada con ID: " + id));
+        Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada con ID: " + id));
 
         if (!disponibilidad.getMedico().getId().equals(request.getMedicoId())) {
-            Medico nuevoMedico = medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
+            Medico nuevoMedico = medicoRepository.findByIdAndEstadoIsTrue(request.getMedicoId()).orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + request.getMedicoId()));
             disponibilidad.setMedico(nuevoMedico);
         }
 
@@ -87,8 +88,7 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
     @Override
     public void eliminar(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada con ID: " + id));
+        Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada con ID: " + id));
         disponibilidad.setEstado(false);
         disponibilidadRepository.save(disponibilidad);
     }

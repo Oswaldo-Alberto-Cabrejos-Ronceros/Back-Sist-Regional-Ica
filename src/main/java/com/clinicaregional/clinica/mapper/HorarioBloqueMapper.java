@@ -22,7 +22,6 @@ public class HorarioBloqueMapper {
     }
 
     public HorarioBloqueResponse toResponse(HorarioBloque entity) {
-        String nombreMedico = entity.getMedico().getNombres() + " " + entity.getMedico().getApellidos();
 
         return new HorarioBloqueResponse(
                 entity.getId(),
@@ -31,7 +30,7 @@ public class HorarioBloqueMapper {
                 entity.getHoraInicio(),
                 entity.getHoraFin(),
                 entity.getEstadoBloque().name(),
-                nombreMedico,
+                entity.getMedico().getId(),
                 entity.getCita() != null ? entity.getCita().getId() : null,
                 entity.getDisponibilidad().getId()
         );

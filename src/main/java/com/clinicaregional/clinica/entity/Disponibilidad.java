@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import java.time.LocalTime;
 
 import org.hibernate.annotations.Filter;
-import org.springframework.cglib.core.Local;
 
 import com.clinicaregional.clinica.enums.DiaSemana;
 

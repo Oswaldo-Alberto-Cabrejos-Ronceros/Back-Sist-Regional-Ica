@@ -17,7 +17,7 @@ public class HorarioBloqueResponse {
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private String estadoBloque;
-    private String medicoNombre;
+    private Long medicoId;
     private Long citaId;
     private Long disponibilidadId;
 }

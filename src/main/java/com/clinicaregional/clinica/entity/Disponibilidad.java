@@ -39,4 +39,7 @@ public class Disponibilidad {
     @JoinColumn(name = "medico_id")
     private Medico medico;
 
+    @Column(nullable = false)
+    private Boolean estado = true;
+
 }

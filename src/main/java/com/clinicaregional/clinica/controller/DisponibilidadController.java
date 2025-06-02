@@ -36,8 +36,8 @@ public class DisponibilidadController {
     }
 
     @GetMapping("/medico/{id}")
-    public ResponseEntity<DisponibilidadResponse> listarPorMedicoId(@PathVariable Long id) {
-        return ResponseEntity.ok(disponibilidadService.obtenerPorId(id));
+    public ResponseEntity<List<DisponibilidadResponse>> listarPorMedicoId(@PathVariable Long id) {
+        return ResponseEntity.ok(disponibilidadService.listarPorMedicoId(id));
     }
 
     @PutMapping("/{id}")

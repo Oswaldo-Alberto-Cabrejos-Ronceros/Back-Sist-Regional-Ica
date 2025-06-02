@@ -58,6 +58,8 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
     @Transactional(readOnly = true)
     @Override
     public List<DisponibilidadResponse> listarPorMedicoId(Long medicoId) {
+        medicoRepository.findByIdAndEstadoIsTrue(medicoId).orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + medicoId));
+
         filtroEstado.activarFiltroEstado(true);
         return disponibilidadRepository.findAllByMedicoId(medicoId).stream().map(disponibilidadMapper::toResponse).collect(Collectors.toList());
     }

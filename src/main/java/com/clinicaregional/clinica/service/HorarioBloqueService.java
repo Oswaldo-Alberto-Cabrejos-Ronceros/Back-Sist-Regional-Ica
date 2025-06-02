@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface HorarioBloqueService {
     List<HorarioBloqueResponse> obtenerHorariosBloques();
+    List<HorarioBloqueResponse> obtenerHoraiosBloquesPorMedicoId(Long medicoId);
     HorarioBloqueResponse crearHorarioBloque(HorarioBloqueRequest horarioBloqueRequest);
     HorarioBloqueResponse obtenerHorarioBloquePorId(Long id);
     boolean estaDiponibleHorarioBloque(Long id);

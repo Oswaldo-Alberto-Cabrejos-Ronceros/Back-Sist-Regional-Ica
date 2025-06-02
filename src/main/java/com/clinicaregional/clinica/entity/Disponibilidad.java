@@ -35,7 +35,7 @@ public class Disponibilidad extends EntidadConEstado{
 
     private String notas;
 
-    @OneToMany
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
     private Medico medico;
 

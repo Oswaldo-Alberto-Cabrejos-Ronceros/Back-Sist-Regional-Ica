@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,8 @@ public interface PacienteService {
     Optional<PacienteDTO> getPacientePorId(Long id);
 
     Optional<PacienteDTO> getPacientePorIdentificacion(String identificacion);
+
+    MyInfoPaciente getMyInfoPaciente(Long pacienteId);
 
     PacienteDTO crearPaciente(PacienteDTO pacienteDTO);
 

@@ -1,59 +1,55 @@
 package com.clinicaregional.clinica.controller;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.clinicaregional.clinica.dto.request.HorarioBloqueRequest;
 import com.clinicaregional.clinica.dto.response.HorarioBloqueResponse;
-import com.clinicaregional.clinica.enums.EstadoBloque;
 import com.clinicaregional.clinica.service.HorarioBloqueService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
+@RequestMapping("/api/horario-bloques")
+@RequiredArgsConstructor
 public class HorarioBloqueController {
+
     private final HorarioBloqueService horarioBloqueService;
-
-    @Autowired
-    public HorarioBloqueController(HorarioBloqueService horarioBloqueService) {
-        this.horarioBloqueService = horarioBloqueService;
-    }   
-
-    
-    @GetMapping("/medico/{medicoId}")
-    public ResponseEntity<List<HorarioBloqueResponse>> obtenerPorMedicoId(@PathVariable Long medicoId) {
-        return ResponseEntity.ok(horarioBloqueService.obtenerHoraiosBloquesPorMedicoId(medicoId));
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<HorarioBloqueResponse> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(horarioBloqueService.obtenerHorarioBloquePorId(id));
+        return ResponseEntity.ok(horarioBloqueService.obtenerPorId(id));
     }
 
-    @GetMapping("/{id}/disponible")
-    public ResponseEntity<Boolean> estaDisponible(@PathVariable Long id) {
-        return ResponseEntity.ok(horarioBloqueService.estaDiponibleHorarioBloque(id));
+    @GetMapping("/disponibilidad/{id}")
+    public ResponseEntity<List<HorarioBloqueResponse>> listarPorDisponibilidad(
+            @PathVariable("id") Long disponibilidadId) {
+        return ResponseEntity.ok(horarioBloqueService.listarPorDisponibilidad(disponibilidadId));
+    }
+
+    @GetMapping("/medico/{id}")
+    public ResponseEntity<List<HorarioBloqueResponse>> listarPorMedico(@PathVariable("id") Long medicoId) {
+        return ResponseEntity.ok(horarioBloqueService.listarPorMedico(medicoId));
+    }
+
+    @GetMapping("/fecha")
+    public ResponseEntity<List<HorarioBloqueResponse>> listarPorFecha(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        return ResponseEntity.ok(horarioBloqueService.listarPorFecha(fecha));
     }
 
     @PostMapping
-    public ResponseEntity<HorarioBloqueResponse> crear(@RequestBody HorarioBloqueRequest request) {
-        return ResponseEntity.ok(horarioBloqueService.crearHorarioBloque(request));
+    public ResponseEntity<HorarioBloqueResponse> registrar(@Valid @RequestBody HorarioBloqueRequest request) {
+        return ResponseEntity.ok(horarioBloqueService.registrar(request));
     }
 
     @PutMapping("/{id}/estado")
-    public ResponseEntity<HorarioBloqueResponse> actualizarEstado(@PathVariable Long id, @RequestParam EstadoBloque estado) {
-        return ResponseEntity.ok(horarioBloqueService.actualizarEstadoHorarioBloque(id, estado));
-    }
-
-    @PutMapping("/{id}/liberar")
-    public ResponseEntity<Void> liberar(@PathVariable Long id) {
-        horarioBloqueService.liberarHorarioBloque(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<HorarioBloqueResponse> actualizarEstado(
+            @PathVariable Long id,
+            @RequestParam("estado") String nuevoEstado) {
+        return ResponseEntity.ok(horarioBloqueService.actualizarEstado(id, nuevoEstado));
     }
 }
-

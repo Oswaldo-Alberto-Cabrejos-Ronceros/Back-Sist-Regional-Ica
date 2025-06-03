@@ -14,8 +14,10 @@ import com.clinicaregional.clinica.enums.EstadoBloque;
 import com.clinicaregional.clinica.service.HorarioBloqueService;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
+@RequestMapping("/api/horarios-bloque")
 public class HorarioBloqueController {
     private final HorarioBloqueService horarioBloqueService;
 

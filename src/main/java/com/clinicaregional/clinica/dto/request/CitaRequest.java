@@ -2,8 +2,11 @@ package com.clinicaregional.clinica.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import java.sql.Time;
-import java.util.Date;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,12 +21,14 @@ public class CitaRequest {
 
     @NotNull(message = "La fecha no puede estar en blanco")
     @FutureOrPresent(message = "La fecha no puede ser pasada")
-    private Date fecha;
-    @NotNull(message = "La hora no puede estar en blanco")
-    @FutureOrPresent(message = "La hora no puede ser pasada")
-    private Time hora;
-    private boolean estadoCita;
-    private String notas;
-    private String antecedentes;
+    private LocalDate fecha;
 
+    @NotNull(message = "La hora no puede estar en blanco")
+    private LocalTime hora;
+
+    @Size(max = 255, message = "Las notas no deben superar los 255 caracteres")
+    private String notas;
+
+    @Size(max = 1000, message = "Los antecedentes no deben superar los 1000 caracteres")
+    private String antecedentes;
 }

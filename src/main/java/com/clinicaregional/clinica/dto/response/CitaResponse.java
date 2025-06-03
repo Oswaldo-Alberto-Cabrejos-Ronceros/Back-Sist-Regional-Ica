@@ -1,7 +1,11 @@
 package com.clinicaregional.clinica.dto.response;
 
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
+
+import com.clinicaregional.clinica.enums.EstadoCita;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,10 +18,11 @@ import lombok.Setter;
 @Setter
 public class CitaResponse {
 
-    private Long id;
-    private Date fecha;
-    private Time hora;
-    private boolean estadoCita;
+    private Long citaId;
+    private LocalDate fecha;
+    private LocalTime hora;
+    private EstadoCita estadoCita;
     private String notas;
-    
+    private String antecedentes;
+
 }

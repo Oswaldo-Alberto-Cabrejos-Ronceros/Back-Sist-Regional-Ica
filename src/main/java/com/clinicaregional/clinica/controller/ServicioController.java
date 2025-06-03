@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 
 import com.clinicaregional.clinica.dto.request.ServicioRequest;
 import com.clinicaregional.clinica.dto.response.ServicioResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/servicios")
@@ -20,6 +21,11 @@ public class ServicioController {
     @Autowired
     public ServicioController(ServicioService servicioService) {
         this.servicioService = servicioService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ServicioResponse>> obtenerServicios() {
+        return ResponseEntity.ok(servicioService.obtenerServicios());
     }
 
     @PostMapping

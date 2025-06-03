@@ -15,7 +15,6 @@ import org.hibernate.annotations.Filter;
 @Entity
 @Table(name = "coberturas")
 @SuperBuilder
-//para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")
 public class Cobertura extends EntidadConEstado{
     @Id

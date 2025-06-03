@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,4 +30,16 @@ public class CitaRequest {
 
     @Size(max = 1000, message = "Los antecedentes no deben superar los 1000 caracteres")
     private String antecedentes;
+
+    @NotNull(message = "El ID del paciente es obligatorio")
+    private Long pacienteId;
+
+    @NotNull(message = "El ID del médico es obligatorio")
+    private Long medicoId;
+
+    @NotNull(message = "El ID del servicio es obligatorio")
+    private Long servicioId;
+
+    private Long seguroId;     // Opcional
+    private Long coberturaId;  // Opcional
 }

@@ -20,7 +20,7 @@ import java.util.Optional;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    //inyectamos por constructor
+    // inyectamos por constructor
     private final JwtUtil jwtUtil;
 
     @Autowired
@@ -28,35 +28,47 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
     }
 
-    //sobreescribimos el metodo que se encarga de decir en que casos no se aplica el filterInternal
+    // sobreescribimos el metodo que se encarga de decir en que casos no se aplica
+    // el filterInternal
     @Override
     public boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        return path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register") || path.startsWith("/api/auth/refresh");
+        return path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")
+                || path.startsWith("/api/auth/refresh");
     }
 
-    //sobreescribimos para aplicar filtro
+    // sobreescribimos para aplicar filtro
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //obtenemos las cookies
-        Cookie[] cookies = request.getCookies();
-        //si existen cookies
-        if (cookies != null) {
-            //buscamos la cookie jwtToken
-            Optional<Cookie> jwtToken = Arrays.stream(cookies).filter(c -> c.getName().equals("jwtToken")).findFirst();
-            if (jwtToken.isPresent()) {
-                String token = jwtToken.get().getValue();
-                //validadamos token
-                if (jwtUtil.validateToken(token)) {
-                    String email = jwtUtil.getEmailFromJwt(token);
-                    List<GrantedAuthority> authorities = jwtUtil.getAuthoritiesFromJwt(token);
-                    //creamos un usuario autenticado
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, null, authorities);
-                    //guardamos el usuario autenticado en el contexto de spring security
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
+        try {
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                Optional<Cookie> jwtToken = Arrays.stream(cookies)
+                        .filter(c -> c.getName().equals("jwtToken"))
+                        .findFirst();
+
+                if (jwtToken.isPresent()) {
+                    String token = jwtToken.get().getValue();
+
+                    // 🔐 Validar solo si es válido, atrapar cualquier excepción del util
+                    if (jwtUtil.validateToken(token)) {
+                        String email = jwtUtil.getEmailFromJwt(token);
+                        List<GrantedAuthority> authorities = jwtUtil.getAuthoritiesFromJwt(token);
+
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email,
+                                null, authorities);
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
             }
+        } catch (Exception e) {
+            // Evita que excepciones internas del filtro bloqueen rutas públicas
+            SecurityContextHolder.clearContext();
         }
+
         filterChain.doFilter(request, response);
     }
+
 }

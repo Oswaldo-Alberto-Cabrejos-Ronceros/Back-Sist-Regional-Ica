@@ -26,8 +26,6 @@ public class Disponibilidad extends EntidadConEstado {
     @Column(name = "disponibilidad_id")
     private Long id;
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "dia_semana", nullable = false)
     private DiaSemana diaSemana;
 
     private LocalTime horaInicio;

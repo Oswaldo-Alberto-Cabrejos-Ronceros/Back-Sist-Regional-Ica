@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
+@RequestMapping("/api/horario-bloques")
+@RequiredArgsConstructor
 public class HorarioBloqueController {
 
     private final HorarioBloqueService horarioBloqueService;

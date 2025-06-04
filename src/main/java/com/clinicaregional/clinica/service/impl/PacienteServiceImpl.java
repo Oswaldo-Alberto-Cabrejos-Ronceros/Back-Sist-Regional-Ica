@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
@@ -71,6 +72,14 @@ public class PacienteServiceImpl implements PacienteService {
         filtroEstado.activarFiltroEstado(true);
         return pacienteRepository.findByNumeroIdentificacion(identificacion)
                 .map(pacienteMapper::mapToPacienteDTO);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    //despues agregar validacion de owner
+    public MyInfoPaciente getMyInfoPaciente(Long pacienteId) {
+        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(pacienteId).orElseThrow(()->new ResourceNotFoundException("Paciente no encontrado con id" + pacienteId));
+        return pacienteMapper.mapToMyInfoPaciente(paciente);
     }
 
     @Transactional

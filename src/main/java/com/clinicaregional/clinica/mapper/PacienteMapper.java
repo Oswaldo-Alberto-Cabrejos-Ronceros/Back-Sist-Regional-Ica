@@ -1,7 +1,9 @@
 package com.clinicaregional.clinica.mapper;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.entity.Paciente;
+import com.clinicaregional.clinica.entity.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +52,19 @@ public class PacienteMapper {
                 pacienteDTO.getTipoSangre(),
                 pacienteDTO.getAntecedentes(),
                 pacienteDTO.getUsuario()!=null ? usuarioMapper.mapToUsuario(pacienteDTO.getUsuario()):null //usuario puede ser null
+        );
+    }
+
+    public MyInfoPaciente mapToMyInfoPaciente(Paciente paciente) {
+        return new MyInfoPaciente(
+                paciente.getNombres(),
+                paciente.getApellidos(),
+                paciente.getNumeroIdentificacion(),
+                paciente.getUsuario().getCorreo(),
+                paciente.getFechaNacimiento(),
+                paciente.getSexo(),
+                paciente.getNacionalidad(),
+                paciente.getDireccion()
         );
     }
 }

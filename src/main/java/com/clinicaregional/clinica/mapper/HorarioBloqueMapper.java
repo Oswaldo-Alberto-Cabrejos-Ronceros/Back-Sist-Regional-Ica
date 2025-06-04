@@ -18,7 +18,7 @@ public class HorarioBloqueMapper {
                 bloque.getHoraFin(),
                 bloque.getEstadoBloque().name(),
                 bloque.getDisponibilidad().getId(),
-                bloque.getCita() != null ? bloque.getCita().getCitaId() : null);
+                bloque.getCita() != null ? bloque.getCita().getId() : null);
     }
 
     // Request → Entity

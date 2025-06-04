@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.repository;
 
+import com.clinicaregional.clinica.entity.Cita;
 import com.clinicaregional.clinica.entity.HorarioBloque;
 import com.clinicaregional.clinica.enums.EstadoBloque;
 
@@ -21,5 +22,9 @@ public interface HorarioBloqueRepository extends JpaRepository<HorarioBloque, Lo
     List<HorarioBloque> findByFecha(LocalDate fecha);
 
     Optional<HorarioBloque> findByFechaAndHoraInicioAndEstadoBloque(LocalDate fecha, LocalTime hora, EstadoBloque estadoBloque);
+
+    Optional<HorarioBloque> findByCitaId(Long citaId);
+
+    Optional<HorarioBloque> findByCita(Cita cita);
 
 }

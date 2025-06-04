@@ -45,7 +45,7 @@ public class CitaMapper {
 
     public CitaResponse toResponse(Cita cita) {
         return new CitaResponse(
-                cita.getCitaId(),
+                cita.getId(),
                 cita.getFecha(),
                 cita.getHora(),
                 cita.getEstadoCita(),

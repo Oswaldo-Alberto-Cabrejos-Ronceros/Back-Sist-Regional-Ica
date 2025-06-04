@@ -16,4 +16,13 @@ public interface CitaService {
     CitaResponse actualizar(Long id, CitaRequest request);
 
     void eliminar(Long id);
+
+    CitaResponse confirmarCita(Long citaId);
+
+    CitaResponse cancelarCita(Long citaId);
+
+    CitaResponse atenderCita(Long citaId);
+
+    CitaResponse reprogramarCita(Long citaId, CitaRequest nuevaCitaRequest);
+
 }

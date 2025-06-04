@@ -48,4 +48,28 @@ public class CitaController {
         citaService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+
+    // Confirmar una cita
+    @PutMapping("/confirmar/{id}")
+    public ResponseEntity<CitaResponse> confirmarCita(@PathVariable Long id) {
+        return ResponseEntity.ok(citaService.confirmarCita(id));
+    }
+
+    // Cancelar una cita
+    @PutMapping("/cancelar/{id}")
+    public ResponseEntity<CitaResponse> cancelar(@PathVariable Long id) {
+        return ResponseEntity.ok(citaService.cancelarCita(id));
+    }
+
+    // Atender una cita
+    @PutMapping("/atender/{id}")
+    public ResponseEntity<CitaResponse> atender(@PathVariable Long id) {
+        return ResponseEntity.ok(citaService.atenderCita(id));
+    }
+
+    @PutMapping("/reprogramar/{id}")
+    public ResponseEntity<CitaResponse> reprogramar(@PathVariable Long id, @Valid @RequestBody CitaRequest request) {
+        return ResponseEntity.ok(citaService.reprogramarCita(id, request));
+    }
+
 }

@@ -4,4 +4,5 @@ public enum EstadoBloque {
     DISPONIBLE,
     OCUPADO,
     TERMINADO,
+    EXPIRO,
 }

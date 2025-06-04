@@ -12,12 +12,10 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class HorarioBloqueResponse {
     private Long id;
-    private String nombre;
     private LocalDate fecha;
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private String estadoBloque;
-    private Long medicoId;
-    private Long citaId;
     private Long disponibilidadId;
+    private Long citaId;
 }

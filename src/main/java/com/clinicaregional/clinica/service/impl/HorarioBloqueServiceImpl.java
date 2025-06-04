@@ -2,97 +2,108 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.request.HorarioBloqueRequest;
 import com.clinicaregional.clinica.dto.response.HorarioBloqueResponse;
+import com.clinicaregional.clinica.entity.Disponibilidad;
 import com.clinicaregional.clinica.entity.HorarioBloque;
 import com.clinicaregional.clinica.enums.EstadoBloque;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.HorarioBloqueMapper;
-import com.clinicaregional.clinica.repository.CitaRepository;
+import com.clinicaregional.clinica.repository.DisponibilidadRepository;
 import com.clinicaregional.clinica.repository.HorarioBloqueRepository;
-import com.clinicaregional.clinica.service.DisponibilidadService;
 import com.clinicaregional.clinica.service.HorarioBloqueService;
-import com.clinicaregional.clinica.service.MedicoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class HorarioBloqueServiceImpl implements HorarioBloqueService {
 
     private final HorarioBloqueRepository horarioBloqueRepository;
+    private final DisponibilidadRepository disponibilidadRepository;
     private final HorarioBloqueMapper horarioBloqueMapper;
-    private final MedicoService medicoService;
-    private final CitaRepository citaRepository;
-    private final DisponibilidadService disponibilidadService;
 
-    @Autowired
-    public HorarioBloqueServiceImpl(HorarioBloqueRepository horarioBloqueRepository, HorarioBloqueMapper horarioBloqueMapper,
-                                    MedicoService medicoService, CitaRepository citaRepository, DisponibilidadService disponibilidadService) {
-        this.horarioBloqueRepository = horarioBloqueRepository;
-        this.horarioBloqueMapper = horarioBloqueMapper;
-        this.medicoService = medicoService;
-        this.citaRepository = citaRepository;
-        this.disponibilidadService = disponibilidadService;
+    @Transactional(readOnly = true)
+    @Override
+    public HorarioBloqueResponse obtenerPorId(Long id) {
+        HorarioBloque bloque = horarioBloqueRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horario bloque no encontrado con ID: " + id));
+        return horarioBloqueMapper.mapToHorarioBloqueResponse(bloque);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<HorarioBloqueResponse> obtenerHorariosBloques() {
-        return horarioBloqueRepository.findAll().stream().map(horarioBloqueMapper::toResponse).collect((Collectors.toList()));
+    public List<HorarioBloqueResponse> listarPorDisponibilidad(Long disponibilidadId) {
+        return horarioBloqueRepository.findByDisponibilidadId(disponibilidadId).stream()
+                .map(horarioBloqueMapper::mapToHorarioBloqueResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<HorarioBloqueResponse> obtenerHoraiosBloquesPorMedicoId(Long medicoId) {
-        return horarioBloqueRepository.findAllByMedicoId(medicoId).stream().map(horarioBloqueMapper::toResponse).collect((Collectors.toList()));
+    public List<HorarioBloqueResponse> listarPorMedico(Long medicoId) {
+        return horarioBloqueRepository.findByDisponibilidad_Medico_Id(medicoId).stream()
+                .map(horarioBloqueMapper::mapToHorarioBloqueResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<HorarioBloqueResponse> listarPorFecha(LocalDate fecha) {
+        return horarioBloqueRepository.findByFecha(fecha).stream()
+                .map(horarioBloqueMapper::mapToHorarioBloqueResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
-    public HorarioBloqueResponse crearHorarioBloque(HorarioBloqueRequest horarioBloqueRequest) {
-        medicoService.obtenerMedicoPorId(horarioBloqueRequest.getMedicoId());
-        if (!citaRepository.existsById(horarioBloqueRequest.getCitaId())) {
-            throw new ResourceNotFoundException("No se encontro cita con el id: " + horarioBloqueRequest.getCitaId());
+    public HorarioBloqueResponse actualizarEstado(Long id, String nuevoEstado) {
+        HorarioBloque bloque = horarioBloqueRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horario bloque no encontrado con ID: " + id));
+
+        EstadoBloque estado = EstadoBloque.valueOf(nuevoEstado.toUpperCase());
+        bloque.setEstadoBloque(estado);
+
+        HorarioBloque actualizado = horarioBloqueRepository.save(bloque);
+        return horarioBloqueMapper.mapToHorarioBloqueResponse(actualizado);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean estaDisponible(Long id) {
+        HorarioBloque bloque = horarioBloqueRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horario bloque no encontrado con ID: " + id));
+        return bloque.getEstadoBloque() == EstadoBloque.DISPONIBLE;
+    }
+
+    @Transactional
+    @Override
+    public void liberar(Long id) {
+        HorarioBloque bloque = horarioBloqueRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Horario bloque no encontrado con ID: " + id));
+
+        if (bloque.getEstadoBloque() == EstadoBloque.DISPONIBLE) {
+            throw new DuplicateResourceException("El bloque ya está libre.");
         }
-        disponibilidadService.obtenerPorId(horarioBloqueRequest.getDisponibilidadId());
-        HorarioBloque horarioBloque = horarioBloqueMapper.toEntity(horarioBloqueRequest);
-        HorarioBloque created = horarioBloqueRepository.save(horarioBloque);
-        return horarioBloqueMapper.toResponse(created);
+
+        bloque.setEstadoBloque(EstadoBloque.DISPONIBLE);
+        horarioBloqueRepository.save(bloque);
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public HorarioBloqueResponse obtenerHorarioBloquePorId(Long id) {
-        HorarioBloque horarioBloque = horarioBloqueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro bloque horario con el id:" + id));
-        return horarioBloqueMapper.toResponse(horarioBloque);
-    }
+    public HorarioBloqueResponse registrar(HorarioBloqueRequest request) {
+        Disponibilidad disponibilidad = disponibilidadRepository.findById(request.getDisponibilidadId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Disponibilidad no encontrada con ID: " + request.getDisponibilidadId()));
 
-    @Transactional(readOnly = true)
-    @Override
-    public boolean estaDiponibleHorarioBloque(Long id) {
-        HorarioBloqueResponse horarioBloqueResponse = obtenerHorarioBloquePorId(id);
-        return horarioBloqueResponse.getEstadoBloque().equals("DISPONIBLE");
-    }
+        HorarioBloque bloque = horarioBloqueMapper.mapToHorarioBloque(request);
+        bloque.setDisponibilidad(disponibilidad);
 
-    @Transactional
-    @Override
-    public HorarioBloqueResponse actualizarEstadoHorarioBloque(Long id, EstadoBloque estado) {
-        HorarioBloque horarioBloque = horarioBloqueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro bloque horario con el id:" + id));
-        horarioBloque.setEstadoBloque(estado);
-        HorarioBloque updated = horarioBloqueRepository.save(horarioBloque);
-        return horarioBloqueMapper.toResponse(updated);
-    }
-
-    @Transactional
-    @Override
-    public void liberarHorarioBloque(Long id) {
-        HorarioBloque horarioBloque = horarioBloqueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro bloque horario con el id:" + id));
-        if (horarioBloque.getEstadoBloque() == EstadoBloque.DISPONIBLE) {
-            throw new DuplicateResourceException("Ya esta liberado el bloque horario ingreado");
-        }
-        horarioBloque.setEstadoBloque(EstadoBloque.DISPONIBLE);
+        HorarioBloque guardado = horarioBloqueRepository.save(bloque);
+        return horarioBloqueMapper.mapToHorarioBloqueResponse(guardado);
     }
 }

@@ -14,14 +14,15 @@ import java.util.Optional;
 
 @Repository
 public interface HorarioBloqueRepository extends JpaRepository<HorarioBloque, Long> {
-    //para obtener el horario bloque de un medico
+    // para obtener el horario bloque de un medico
     List<HorarioBloque> findByDisponibilidadId(Long disponibilidadId);
 
     List<HorarioBloque> findByDisponibilidad_Medico_Id(Long medicoId);
 
     List<HorarioBloque> findByFecha(LocalDate fecha);
 
-    Optional<HorarioBloque> findByFechaAndHoraInicioAndEstadoBloque(LocalDate fecha, LocalTime hora, EstadoBloque estadoBloque);
+    Optional<HorarioBloque> findByFechaAndHoraInicioAndEstadoBloque(LocalDate fecha, LocalTime hora,
+            EstadoBloque estadoBloque);
 
     Optional<HorarioBloque> findByCitaId(Long citaId);
 

@@ -2,17 +2,26 @@ package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.request.HorarioBloqueRequest;
 import com.clinicaregional.clinica.dto.response.HorarioBloqueResponse;
-import com.clinicaregional.clinica.entity.HorarioBloque;
-import com.clinicaregional.clinica.enums.EstadoBloque;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface HorarioBloqueService {
-    List<HorarioBloqueResponse> obtenerHorariosBloques();
-    List<HorarioBloqueResponse> obtenerHoraiosBloquesPorMedicoId(Long medicoId);
-    HorarioBloqueResponse crearHorarioBloque(HorarioBloqueRequest horarioBloqueRequest);
-    HorarioBloqueResponse obtenerHorarioBloquePorId(Long id);
-    boolean estaDiponibleHorarioBloque(Long id);
-    HorarioBloqueResponse actualizarEstadoHorarioBloque(Long id, EstadoBloque estado);
-    void liberarHorarioBloque(Long id);
+
+    HorarioBloqueResponse obtenerPorId(Long id);
+
+    List<HorarioBloqueResponse> listarPorDisponibilidad(Long disponibilidadId);
+
+    List<HorarioBloqueResponse> listarPorMedico(Long medicoId);
+
+    List<HorarioBloqueResponse> listarPorFecha(LocalDate fecha);
+
+    HorarioBloqueResponse actualizarEstado(Long id, String nuevoEstado);
+
+    boolean estaDisponible(Long id);
+
+    void liberar(Long id); // útil si una cita se cancela y se quiere marcar como DISPONIBLE
+
+    HorarioBloqueResponse registrar(HorarioBloqueRequest request);
+
 }

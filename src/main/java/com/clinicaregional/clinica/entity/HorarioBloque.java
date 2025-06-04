@@ -7,40 +7,41 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import org.hibernate.annotations.Filter;
+
 @Entity
+@Table(name = "horarios_bloque")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "horarios_bloque")
-public class HorarioBloque {
+@Builder
+@Filter(name = "estadoActivo", condition = "estado = :estado")
+public class HorarioBloque extends EntidadConEstado{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "horario_bloque_id")
     private Long id;
 
-    private String nombre;
-
+    @Column(nullable = false)
     private LocalDate fecha;
 
+    @Column(nullable = false, name = "hora_inicio")
     private LocalTime horaInicio;
 
+    @Column(nullable = false, name = "hora_fin")
     private LocalTime horaFin;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "estado_bloque", nullable = false)
+    @Column(nullable = false, name = "estado_bloque")
     private EstadoBloque estadoBloque;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medico_id", nullable = false)
-    private Medico medico;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cita_id")
-    private Cita cita;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "disponibilidad_id", nullable = false)
     private Disponibilidad disponibilidad;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cita_id", unique = true)
+    private Cita cita;
 }

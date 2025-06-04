@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.entity;
 
 import java.time.LocalTime;
+import java.util.List;
 
 import org.hibernate.annotations.Filter;
 
@@ -19,16 +20,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "disponibilidades")
 @Filter(name = "estadoActivo", condition = "estado = :estado")
-public class Disponibilidad extends EntidadConEstado{
+public class Disponibilidad extends EntidadConEstado {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "disponibilidad_id")
     private Long id;
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "dia_semana", nullable = false)
     private DiaSemana diaSemana;
-    
+
     private LocalTime horaInicio;
 
     private LocalTime horaFin;
@@ -38,5 +37,8 @@ public class Disponibilidad extends EntidadConEstado{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medico_id")
     private Medico medico;
+
+    @OneToMany(mappedBy = "disponibilidad", cascade = CascadeType.ALL)
+    private List<HorarioBloque> bloques;
 
 }

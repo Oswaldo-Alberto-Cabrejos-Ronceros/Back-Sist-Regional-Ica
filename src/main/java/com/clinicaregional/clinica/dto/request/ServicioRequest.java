@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,5 +23,7 @@ public class ServicioRequest {
     private String descripcion;
 
     private String imagenUrl;
-    
+
+    @NotNull(message = "Especialidad Id es obligatorio")
+    private Long especialidadId;
 }

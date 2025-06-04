@@ -9,6 +9,8 @@ public interface ServicioService {
 
     List<ServicioResponse> obtenerServicios();
 
+    List<ServicioResponse> obtenerServiciosPorEspecialidadId(Long especialidadId);
+
     ServicioResponse agregarServicio(ServicioRequest servicioRequest);
 
     void eliminarServicio(Long id);

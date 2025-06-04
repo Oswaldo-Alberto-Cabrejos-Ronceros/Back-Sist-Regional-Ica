@@ -16,5 +16,5 @@ public class ServicioResponse {
     private String nombre;
     private String descripcion;
     private String imagenUrl;
-    
+    private Long especialidadId;
 }

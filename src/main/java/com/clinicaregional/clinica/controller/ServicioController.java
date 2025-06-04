@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 
 import com.clinicaregional.clinica.dto.request.ServicioRequest;
 import com.clinicaregional.clinica.dto.response.ServicioResponse;
+
 import java.util.List;
 
 @RestController
@@ -28,6 +29,11 @@ public class ServicioController {
         return ResponseEntity.ok(servicioService.obtenerServicios());
     }
 
+    @GetMapping("/especialidad/{id}")
+    public ResponseEntity<List<ServicioResponse>> obtenerServiciosByEspecialidad(@PathVariable Long id) {
+        return ResponseEntity.ok(servicioService.obtenerServiciosPorEspecialidadId(id));
+    }
+
     @PostMapping
     public ResponseEntity<ServicioResponse> agregarServicio(@RequestBody @Valid ServicioRequest servicioRequest) {
         ServicioResponse servicioResponse = servicioService.agregarServicio(servicioRequest);
@@ -36,7 +42,7 @@ public class ServicioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarServicio(@PathVariable Long id,
-            @RequestBody @Valid ServicioRequest servicioRequest) {
+                                                @RequestBody @Valid ServicioRequest servicioRequest) {
         try {
             ServicioResponse servicioResponse = servicioService.actualizarServicio(id, servicioRequest);
             return ResponseEntity.ok(servicioResponse);

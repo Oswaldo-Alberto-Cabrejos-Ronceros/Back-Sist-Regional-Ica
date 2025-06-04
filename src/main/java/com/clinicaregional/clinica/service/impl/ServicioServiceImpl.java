@@ -12,8 +12,9 @@ import com.clinicaregional.clinica.mapper.ServicioMapper;
 import com.clinicaregional.clinica.repository.ServicioRepository;
 import com.clinicaregional.clinica.service.ServicioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
-import org.springframework.transaction.annotation.Transactional; 
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class ServicioServiceImpl implements ServicioService {
     private final EspecialidadService especialidadService;
 
     public ServicioServiceImpl(ServicioRepository servicioRepository, ServicioMapper servicioMapper,
-            FiltroEstado filtroEstado,EspecialidadService especialidadService) {
+                               FiltroEstado filtroEstado, EspecialidadService especialidadService) {
         this.servicioRepository = servicioRepository;
         this.servicioMapper = servicioMapper;
         this.filtroEstado = filtroEstado;
@@ -42,6 +43,15 @@ public class ServicioServiceImpl implements ServicioService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public List<ServicioResponse> obtenerServiciosPorEspecialidadId(Long especialidadId) {
+        filtroEstado.activarFiltroEstado(true);
+        return servicioRepository.findAllByEspecialidad_Id(especialidadId).stream()
+                .map(servicioMapper::mapToServicioResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     @Override
     public ServicioResponse agregarServicio(ServicioRequest servicioRequest) {
@@ -49,7 +59,7 @@ public class ServicioServiceImpl implements ServicioService {
         if (servicioRepository.existsByNombre(servicioRequest.getNombre())) {
             throw new DuplicateResourceException("Ya existe un servicio con el nombre ingresado");
         }
-        especialidadService.getEspecialidadById(servicioRequest.getEspecialidadId()).orElseThrow(()->new ResourceNotFoundException("No se encontro especialidad con el id:" + servicioRequest.getEspecialidadId()));
+        especialidadService.getEspecialidadById(servicioRequest.getEspecialidadId()).orElseThrow(() -> new ResourceNotFoundException("No se encontro especialidad con el id:" + servicioRequest.getEspecialidadId()));
         Servicio servicio = servicioMapper.mapToServicio(servicioRequest);
         Servicio savedServicio = servicioRepository.save(servicio);
         return servicioMapper.mapToServicioResponse(savedServicio);
@@ -74,7 +84,7 @@ public class ServicioServiceImpl implements ServicioService {
         if (servicioRepository.existsByNombre(servicioRequest.getNombre())) {
             throw new DuplicateResourceException("Ya existe un servicio con el nombre ingresado");
         }
-        especialidadService.getEspecialidadById(servicioRequest.getEspecialidadId()).orElseThrow(()->new ResourceNotFoundException("No se encontro especialidad con el id:" + servicioRequest.getEspecialidadId()));
+        especialidadService.getEspecialidadById(servicioRequest.getEspecialidadId()).orElseThrow(() -> new ResourceNotFoundException("No se encontro especialidad con el id:" + servicioRequest.getEspecialidadId()));
         servicio.setNombre(servicioRequest.getNombre());
         servicio.setDescripcion(servicioRequest.getDescripcion());
         servicio.setImagenUrl(servicioRequest.getImagenUrl());

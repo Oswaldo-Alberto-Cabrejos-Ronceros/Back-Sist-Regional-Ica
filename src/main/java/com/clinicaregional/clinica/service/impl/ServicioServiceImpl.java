@@ -47,6 +47,7 @@ public class ServicioServiceImpl implements ServicioService {
     @Override
     public List<ServicioResponse> obtenerServiciosPorEspecialidadId(Long especialidadId) {
         filtroEstado.activarFiltroEstado(true);
+        especialidadService.getEspecialidadById(especialidadId).orElseThrow(() -> new ResourceNotFoundException("No se encontro especialidad con el id:" + especialidadId));
         return servicioRepository.findAllByEspecialidad_Id(especialidadId).stream()
                 .map(servicioMapper::mapToServicioResponse)
                 .collect(Collectors.toList());

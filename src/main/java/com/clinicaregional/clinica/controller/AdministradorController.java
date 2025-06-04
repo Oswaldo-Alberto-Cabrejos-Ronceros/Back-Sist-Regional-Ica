@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.AdministradorDTO;
 import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
+import com.clinicaregional.clinica.dto.response.MyInfoAdministrador;
 import com.clinicaregional.clinica.service.AdministradorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,13 @@ public class AdministradorController {
     public ResponseEntity<AdministradorDTO> getAdministradorPorId(@PathVariable Long id) {
         return administradorService.getAdministradorById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/my-info/{id}")
+    public ResponseEntity<MyInfoAdministrador> getMyInfoAdministrador(@PathVariable Long id){
+        MyInfoAdministrador myInfoAdministrador = administradorService.getMyInfoAdministrador(id);
+        return ResponseEntity.ok(myInfoAdministrador);
+    }
+
 
     @PostMapping
     public ResponseEntity<AdministradorDTO> createAdministrador(@RequestBody @Valid RegisterAdministradorRequest registerAdministradorRequest) {

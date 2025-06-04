@@ -4,6 +4,7 @@ import com.clinicaregional.clinica.dto.AdministradorDTO;
 import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
+import com.clinicaregional.clinica.dto.response.MyInfoAdministrador;
 import com.clinicaregional.clinica.entity.Administrador;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
@@ -32,7 +33,7 @@ public class AdministradorServiceImpl implements AdministradorService {
 
     @Autowired
     public AdministradorServiceImpl(AdministradorRepository administradorRepository,
-            AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado) {
+                                    AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado) {
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
         this.usuarioService = usuarioService;
@@ -52,6 +53,14 @@ public class AdministradorServiceImpl implements AdministradorService {
     public Optional<AdministradorDTO> getAdministradorById(Long id) {
         filtroEstado.activarFiltroEstado(true);
         return administradorRepository.findByIdAndEstadoIsTrue(id).map(administradorMapper::mapToAdministradorDTO);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public MyInfoAdministrador getMyInfoAdministrador(Long id) {
+        filtroEstado.activarFiltroEstado(true);
+        Administrador administrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro Administrador con el id: " + id));
+        return administradorMapper.mapToMyInfoAdministrador(administrador);
     }
 
     @Transactional

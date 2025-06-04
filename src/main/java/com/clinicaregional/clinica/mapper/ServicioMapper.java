@@ -17,6 +17,7 @@ public class ServicioMapper {
         servicio.setNombre(dto.getNombre());
         servicio.setDescripcion(dto.getDescripcion());
         servicio.setImagenUrl(dto.getImagenUrl());
+        servicio.setPrice(dto.getPrice());
         servicio.setEspecialidad(especialidad);
         return servicio;
     }
@@ -27,6 +28,7 @@ public class ServicioMapper {
         response.setNombre(servicio.getNombre());
         response.setDescripcion(servicio.getDescripcion());
         response.setImagenUrl(servicio.getImagenUrl());
+        response.setPrice(servicio.getPrice());
         response.setEspecialidadId(servicio.getEspecialidad().getId());
         return response;
     }

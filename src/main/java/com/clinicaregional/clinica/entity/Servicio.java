@@ -29,6 +29,7 @@ public class Servicio extends EntidadConEstado {
     private String nombre;
     private String descripcion;
     private String imagenUrl;
+    private Float price;
     @ManyToOne(fetch = FetchType.LAZY)
     private Especialidad especialidad;
 }

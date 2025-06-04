@@ -1,8 +1,6 @@
 package com.clinicaregional.clinica.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +21,10 @@ public class ServicioRequest {
     private String descripcion;
 
     private String imagenUrl;
+
+    @NotNull(message = "Precio no puede estar vacio")
+    @DecimalMin(value = "0.0", message = "El precio debe ser mayor o igual a 0.0")
+    private Float price;
 
     @NotNull(message = "Especialidad Id es obligatorio")
     private Long especialidadId;

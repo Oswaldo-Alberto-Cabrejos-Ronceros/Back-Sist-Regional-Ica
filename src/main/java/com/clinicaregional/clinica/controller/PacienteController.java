@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.service.PacienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,14 +32,19 @@ public class PacienteController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @GetMapping("/num-identificacion/{numIdentificacion}")
     public ResponseEntity<PacienteDTO> getPacienteByNumIdentificacion(@PathVariable String numIdentificacion) {
         return pacienteService.getPacientePorIdentificacion(numIdentificacion)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
+    @GetMapping("/my-info/{id}")
+    public ResponseEntity<MyInfoPaciente> getMyInfoPaciente(@PathVariable Long id) {
+        return ResponseEntity.ok(pacienteService.getMyInfoPaciente(id));
+    }
+
     @PostMapping
     public ResponseEntity<PacienteDTO> createPaciente(@RequestBody @Valid PacienteDTO pacienteDTO) {
         PacienteDTO savedPaciente = pacienteService.crearPaciente(pacienteDTO);
@@ -47,7 +53,7 @@ public class PacienteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
-            @RequestBody @Valid PacienteDTO pacienteDTO) {
+                                                      @RequestBody @Valid PacienteDTO pacienteDTO) {
         PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
         return ResponseEntity.ok(updatedPaciente);
     }

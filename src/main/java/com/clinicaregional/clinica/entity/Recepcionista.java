@@ -33,6 +33,8 @@ public class Recepcionista extends EntidadConEstado {
 
     private String direccion;
 
+    private String imagenUrl;
+
     @Enumerated(EnumType.STRING)
     private TurnoTrabajo turnoTrabajo;
 

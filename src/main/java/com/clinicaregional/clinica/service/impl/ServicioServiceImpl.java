@@ -15,6 +15,10 @@ import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 
+import com.clinicaregional.clinica.dto.response.PagedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,6 +98,27 @@ public class ServicioServiceImpl implements ServicioService {
         servicio.setEspecialidad(especialidad);
         Servicio updatedServicio = servicioRepository.save(servicio);
         return servicioMapper.mapToServicioResponse(updatedServicio);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResponse<ServicioResponse> obtenerServiciosPaginado(Pageable pageable) {
+        filtroEstado.activarFiltroEstado(true);
+        Page<Servicio> servicioPage = servicioRepository.findAllByEstadoIsTrue(pageable);
+
+        List<ServicioResponse> contenido = servicioPage.getContent()
+                .stream()
+                .map(servicioMapper::mapToServicioResponse)
+                .collect(Collectors.toList());
+
+        return new PagedResponse<>(
+                contenido,
+                servicioPage.getNumber(),
+                servicioPage.getSize(),
+                servicioPage.getTotalElements(),
+                servicioPage.getTotalPages(),
+                servicioPage.isLast()
+        );
     }
 
 }

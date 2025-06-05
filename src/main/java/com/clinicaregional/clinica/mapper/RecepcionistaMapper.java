@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.mapper;
 
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.response.MyInfoRecepcionista;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.entity.Recepcionista;
 import com.clinicaregional.clinica.entity.TipoDocumento;
@@ -31,6 +32,7 @@ public class RecepcionistaMapper {
                 .tipoDocumento(tipoDocumento)
                 .telefono(request.getTelefono())
                 .direccion(request.getDireccion())
+                .imagenUrl(request.getImagenUrl())
                 .turnoTrabajo(request.getTurnoTrabajo())
                 .fechaContratacion(request.getFechaContratacion())
                 .usuario(usuario)
@@ -47,9 +49,19 @@ public class RecepcionistaMapper {
                 .tipoDocumentoId(entity.getTipoDocumento().getId())
                 .telefono(entity.getTelefono())
                 .direccion(entity.getDireccion())
+                .imagenUrl(entity.getImagenUrl())
                 .turnoTrabajo(entity.getTurnoTrabajo())
                 .fechaContratacion(entity.getFechaContratacion())
                 .usuarioId(entity.getUsuario().getId())
                 .build();
+    }
+
+    public MyInfoRecepcionista toMyInfoRecepcionista(Recepcionista recepcionista){
+        return new MyInfoRecepcionista(recepcionista.getNombres(),recepcionista.getApellidos(),
+                recepcionista.getUsuario().getCorreo(),
+                recepcionista.getTipoDocumento().getNombre(),recepcionista.getNumeroDocumento(),
+                recepcionista.getTelefono(),recepcionista.getDireccion(), recepcionista.getImagenUrl()
+                ,recepcionista.getFechaContratacion());
+
     }
 }

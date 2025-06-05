@@ -1,6 +1,5 @@
 package com.clinicaregional.clinica.dto.response;
 
-import com.clinicaregional.clinica.enums.Sexo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,14 +11,14 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MyInfoPaciente {
-    private String names;
+public class MyInfoAdministrador {
+    private String nombres;
     private String apellidos;
-    private String numeroIdentificacion;
     private String email;
-    private LocalDate fechaNacimiento;
-    private Sexo sexo;
-    private String nacionalidad;
+    private String tipoDocumento;
+    private String numeroDocumento;
+    private String telefono;
     private String direccion;
     private String imagenUrl;
+    private LocalDate fechaContratacion;
 }

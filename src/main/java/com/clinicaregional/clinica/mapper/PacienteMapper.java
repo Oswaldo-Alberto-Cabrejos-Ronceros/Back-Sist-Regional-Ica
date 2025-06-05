@@ -36,12 +36,10 @@ public class PacienteMapper {
                 paciente.getNacionalidad(),
                 paciente.getTelefono(),
                 paciente.getDireccion(),
+                paciente.getImagenUrl(),
                 paciente.getTipoSangre(),
                 paciente.getAntecedentes(),
-                paciente.getUsuario() != null ? usuarioMapper.mapToUsuarioDTO(paciente.getUsuario()) : null // usuario
-                                                                                                            // puede ser
-                                                                                                            // null
-        );
+                paciente.getUsuario() != null ? usuarioMapper.mapToUsuarioDTO(paciente.getUsuario()) : null);
     }
 
     public Paciente mapToPaciente(PacienteDTO pacienteDTO) {
@@ -56,13 +54,10 @@ public class PacienteMapper {
                 pacienteDTO.getNacionalidad(),
                 pacienteDTO.getTelefono(),
                 pacienteDTO.getDireccion(),
+                pacienteDTO.getImagenUrl(),
                 pacienteDTO.getTipoSangre(),
                 pacienteDTO.getAntecedentes(),
-                pacienteDTO.getUsuario() != null ? usuarioMapper.mapToUsuario(pacienteDTO.getUsuario()) : null // usuario
-                                                                                                               // puede
-                                                                                                               // ser
-                                                                                                               // null
-        );
+                pacienteDTO.getUsuario() != null ? usuarioMapper.mapToUsuario(pacienteDTO.getUsuario()) : null);
     }
 
     public MyInfoPaciente mapToMyInfoPaciente(Paciente paciente) {
@@ -74,7 +69,8 @@ public class PacienteMapper {
                 paciente.getFechaNacimiento(),
                 paciente.getSexo(),
                 paciente.getNacionalidad(),
-                paciente.getDireccion());
+                paciente.getDireccion(),
+                paciente.getImagenUrl());
     }
 
     public PacienteResponseDTO mapToPacienteResponseDTO(Paciente paciente) {
@@ -94,4 +90,5 @@ public class PacienteMapper {
             return 0;
         return Period.between(fechaNacimiento, LocalDate.now()).getYears();
     }
+
 }

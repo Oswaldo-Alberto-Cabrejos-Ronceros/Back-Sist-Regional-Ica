@@ -311,4 +311,5 @@ public class CitaServiceImpl implements CitaService {
                 .distinct() // opcional, si hay duplicados
                 .collect(Collectors.toList());
     }
+    
 }

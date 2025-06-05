@@ -2,7 +2,8 @@ package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
-import org.springframework.stereotype.Service;
+import com.clinicaregional.clinica.dto.response.PagedResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +23,7 @@ public interface PacienteService {
     PacienteDTO actualizarPaciente(Long id, PacienteDTO pacienteDTO);
 
     void eliminarPaciente(Long id);
+
+    PagedResponse<PacienteDTO> listarPacientesPaginado(Pageable pageable);
+
 }

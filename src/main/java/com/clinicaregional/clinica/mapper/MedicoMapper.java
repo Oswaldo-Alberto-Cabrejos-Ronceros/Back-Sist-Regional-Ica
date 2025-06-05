@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.mapper;
 
 import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
+import com.clinicaregional.clinica.dto.response.MyInfoMedico;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import org.springframework.stereotype.Component;
 
@@ -58,5 +59,10 @@ public class MedicoMapper {
         medico.setUsuario(usuario);
         return medico;
     }
-
+    // para mapear a MyInfoMedico
+    public MyInfoMedico mapToMyInfoMedico(Medico medico){
+        return new MyInfoMedico(medico.getNombres(), medico.getApellidos(),medico.getUsuario().getCorreo(), medico.getNumeroColegiatura(),
+                medico.getNumeroRNE(), medico.getTipoDocumento().getNombre(), medico.getNumeroDocumento(),
+                medico.getTelefono(), medico.getDireccion(), medico.getImagen(),medico.getFechaContratacion().toLocalDate());
+    }
 }

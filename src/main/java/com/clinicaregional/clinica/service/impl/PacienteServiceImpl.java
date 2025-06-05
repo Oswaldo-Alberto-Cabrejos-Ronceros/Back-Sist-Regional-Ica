@@ -4,6 +4,7 @@ import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
+import com.clinicaregional.clinica.dto.response.PagedResponse;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.entity.Usuario;
@@ -23,6 +24,8 @@ import java.util.DuplicateFormatFlagsException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
 @Service
 public class PacienteServiceImpl implements PacienteService {
@@ -142,4 +145,25 @@ public class PacienteServiceImpl implements PacienteService {
         paciente.setUsuario(null);
         pacienteRepository.save(paciente);
     }
+
+    @Override
+    public PagedResponse<PacienteDTO> listarPacientesPaginado(Pageable pageable) {
+        filtroEstado.activarFiltroEstado(true);
+        Page<Paciente> paginaPacientes = pacienteRepository.findAllByEstadoIsTrue(pageable);
+
+        List<PacienteDTO> contenido = paginaPacientes.getContent()
+                .stream()
+                .map(pacienteMapper::mapToPacienteDTO)
+                .collect(Collectors.toList());
+
+        return new PagedResponse<>(
+                contenido,
+                paginaPacientes.getNumber(),
+                paginaPacientes.getSize(),
+                paginaPacientes.getTotalElements(),
+                paginaPacientes.getTotalPages(),
+                paginaPacientes.isLast()
+        );
+    }
+
 }

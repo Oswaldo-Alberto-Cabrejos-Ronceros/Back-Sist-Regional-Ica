@@ -4,6 +4,7 @@ import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
 import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+import com.clinicaregional.clinica.dto.response.MyInfoRecepcionista;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.entity.Recepcionista;
 import com.clinicaregional.clinica.entity.Rol;
@@ -67,9 +68,17 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
     @Transactional(readOnly = true)
     @Override
     public Optional<RecepcionistaResponse> obtenerPorId(Long id) {
-        filtroEstado.activarFiltroEstado(true);
         return recepcionistaRepository.findByIdAndEstadoIsTrue(id)
                 .map(recepcionistaMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public MyInfoRecepcionista obtenerMyInfoRecepcionista(Long id) {
+        Recepcionista recepcionista= recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(()->new ResourceNotFoundException(
+                "No se encontro recepcionista con el id: " + id
+        ));
+        return recepcionistaMapper.toMyInfoRecepcionista(recepcionista);
     }
 
     @Transactional

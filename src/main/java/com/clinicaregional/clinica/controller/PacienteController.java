@@ -2,12 +2,15 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
+import com.clinicaregional.clinica.dto.response.PagedResponse;
 import com.clinicaregional.clinica.service.PacienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -63,4 +66,14 @@ public class PacienteController {
         pacienteService.eliminarPaciente(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/paginado")
+    public ResponseEntity<PagedResponse<PacienteDTO>> listarPacientesPaginado(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(pacienteService.listarPacientesPaginado(pageable));
+    }
+
 }

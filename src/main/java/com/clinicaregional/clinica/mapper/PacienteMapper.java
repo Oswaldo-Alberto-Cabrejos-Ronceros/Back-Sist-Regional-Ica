@@ -66,7 +66,8 @@ public class PacienteMapper {
                 paciente.getFechaNacimiento(),
                 paciente.getSexo(),
                 paciente.getNacionalidad(),
-                paciente.getDireccion()
+                paciente.getDireccion(),
+                paciente.getImagenUrl()
         );
     }
 }

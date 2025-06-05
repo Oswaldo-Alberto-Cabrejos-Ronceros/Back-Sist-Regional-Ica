@@ -19,5 +19,6 @@ public class MyInfoAdministrador {
     private String numeroDocumento;
     private String telefono;
     private String direccion;
+    private String imagenUrl;
     private LocalDate fechaContratacion;
 }

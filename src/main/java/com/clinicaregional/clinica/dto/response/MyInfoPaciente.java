@@ -21,4 +21,5 @@ public class MyInfoPaciente {
     private Sexo sexo;
     private String nacionalidad;
     private String direccion;
+    private String imagenUrl;
 }

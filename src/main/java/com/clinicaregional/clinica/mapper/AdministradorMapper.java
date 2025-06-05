@@ -39,6 +39,7 @@ public class AdministradorMapper {
                 administrador.getNumeroDocumento(),
                 administrador.getTelefono(),
                 administrador.getDireccion(),
+                administrador.getImagenUrl(),
                 administrador.getFechaContratacion()
         );
 

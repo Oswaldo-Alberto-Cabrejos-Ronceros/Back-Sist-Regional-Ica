@@ -11,6 +11,7 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.HorarioBloqueMapper;
 import com.clinicaregional.clinica.repository.DisponibilidadRepository;
 import com.clinicaregional.clinica.repository.HorarioBloqueRepository;
+import com.clinicaregional.clinica.service.EspecialidadService;
 import com.clinicaregional.clinica.service.HorarioBloqueService;
 import com.clinicaregional.clinica.service.MedicoEspecialidadService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class HorarioBloqueServiceImpl implements HorarioBloqueService {
     private final DisponibilidadRepository disponibilidadRepository;
     private final HorarioBloqueMapper horarioBloqueMapper;
     private final MedicoEspecialidadService medicoEspecialidadService;
-
+    private final EspecialidadService especialidadService;
 
     @Transactional(readOnly = true)
     @Override
@@ -67,6 +68,8 @@ public class HorarioBloqueServiceImpl implements HorarioBloqueService {
     @Transactional(readOnly = true)
     @Override
     public List<HorarioBloqueResponse> listarPorEspecialidad(Long especialidadId) {
+        //verificamos si existe la especialidad
+        especialidadService.getEspecialidadById(especialidadId);
         //obtenemos los medicos de una especialidad
         List<MedicoEspecialidadResponse> medicos = medicoEspecialidadService.obtenerMedicosPorEspecialidad(especialidadId);
         List<HorarioBloqueResponse> horariosBloques=new ArrayList<>();

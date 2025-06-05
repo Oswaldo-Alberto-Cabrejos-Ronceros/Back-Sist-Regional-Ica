@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 import java.util.List;
 
 import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
+import com.clinicaregional.clinica.dto.response.MyInfoMedico;
 import com.clinicaregional.clinica.entity.TipoDocumento;
 import com.clinicaregional.clinica.service.TipoDocumentoService;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
@@ -79,6 +80,14 @@ public class MedicoServiceImpl implements MedicoService {
         filtroEstado.activarFiltroEstado(true);
         return medicoMapper.mapToMedicoResponseDTO(medicoRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id)));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public MyInfoMedico obtenerMyInfoMedico(Long id) {
+        Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id));
+        return medicoMapper.mapToMyInfoMedico(medico);
     }
 
     @Transactional

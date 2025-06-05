@@ -38,6 +38,8 @@ public class AdministradorDTO {
     @Size(max = 156, message = "La direccion debe ser menor a 156 caracteres")
     private String direccion;
 
+    private String imagenUrl;
+
     @NotNull(message = "Fecha de contratacion es obligatorio")
     @PastOrPresent(message = "La fecha de contratación debe ser antes o hoy")
     private LocalDate fechaContratacion;

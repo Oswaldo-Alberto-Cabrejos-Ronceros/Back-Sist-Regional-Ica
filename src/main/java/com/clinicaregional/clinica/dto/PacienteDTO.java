@@ -49,6 +49,8 @@ public class PacienteDTO {
     @NotBlank(message = "La direccion es obligatoria")
     private String direccion;
 
+    private String imagenUrl;
+
     private TipoSangre tipoSangre;
 
     @Size(max = 255, message = "Los antecedentes deben ser menores a 255")

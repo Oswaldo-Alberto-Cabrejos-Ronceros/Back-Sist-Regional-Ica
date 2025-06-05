@@ -32,6 +32,7 @@ public class PacienteMapper {
                 paciente.getNacionalidad(),
                 paciente.getTelefono(),
                 paciente.getDireccion(),
+                paciente.getImagenUrl(),
                 paciente.getTipoSangre(),
                 paciente.getAntecedentes(),
                 paciente.getUsuario()!=null ? usuarioMapper.mapToUsuarioDTO(paciente.getUsuario()):null //usuario puede ser null
@@ -49,6 +50,7 @@ public class PacienteMapper {
                 pacienteDTO.getNacionalidad(),
                 pacienteDTO.getTelefono(),
                 pacienteDTO.getDireccion(),
+                pacienteDTO.getImagenUrl(),
                 pacienteDTO.getTipoSangre(),
                 pacienteDTO.getAntecedentes(),
                 pacienteDTO.getUsuario()!=null ? usuarioMapper.mapToUsuario(pacienteDTO.getUsuario()):null //usuario puede ser null

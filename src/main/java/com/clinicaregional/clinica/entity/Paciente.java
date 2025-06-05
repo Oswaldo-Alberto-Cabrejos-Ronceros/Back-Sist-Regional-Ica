@@ -46,6 +46,8 @@ public class Paciente extends EntidadConEstado {
 
     private String direccion;
 
+    private String imagenUrl;
+
     @Enumerated(EnumType.STRING)
     private TipoSangre tipoSangre;
 

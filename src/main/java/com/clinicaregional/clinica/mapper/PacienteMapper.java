@@ -2,8 +2,13 @@ package com.clinicaregional.clinica.mapper;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
+import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.Usuario;
+
+import java.time.LocalDate;
+import java.time.Period;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +19,10 @@ public class PacienteMapper {
     private final UsuarioMapper usuarioMapper;
 
     @Autowired
-    public PacienteMapper(TipoDocumentoMapper tipoDocumentoMapper,UsuarioMapper usuarioMapper) {
+    public PacienteMapper(TipoDocumentoMapper tipoDocumentoMapper, UsuarioMapper usuarioMapper) {
         this.tipoDocumentoMapper = tipoDocumentoMapper;
         this.usuarioMapper = usuarioMapper;
     }
-
 
     public PacienteDTO mapToPacienteDTO(Paciente paciente) {
         return new PacienteDTO(
@@ -34,9 +38,12 @@ public class PacienteMapper {
                 paciente.getDireccion(),
                 paciente.getTipoSangre(),
                 paciente.getAntecedentes(),
-                paciente.getUsuario()!=null ? usuarioMapper.mapToUsuarioDTO(paciente.getUsuario()):null //usuario puede ser null
+                paciente.getUsuario() != null ? usuarioMapper.mapToUsuarioDTO(paciente.getUsuario()) : null // usuario
+                                                                                                            // puede ser
+                                                                                                            // null
         );
     }
+
     public Paciente mapToPaciente(PacienteDTO pacienteDTO) {
         return new Paciente(
                 pacienteDTO.getId(),
@@ -51,7 +58,10 @@ public class PacienteMapper {
                 pacienteDTO.getDireccion(),
                 pacienteDTO.getTipoSangre(),
                 pacienteDTO.getAntecedentes(),
-                pacienteDTO.getUsuario()!=null ? usuarioMapper.mapToUsuario(pacienteDTO.getUsuario()):null //usuario puede ser null
+                pacienteDTO.getUsuario() != null ? usuarioMapper.mapToUsuario(pacienteDTO.getUsuario()) : null // usuario
+                                                                                                               // puede
+                                                                                                               // ser
+                                                                                                               // null
         );
     }
 
@@ -64,7 +74,24 @@ public class PacienteMapper {
                 paciente.getFechaNacimiento(),
                 paciente.getSexo(),
                 paciente.getNacionalidad(),
-                paciente.getDireccion()
-        );
+                paciente.getDireccion());
+    }
+
+    public PacienteResponseDTO mapToPacienteResponseDTO(Paciente paciente) {
+        int edad = calcularEdad(paciente.getFechaNacimiento());
+        return new PacienteResponseDTO(
+                paciente.getNombres(),
+                paciente.getApellidos(),
+                paciente.getNumeroIdentificacion(),
+                paciente.getTelefono(),
+                paciente.getSexo(),
+                edad,
+                paciente.getAntecedentes());
+    }
+
+    private int calcularEdad(LocalDate fechaNacimiento) {
+        if (fechaNacimiento == null)
+            return 0;
+        return Period.between(fechaNacimiento, LocalDate.now()).getYears();
     }
 }

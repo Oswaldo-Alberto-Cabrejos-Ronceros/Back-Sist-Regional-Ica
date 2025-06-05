@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
+import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
 import com.clinicaregional.clinica.service.CitaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +71,13 @@ public class CitaController {
     @PutMapping("/reprogramar/{id}")
     public ResponseEntity<CitaResponse> reprogramar(@PathVariable Long id, @Valid @RequestBody CitaRequest request) {
         return ResponseEntity.ok(citaService.reprogramarCita(id, request));
+    }
+
+    // Obtener pacientes que tuvieron citas CONFIRMADAS o ATENDIDAS con un médico
+    @GetMapping("/medico/{medicoId}/pacientes")
+    public ResponseEntity<List<PacienteResponseDTO>> obtenerPacientesPorMedico(
+            @PathVariable Long medicoId) {
+        return ResponseEntity.ok(citaService.obtenerPacientesPorMedicoConCitasConfirmadasOAtendidas(medicoId));
     }
 
 }

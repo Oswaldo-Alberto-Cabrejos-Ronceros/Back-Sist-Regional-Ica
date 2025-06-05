@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
+import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
 import com.clinicaregional.clinica.entity.Cita;
 import com.clinicaregional.clinica.entity.HorarioBloque;
 import com.clinicaregional.clinica.entity.Medico;
@@ -11,6 +12,7 @@ import com.clinicaregional.clinica.enums.EstadoBloque;
 import com.clinicaregional.clinica.enums.EstadoCita;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.CitaMapper;
+import com.clinicaregional.clinica.mapper.PacienteMapper;
 import com.clinicaregional.clinica.repository.CitaRepository;
 import com.clinicaregional.clinica.repository.HorarioBloqueRepository;
 import com.clinicaregional.clinica.repository.MedicoRepository;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CitaServiceImpl implements CitaService {
+
+    private final PacienteMapper pacienteMapper;
 
     private final CitaRepository citaRepository;
     private final CitaMapper citaMapper;
@@ -50,6 +54,11 @@ public class CitaServiceImpl implements CitaService {
                         "No hay bloques DISPONIBLES para la fecha " + request.getFecha() +
                                 " y hora " + request.getHora()));
 
+        // Verificación crítica: asegurar que el bloque pertenece al médico esperado
+        if (!bloque.getDisponibilidad().getMedico().getId().equals(request.getMedicoId())) {
+            throw new IllegalArgumentException("El bloque horario no pertenece al médico especificado.");
+        }
+
         // 2. Verificar que el bloque no esté ocupado
         if (bloque.getCita() != null) {
             throw new IllegalStateException("Ese bloque horario ya tiene una cita asignada");
@@ -63,7 +72,7 @@ public class CitaServiceImpl implements CitaService {
         Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
         Medico medico = medicoRepository.findById(medicoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Médico  no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado"));
         Servicio servicio = servicioRepository.findById(servicioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
 
@@ -288,4 +297,18 @@ public class CitaServiceImpl implements CitaService {
         return citaMapper.toResponse(citaReprogramada);
     }
 
+    @Override
+    public List<PacienteResponseDTO> obtenerPacientesPorMedicoConCitasConfirmadasOAtendidas(Long medicoId) {
+        if (!medicoRepository.existsById(medicoId)) {
+            throw new ResourceNotFoundException("No se encontró un médico con ID: " + medicoId);
+        }
+
+        List<EstadoCita> estados = List.of(EstadoCita.CONFIRMADA, EstadoCita.ATENDIDA);
+        List<Paciente> pacientes = citaRepository.findPacientesByMedicoIdAndEstadoCitaIn(medicoId, estados);
+
+        return pacientes.stream()
+                .map(pacienteMapper::mapToPacienteResponseDTO)
+                .distinct() // opcional, si hay duplicados
+                .collect(Collectors.toList());
+    }
 }

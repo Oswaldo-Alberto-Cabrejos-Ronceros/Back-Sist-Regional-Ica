@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.mapper;
 
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.response.MyInfoRecepcionista;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.entity.Recepcionista;
 import com.clinicaregional.clinica.entity.TipoDocumento;
@@ -53,5 +54,14 @@ public class RecepcionistaMapper {
                 .fechaContratacion(entity.getFechaContratacion())
                 .usuarioId(entity.getUsuario().getId())
                 .build();
+    }
+
+    public MyInfoRecepcionista toMyInfoRecepcionista(Recepcionista recepcionista){
+        return new MyInfoRecepcionista(recepcionista.getNombres(),recepcionista.getApellidos(),
+                recepcionista.getUsuario().getCorreo(),
+                recepcionista.getTipoDocumento().getNombre(),recepcionista.getNumeroDocumento(),
+                recepcionista.getTelefono(),recepcionista.getDireccion(), recepcionista.getImagenUrl()
+                ,recepcionista.getFechaContratacion());
+
     }
 }

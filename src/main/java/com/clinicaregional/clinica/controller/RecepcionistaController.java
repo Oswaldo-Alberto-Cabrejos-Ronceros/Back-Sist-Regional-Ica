@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.response.MyInfoRecepcionista;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.service.RecepcionistaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +24,7 @@ public class RecepcionistaController {
 
     @PostMapping
     public ResponseEntity<?> registrar(@RequestBody @Valid RecepcionistaRequest recepcionistaRequest,
-            BindingResult result) {
+                                       BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("Datos inválidos");
         }
@@ -42,9 +43,15 @@ public class RecepcionistaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/my-info/{id}")
+    public ResponseEntity<MyInfoRecepcionista> obtenerMyInfoRecepcionista(@PathVariable Long id) {
+        MyInfoRecepcionista myInfoRecepcionista = recepcionistaService.obtenerMyInfoRecepcionista(id);
+        return ResponseEntity.ok(myInfoRecepcionista);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<RecepcionistaResponse> actualizar(@PathVariable Long id,
-            @RequestBody RecepcionistaRequest recepcionistaRequest) {
+                                                            @RequestBody RecepcionistaRequest recepcionistaRequest) {
         return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionistaRequest));
     }
 

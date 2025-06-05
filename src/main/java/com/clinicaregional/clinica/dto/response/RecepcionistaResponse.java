@@ -23,6 +23,7 @@ public class RecepcionistaResponse {
     private Long tipoDocumentoId;
     private String telefono;
     private String direccion;
+    private String imagenUrl;
     private TurnoTrabajo turnoTrabajo;
     private LocalDate fechaContratacion;
     private Long usuarioId;

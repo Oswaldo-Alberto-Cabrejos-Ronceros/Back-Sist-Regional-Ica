@@ -35,6 +35,8 @@ public class Administrador extends EntidadConEstado{
 
     private String direccion;
 
+    private String imagenUrl;
+
     private LocalDate fechaContratacion;
 
     @OneToOne

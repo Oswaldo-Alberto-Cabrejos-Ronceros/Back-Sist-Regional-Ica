@@ -30,6 +30,7 @@ public class RecepcionistaRequest {
     @Size(max = 156, message = "La direccion debe ser menor a 156 caracteres")
     private String direccion;
 
+    private String imagenUrl;
 
     private TurnoTrabajo turnoTrabajo;
 

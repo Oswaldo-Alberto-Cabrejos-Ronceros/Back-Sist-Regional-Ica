@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.request.HorarioBloqueRequest;
 import com.clinicaregional.clinica.dto.response.HorarioBloqueResponse;
+import com.clinicaregional.clinica.dto.response.MedicoEspecialidadResponse;
 import com.clinicaregional.clinica.entity.Disponibilidad;
 import com.clinicaregional.clinica.entity.HorarioBloque;
 import com.clinicaregional.clinica.enums.EstadoBloque;
@@ -11,11 +12,13 @@ import com.clinicaregional.clinica.mapper.HorarioBloqueMapper;
 import com.clinicaregional.clinica.repository.DisponibilidadRepository;
 import com.clinicaregional.clinica.repository.HorarioBloqueRepository;
 import com.clinicaregional.clinica.service.HorarioBloqueService;
+import com.clinicaregional.clinica.service.MedicoEspecialidadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,8 @@ public class HorarioBloqueServiceImpl implements HorarioBloqueService {
     private final HorarioBloqueRepository horarioBloqueRepository;
     private final DisponibilidadRepository disponibilidadRepository;
     private final HorarioBloqueMapper horarioBloqueMapper;
+    private final MedicoEspecialidadService medicoEspecialidadService;
+
 
     @Transactional(readOnly = true)
     @Override
@@ -59,7 +64,20 @@ public class HorarioBloqueServiceImpl implements HorarioBloqueService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
+    @Override
+    public List<HorarioBloqueResponse> listarPorEspecialidad(Long especialidadId) {
+        //obtenemos los medicos de una especialidad
+        List<MedicoEspecialidadResponse> medicos = medicoEspecialidadService.obtenerMedicosPorEspecialidad(especialidadId);
+        List<HorarioBloqueResponse> horariosBloques=new ArrayList<>();
+        for (MedicoEspecialidadResponse medico : medicos){
+            List<HorarioBloqueResponse> horarioBloquesPorMedico= listarPorMedico(medico.getMedicoId());
+            horariosBloques.addAll(horarioBloquesPorMedico);
+        }
+        return horariosBloques;
+    }
+
+    @Transactional(readOnly = true)
     @Override
     public HorarioBloqueResponse actualizarEstado(Long id, String nuevoEstado) {
         HorarioBloque bloque = horarioBloqueRepository.findById(id)

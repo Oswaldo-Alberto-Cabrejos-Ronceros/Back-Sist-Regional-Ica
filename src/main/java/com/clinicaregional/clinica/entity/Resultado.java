@@ -1,5 +1,7 @@
 package com.clinicaregional.clinica.entity;
 
+import org.hibernate.annotations.Filter;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "resultados")
+@Filter(name = "estadoActivo", condition = "estado = :estado")
 @Builder
 public class Resultado extends EntidadConEstado {
     @Id

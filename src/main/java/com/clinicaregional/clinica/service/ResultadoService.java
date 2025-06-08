@@ -9,9 +9,9 @@ public interface ResultadoService {
 
     ResultadoResponse crear(ResultadoRequest resultadoRequest);
 
-    List<ResultadoResponse> obtenerPorCita(Long id);
+    List<ResultadoResponse> obtenerPorCita(Long citaId);
 
-    List<ResultadoResponse> listarPorHistorialClinico(Long citaId);
+    List<ResultadoResponse> listarPorHistorialClinicoDePaciente(Long Id);
 
     ResultadoResponse actualizar(Long id, ResultadoRequest resultadoRequest);
 

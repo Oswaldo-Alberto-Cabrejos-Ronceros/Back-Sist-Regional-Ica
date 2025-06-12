@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -9,6 +10,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import java.util.UUID;
 
+@Service
 public class S3ServiceImpl implements S3Service {
 
     private final S3Client s3Client;

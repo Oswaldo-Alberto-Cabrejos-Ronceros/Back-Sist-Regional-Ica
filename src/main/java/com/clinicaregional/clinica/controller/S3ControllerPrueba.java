@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.service.S3Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,7 +15,8 @@ public class S3ControllerPrueba {
 
     private final S3Service s3Service;
 
-    public S3ControllerPrueba(S3Service s3Service){
+    @Autowired
+    public S3ControllerPrueba(S3Service s3Service) {
         this.s3Service=s3Service;
     }
 

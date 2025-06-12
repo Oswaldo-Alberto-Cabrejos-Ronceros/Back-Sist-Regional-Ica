@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/prueba/s3")
+@RequestMapping("/api/prueba/s3")
 public class S3ControllerPrueba {
 
     private final S3Service s3Service;
@@ -25,8 +25,8 @@ public class S3ControllerPrueba {
         return ResponseEntity.status(HttpStatus.CREATED).body(s3Service.subirArchivo(archivo,"images"));
     }
 
-    @GetMapping("/{key}")
-    public ResponseEntity<byte[]> recuperarArchivo(@PathVariable String key){
+    @GetMapping
+    public ResponseEntity<byte[]> recuperarArchivo(@RequestParam String key){
         //recuperamos archivo
         byte [] archivo = s3Service.recuperarArchivo(key);
         //configuramos los headers de la respuesta
@@ -38,8 +38,8 @@ public class S3ControllerPrueba {
         return new ResponseEntity<>(archivo,httpHeaders,HttpStatus.OK);
     }
 
-    @DeleteMapping("/{key}")
-    public ResponseEntity<Void> eliminarArchivo(@PathVariable String key){
+    @DeleteMapping
+    public ResponseEntity<Void> eliminarArchivo(@RequestParam String key){
         s3Service.eliminarArchivo(key);
         return ResponseEntity.noContent().build();
     }

@@ -1,153 +1,183 @@
-// package com.clinicaregional.clinica.servicios.service;
+package com.clinicaregional.clinica.servicios.service;
 
-// import com.clinicaregional.clinica.dto.request.ServicioRequest;
-// import com.clinicaregional.clinica.dto.response.ServicioResponse;
-// import com.clinicaregional.clinica.entity.Servicio;
-// import com.clinicaregional.clinica.exception.ResourceNotFoundException;
-// import com.clinicaregional.clinica.mapper.ServicioMapper;
-// import com.clinicaregional.clinica.repository.ServicioRepository;
-// import com.clinicaregional.clinica.service.impl.ServicioServiceImpl;
-// import com.clinicaregional.clinica.util.FiltroEstado;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.MockitoAnnotations;
+import com.clinicaregional.clinica.dto.request.ServicioRequest;
+import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
+import com.clinicaregional.clinica.dto.response.ServicioResponse;
+import com.clinicaregional.clinica.entity.Especialidad;
+import com.clinicaregional.clinica.entity.Servicio;
+import com.clinicaregional.clinica.exception.ResourceNotFoundException;
+import com.clinicaregional.clinica.mapper.ServicioMapper;
+import com.clinicaregional.clinica.repository.ServicioRepository;
+import com.clinicaregional.clinica.service.EspecialidadService;
+import com.clinicaregional.clinica.service.impl.EspecialidadServiceImpl;
+import com.clinicaregional.clinica.service.impl.ServicioServiceImpl;
+import com.clinicaregional.clinica.util.FiltroEstado;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-// import java.util.Optional;
+import java.util.Optional;
 
-// import static org.assertj.core.api.Assertions.assertThat;
-// import static org.junit.jupiter.api.Assertions.assertThrows;
-// import static org.mockito.ArgumentMatchers.any;
-// import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-// class ServicioServiceImplTest {
+class ServicioServiceImplTest {
 
-//     @Mock
-//     private ServicioRepository servicioRepository;
+    @Mock
+    private ServicioRepository servicioRepository;
 
-//     @Mock
-//     private ServicioMapper servicioMapper;
+    @Mock
+    private ServicioMapper servicioMapper;
 
-//     @Mock
-//     private FiltroEstado filtroEstado;
+    @Mock
+    private FiltroEstado filtroEstado;
 
-//     @InjectMocks
-//     private ServicioServiceImpl servicioService;
+    @Mock
+    private EspecialidadServiceImpl especialidadService;
 
-//     @BeforeEach
-//     void setUp() {
-//         MockitoAnnotations.openMocks(this);
-//     }
+    @InjectMocks
+    private ServicioServiceImpl servicioService;
 
-//     @Test
-//     @DisplayName("Agregar servicio exitosamente")
-//     void agregarServicio_debeRetornarServicioResponse() {
-//         // Arrange
-//         ServicioRequest request = new ServicioRequest("Cardiología", "Atiende problemas del corazón", "cardio.jpg");
-//         Servicio servicio = Servicio.builder()
-//                 .nombre("Cardiología")
-//                 .descripcion("Atiende problemas del corazón")
-//                 .imagenUrl("cardio.jpg")
-//                 .build();
-//         Servicio servicioGuardado = Servicio.builder()
-//                 .id(1L)
-//                 .nombre("Cardiología")
-//                 .descripcion("Atiende problemas del corazón")
-//                 .imagenUrl("cardio.jpg")
-//                 .build();
-//         ServicioResponse response = new ServicioResponse(1L, "Cardiología", "Atiende problemas del corazón",
-//                 "cardio.jpg");
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
-//         when(servicioRepository.existsByNombre("Cardiología")).thenReturn(false);
-//         when(servicioMapper.mapToServicio(request)).thenReturn(servicio);
-//         when(servicioRepository.save(servicio)).thenReturn(servicioGuardado);
-//         when(servicioMapper.mapToServicioResponse(servicioGuardado)).thenReturn(response);
+    @Test
+    @DisplayName("Agregar servicio exitosamente")
+    void agregarServicio_debeRetornarServicioResponse() {
+        // Arrange
+        ServicioRequest request = new ServicioRequest("Cardiología", "Atiende problemas del corazón", "cardio.jpg",
+                70.0f, 1L);
+        Servicio servicio = Servicio.builder()
+                .nombre("Cardiología")
+                .descripcion("Atiende problemas del corazón")
+                .imagenUrl("cardio.jpg")
+                .price(70.0f)
+                .especialidad(Especialidad.builder().id(1L).build())
+                .build();
+        Servicio servicioGuardado = Servicio.builder()
+                .id(1L)
+                .nombre("Cardiología")
+                .descripcion("Atiende problemas del corazón")
+                .imagenUrl("cardio.jpg")
+                .price(70.0f)
+                .especialidad(Especialidad.builder().id(1L).build())
+                .build();
+        ServicioResponse response = new ServicioResponse(1L, "Cardiología", "Atiende problemas del corazón",
+                "cardio.jpg", 70.0f, 1L);
 
-//         // Act
-//         ServicioResponse resultado = servicioService.agregarServicio(request);
+        when(servicioRepository.existsByNombre("Cardiología")).thenReturn(false);
+        when(especialidadService.getEspecialidadById(1L))
+                .thenReturn(Optional.of(new EspecialidadResponse(1L, "Cardiología", "Desc", "img.jpg")));
+        when(servicioMapper.mapToServicio(request)).thenReturn(servicio);
+        when(servicioRepository.save(servicio)).thenReturn(servicioGuardado);
+        when(servicioMapper.mapToServicioResponse(servicioGuardado)).thenReturn(response);
 
-//         // Assert
-//         assertThat(resultado.getNombre()).isEqualTo("Cardiología");
-//         verify(servicioRepository).save(any());
-//     }
+        // Act
+        ServicioResponse resultado = servicioService.agregarServicio(request);
 
-//     @Test
-//     @DisplayName("Agregar servicio con nombre duplicado lanza excepción")
-//     void agregarServicio_conNombreDuplicado_debeLanzarExcepcion() {
-//         ServicioRequest request = new ServicioRequest("Cardiología", "desc", "img.jpg");
-//         when(servicioRepository.existsByNombre("Cardiología")).thenReturn(true);
+        // Assert
+        assertThat(resultado.getNombre()).isEqualTo("Cardiología");
+        verify(servicioRepository).save(any());
+    }
 
-//         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-//             servicioService.agregarServicio(request);
-//         });
+    @Test
+    @DisplayName("Agregar servicio con nombre duplicado lanza excepción")
+    void agregarServicio_conNombreDuplicado_debeLanzarExcepcion() {
+        ServicioRequest request = new ServicioRequest("Cardiología", "desc", "img.jpg", 70.0f, 1L);
+        when(servicioRepository.existsByNombre("Cardiología")).thenReturn(true);
 
-//         assertThat(exception.getMessage()).isEqualTo("Ya existe un servicio con el nombre ingresado");
-//     }
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            servicioService.agregarServicio(request);
+        });
 
-//     @Test
-//     @DisplayName("Actualizar servicio correctamente")
-//     void actualizarServicio_existente_debeRetornarActualizado() {
-//         ServicioRequest request = new ServicioRequest("Pediatría", "Niños", "pediatria.jpg");
-//         Servicio existente = Servicio.builder().id(1L).nombre("Antiguo").descripcion("Antigua desc").estado(true)
-//                 .build();
-//         Servicio actualizado = Servicio.builder().id(1L).nombre("Pediatría").descripcion("Niños")
-//                 .imagenUrl("pediatria.jpg").estado(true).build();
-//         ServicioResponse response = new ServicioResponse(1L, "Pediatría", "Niños", "pediatria.jpg");
+        assertThat(exception.getMessage()).isEqualTo("Ya existe un servicio con el nombre ingresado");
+    }
 
-//         when(servicioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(existente));
-//         when(servicioRepository.existsByNombre("Pediatría")).thenReturn(false);
-//         when(servicioRepository.save(any())).thenReturn(actualizado);
-//         when(servicioMapper.mapToServicioResponse(actualizado)).thenReturn(response);
+    @Test
+    @DisplayName("Actualizar servicio correctamente")
+    void actualizarServicio_existente_debeRetornarActualizado() {
+        ServicioRequest request = new ServicioRequest("Pediatría", "Niños", "pediatria.jpg", 70.0f, 1L);
+        Servicio existente = Servicio.builder()
+                .nombre("Antiguo")
+                .descripcion("Antigua desc")
+                .imagenUrl("antigua.jpg")
+                .price(50.0f)
+                .especialidad(Especialidad.builder().id(1L).build())
+                .build();
+        Servicio actualizado = Servicio.builder()
+                .nombre("Pediatría")
+                .descripcion("Niños")
+                .imagenUrl("pediatria.jpg")
+                .price(70.0f)
+                .especialidad(Especialidad.builder().id(1L).build())
+                .build();
+        ServicioResponse response = new ServicioResponse(1L,
+                "Pediatría",
+                "Niños",
+                "pediatria.jpg",
+                70.0f,
+                1L);
+        when(servicioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(existente));
+        when(servicioRepository.existsByNombre("Pediatría")).thenReturn(false);
+        when(servicioRepository.save(any())).thenReturn(actualizado);
+        when(servicioMapper.mapToServicioResponse(actualizado)).thenReturn(response);
+        when(especialidadService.getEspecialidadById(1L))
+                .thenReturn(Optional.of(new EspecialidadResponse(1L, "Pediatría", "Niños", "pediatria.jpg")));
 
-//         ServicioResponse result = servicioService.actualizarServicio(1L, request);
+        ServicioResponse result = servicioService.actualizarServicio(1L, request);
 
-//         assertThat(result.getNombre()).isEqualTo("Pediatría");
-//     }
+        assertThat(result.getNombre()).isEqualTo("Pediatría");
+    }
 
-//     @Test
-//     @DisplayName("Actualizar servicio inexistente lanza excepción")
-//     void actualizarServicio_inexistente_debeLanzarExcepcion() {
-//         ServicioRequest request = new ServicioRequest("Nuevo", "desc", "img.jpg");
-//         when(servicioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
+    @Test
+    @DisplayName("Actualizar servicio inexistente lanza excepción")
+    void actualizarServicio_inexistente_debeLanzarExcepcion() {
+        ServicioRequest request = new ServicioRequest("Nuevo", "desc", "img.jpg", 70.0f, 1L);
+        when(servicioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
-//         assertThrows(ResourceNotFoundException.class, () -> servicioService.actualizarServicio(99L, request));
-//     }
+        assertThrows(ResourceNotFoundException.class, () -> servicioService.actualizarServicio(99L, request));
+    }
 
-//     @Test
-//     @DisplayName("Actualizar servicio con nombre duplicado lanza excepción")
-//     void actualizarServicio_conNombreDuplicado_debeLanzarExcepcion() {
-//         ServicioRequest request = new ServicioRequest("Duplicado", "desc", "img.jpg");
-//         Servicio existente = Servicio.builder().id(1L).nombre("Original").estado(true).build();
+    @Test
+    @DisplayName("Actualizar servicio con nombre duplicado lanza excepción")
+    void actualizarServicio_conNombreDuplicado_debeLanzarExcepcion() {
+        ServicioRequest request = new ServicioRequest("Duplicado", "desc", "img.jpg", 70.0f, 1L);
+        Servicio existente = Servicio.builder().id(1L).nombre("Original").estado(true).build();
 
-//         when(servicioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(existente));
-//         when(servicioRepository.existsByNombre("Duplicado")).thenReturn(true);
+        when(servicioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(existente));
+        when(servicioRepository.existsByNombre("Duplicado")).thenReturn(true);
 
-//         RuntimeException exception = assertThrows(RuntimeException.class,
-//                 () -> servicioService.actualizarServicio(1L, request));
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> servicioService.actualizarServicio(1L, request));
 
-//         assertThat(exception.getMessage()).isEqualTo("Ya existe un servicio con el nombre ingresado");
-//     }
+        assertThat(exception.getMessage()).isEqualTo("Ya existe un servicio con el nombre ingresado");
+    }
 
-//     @Test
-//     @DisplayName("Eliminar servicio correctamente")
-//     void eliminarServicio_existente_debeActualizarEstadoFalse() {
-//         Servicio servicio = Servicio.builder().id(1L).nombre("Pediatría").estado(true).build();
-//         when(servicioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(servicio));
+    @Test
+    @DisplayName("Eliminar servicio correctamente")
+    void eliminarServicio_existente_debeActualizarEstadoFalse() {
+        Servicio servicio = Servicio.builder().id(1L).nombre("Pediatría").estado(true).build();
+        when(servicioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(servicio));
 
-//         servicioService.eliminarServicio(1L);
+        servicioService.eliminarServicio(1L);
 
-//         assertThat(servicio.getEstado()).isFalse();
-//         verify(servicioRepository).save(servicio);
-//     }
+        assertThat(servicio.getEstado()).isFalse();
+        verify(servicioRepository).save(servicio);
+    }
 
-//     @Test
-//     @DisplayName("Eliminar servicio inexistente lanza excepción")
-//     void eliminarServicio_inexistente_debeLanzarExcepcion() {
-//         when(servicioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
+    @Test
+    @DisplayName("Eliminar servicio inexistente lanza excepción")
+    void eliminarServicio_inexistente_debeLanzarExcepcion() {
+        when(servicioRepository.findByIdAndEstadoIsTrue(99L)).thenReturn(Optional.empty());
 
-//         assertThrows(ResourceNotFoundException.class, () -> servicioService.eliminarServicio(99L));
-//     }
+        assertThrows(ResourceNotFoundException.class, () -> servicioService.eliminarServicio(99L));
+    }
 
-// }
+}

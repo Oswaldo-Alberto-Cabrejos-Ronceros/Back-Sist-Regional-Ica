@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.ServicioSeguro.repository;
+package com.clinicaregional.clinica.servicioSeguro.repository;
 
 import com.clinicaregional.clinica.entity.Cobertura;
 import com.clinicaregional.clinica.entity.Seguro;

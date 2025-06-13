@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.ServicioSeguro.controller;
+package com.clinicaregional.clinica.servicioSeguro.controller;
 
 import com.clinicaregional.clinica.controller.ServicioSeguroController;
 import com.clinicaregional.clinica.dto.ServicioSeguroDTO;

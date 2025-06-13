@@ -1,4 +1,4 @@
-package com.clinicaregional.clinica.ServicioSeguro.servicio;
+package com.clinicaregional.clinica.servicioSeguro.servicio;
 
 import com.clinicaregional.clinica.dto.CoberturaDTO;
 import com.clinicaregional.clinica.dto.ServicioSeguroDTO;

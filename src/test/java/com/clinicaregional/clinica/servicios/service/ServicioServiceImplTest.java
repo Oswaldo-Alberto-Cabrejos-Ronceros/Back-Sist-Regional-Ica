@@ -1,7 +1,9 @@
 package com.clinicaregional.clinica.servicios.service;
 
 import com.clinicaregional.clinica.dto.request.ServicioRequest;
+import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 import com.clinicaregional.clinica.dto.response.ServicioResponse;
+import com.clinicaregional.clinica.entity.Especialidad;
 import com.clinicaregional.clinica.entity.Servicio;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.ServicioMapper;
@@ -56,17 +58,23 @@ class ServicioServiceImplTest {
                 .nombre("Cardiología")
                 .descripcion("Atiende problemas del corazón")
                 .imagenUrl("cardio.jpg")
+                .price(70.0f)
+                .especialidad(Especialidad.builder().id(1L).build())
                 .build();
         Servicio servicioGuardado = Servicio.builder()
                 .id(1L)
                 .nombre("Cardiología")
                 .descripcion("Atiende problemas del corazón")
                 .imagenUrl("cardio.jpg")
+                .price(70.0f)
+                .especialidad(Especialidad.builder().id(1L).build())
                 .build();
         ServicioResponse response = new ServicioResponse(1L, "Cardiología", "Atiende problemas del corazón",
                 "cardio.jpg", 70.0f, 1L);
 
         when(servicioRepository.existsByNombre("Cardiología")).thenReturn(false);
+        when(especialidadService.getEspecialidadById(1L))
+                .thenReturn(Optional.of(new EspecialidadResponse(1L, "Cardiología", "Desc", "img.jpg")));
         when(servicioMapper.mapToServicio(request)).thenReturn(servicio);
         when(servicioRepository.save(servicio)).thenReturn(servicioGuardado);
         when(servicioMapper.mapToServicioResponse(servicioGuardado)).thenReturn(response);
@@ -96,16 +104,32 @@ class ServicioServiceImplTest {
     @DisplayName("Actualizar servicio correctamente")
     void actualizarServicio_existente_debeRetornarActualizado() {
         ServicioRequest request = new ServicioRequest("Pediatría", "Niños", "pediatria.jpg", 70.0f, 1L);
-        Servicio existente = Servicio.builder().id(1L).nombre("Antiguo").descripcion("Antigua desc").estado(true)
+        Servicio existente = Servicio.builder()
+                .nombre("Antiguo")
+                .descripcion("Antigua desc")
+                .imagenUrl("antigua.jpg")
+                .price(50.0f)
+                .especialidad(Especialidad.builder().id(1L).build())
                 .build();
-        Servicio actualizado = Servicio.builder().id(1L).nombre("Pediatría").descripcion("Niños")
-                .imagenUrl("pediatria.jpg").estado(true).build();
-        ServicioResponse response = new ServicioResponse(1L, "Pediatría", "Niños", "pediatria.jpg", 70.0f, 1L);
-
+        Servicio actualizado = Servicio.builder()
+                .nombre("Pediatría")
+                .descripcion("Niños")
+                .imagenUrl("pediatria.jpg")
+                .price(70.0f)
+                .especialidad(Especialidad.builder().id(1L).build())
+                .build();
+        ServicioResponse response = new ServicioResponse(1L,
+                "Pediatría",
+                "Niños",
+                "pediatria.jpg",
+                70.0f,
+                1L);
         when(servicioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(existente));
         when(servicioRepository.existsByNombre("Pediatría")).thenReturn(false);
         when(servicioRepository.save(any())).thenReturn(actualizado);
         when(servicioMapper.mapToServicioResponse(actualizado)).thenReturn(response);
+        when(especialidadService.getEspecialidadById(1L))
+                .thenReturn(Optional.of(new EspecialidadResponse(1L, "Pediatría", "Niños", "pediatria.jpg")));
 
         ServicioResponse result = servicioService.actualizarServicio(1L, request);
 

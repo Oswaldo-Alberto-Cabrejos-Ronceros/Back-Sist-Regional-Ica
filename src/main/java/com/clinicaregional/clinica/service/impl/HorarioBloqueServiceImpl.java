@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +45,10 @@ public class HorarioBloqueServiceImpl implements HorarioBloqueService {
     @Transactional(readOnly = true)
     @Override
     public List<HorarioBloqueResponse> listarPorDisponibilidad(Long disponibilidadId) {
-        return horarioBloqueRepository.findByDisponibilidadId(disponibilidadId).stream()
+        LocalDate hoy = LocalDate.now();
+        return horarioBloqueRepository.findByDisponibilidadIdAndFechaGreaterThanEqual(disponibilidadId, hoy)
+                .stream()
+                .filter(b -> !b.getFecha().isEqual(hoy) || b.getHoraFin().isAfter(LocalTime.now())) 
                 .map(horarioBloqueMapper::mapToHorarioBloqueResponse)
                 .collect(Collectors.toList());
     }
@@ -52,7 +56,10 @@ public class HorarioBloqueServiceImpl implements HorarioBloqueService {
     @Transactional(readOnly = true)
     @Override
     public List<HorarioBloqueResponse> listarPorMedico(Long medicoId) {
-        return horarioBloqueRepository.findByDisponibilidad_Medico_Id(medicoId).stream()
+        LocalDate hoy = LocalDate.now();
+        return horarioBloqueRepository.findByDisponibilidad_Medico_IdAndFechaGreaterThanEqual(medicoId, hoy)
+                .stream()
+                .filter(b -> !b.getFecha().isEqual(hoy) || b.getHoraFin().isAfter(LocalTime.now()))
                 .map(horarioBloqueMapper::mapToHorarioBloqueResponse)
                 .collect(Collectors.toList());
     }
@@ -68,13 +75,14 @@ public class HorarioBloqueServiceImpl implements HorarioBloqueService {
     @Transactional(readOnly = true)
     @Override
     public List<HorarioBloqueResponse> listarPorEspecialidad(Long especialidadId) {
-        //verificamos si existe la especialidad
+        // verificamos si existe la especialidad
         especialidadService.getEspecialidadById(especialidadId);
-        //obtenemos los medicos de una especialidad
-        List<MedicoEspecialidadResponse> medicos = medicoEspecialidadService.obtenerMedicosPorEspecialidad(especialidadId);
-        List<HorarioBloqueResponse> horariosBloques=new ArrayList<>();
-        for (MedicoEspecialidadResponse medico : medicos){
-            List<HorarioBloqueResponse> horarioBloquesPorMedico= listarPorMedico(medico.getMedicoId());
+        // obtenemos los medicos de una especialidad
+        List<MedicoEspecialidadResponse> medicos = medicoEspecialidadService
+                .obtenerMedicosPorEspecialidad(especialidadId);
+        List<HorarioBloqueResponse> horariosBloques = new ArrayList<>();
+        for (MedicoEspecialidadResponse medico : medicos) {
+            List<HorarioBloqueResponse> horarioBloquesPorMedico = listarPorMedico(medico.getMedicoId());
             horariosBloques.addAll(horarioBloquesPorMedico);
         }
         return horariosBloques;

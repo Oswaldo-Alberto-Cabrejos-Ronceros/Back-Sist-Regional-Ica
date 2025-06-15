@@ -1,19 +1,5 @@
 package com.clinicaregional.clinica.disponibilidad.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalTime;
-import java.util.Optional;
-
-import org.hibernate.Filter;
-import org.hibernate.Session;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-
 import com.clinicaregional.clinica.entity.Disponibilidad;
 import com.clinicaregional.clinica.entity.Medico;
 import com.clinicaregional.clinica.entity.Rol;
@@ -23,6 +9,23 @@ import com.clinicaregional.clinica.enums.DiaSemana;
 import com.clinicaregional.clinica.enums.TipoContrato;
 import com.clinicaregional.clinica.enums.TipoMedico;
 import com.clinicaregional.clinica.repository.DisponibilidadRepository;
+
+import org.hibernate.Filter;
+import org.hibernate.Session;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class DisponibilidadRepositoryTest {
@@ -34,104 +37,164 @@ class DisponibilidadRepositoryTest {
     private TestEntityManager entityManager;
 
     private Medico medico;
-    private Disponibilidad disponibilidad;
-    private TipoDocumento tipoDocumento;
 
     @BeforeEach
-    void setUp() {
+    void configurarFiltroYEntidadBase() {
         Session session = entityManager.getEntityManager().unwrap(Session.class);
         Filter filter = session.enableFilter("estadoActivo");
         filter.setParameter("estado", true);
 
+        // Datos requeridos: Rol, TipoDocumento, Usuario, Medico
         Rol rol = new Rol();
         rol.setNombre("MEDICO");
-        rol.setDescripcion("Médico general");
+        rol.setDescripcion("Rol médico");
         rol.setEstado(true);
         rol = entityManager.persist(rol);
 
-        tipoDocumento = new TipoDocumento();
+        TipoDocumento tipoDocumento = new TipoDocumento();
         tipoDocumento.setNombre("DNI");
         tipoDocumento.setEstado(true);
         tipoDocumento = entityManager.persist(tipoDocumento);
 
         Usuario usuario = new Usuario();
         usuario.setCorreo("medico@clinica.pe");
-        usuario.setPassword("medID123");
+        usuario.setPassword("clave123");
         usuario.setEstado(true);
         usuario.setRol(rol);
         usuario = entityManager.persist(usuario);
 
         medico = Medico.builder()
-                .nombres("Juan")
-                .apellidos("Perez")
-                .numeroColegiatura("123456")
-                .numeroRNE("654321")
-                .tipoDocumento(tipoDocumento)
-                .numeroDocumento("12345678")
-                .telefono("999999999")
-                .direccion("Calle Salud 123")
-                .descripcion("Médico con experiencia")
+                .nombres("Luis")
+                .apellidos("Gonzales")
+                .numeroColegiatura("123456789")
+                .numeroRNE("987654321")
+                .numeroDocumento("87654321")
+                .telefono("987654321")
+                .direccion("Av. Salud 456")
+                .descripcion("Especialista")
                 .imagen("https://img.jpg")
-                .fechaContratacion(java.time.LocalDateTime.now())
+                .fechaContratacion(LocalDateTime.now())
                 .tipoContrato(TipoContrato.FIJO)
                 .tipoMedico(TipoMedico.GENERAL)
+                .tipoDocumento(tipoDocumento)
                 .usuario(usuario)
                 .estado(true)
                 .build();
         medico = entityManager.persist(medico);
+    }
 
-        disponibilidad = new Disponibilidad();
-        disponibilidad.setDiaSemana(DiaSemana.LUNES);
-        disponibilidad.setHoraInicio(LocalTime.of(8, 0));
-        disponibilidad.setHoraFin(LocalTime.of(14, 0));
-        disponibilidad.setNotas("Atención general");
+    @Test
+    @DisplayName("Guardar disponibilidad activa y buscar por ID")
+    void guardarDisponibilidadActiva_debeEncontrarlaPorId() {
+        // Arrange
+        Disponibilidad disponibilidad = new Disponibilidad();
+        disponibilidad.setDiaSemana(DiaSemana.MARTES);
+        disponibilidad.setHoraInicio(LocalTime.of(9, 0));
+        disponibilidad.setHoraFin(LocalTime.of(13, 0));
+        disponibilidad.setNotas("Consulta general");
         disponibilidad.setMedico(medico);
         disponibilidad.setEstado(true);
-        disponibilidad = entityManager.persist(disponibilidad);
-
+        disponibilidad = disponibilidadRepository.save(disponibilidad);
         entityManager.flush();
         entityManager.clear();
-    }
 
-    @Test
-    @DisplayName("Buscar por ID y estado true")
-    void testFindByIdAndEstadoIsTrue() {
+        // Act
         Optional<Disponibilidad> resultado = disponibilidadRepository.findByIdAndEstadoIsTrue(disponibilidad.getId());
+
+        // Assert
         assertThat(resultado).isPresent();
-        assertThat(resultado.get().getDiaSemana()).isEqualTo(DiaSemana.LUNES);
+        assertThat(resultado.get().getDiaSemana()).isEqualTo(DiaSemana.MARTES);
     }
 
     @Test
-    @DisplayName("Verificar existencia de disponibilidad por médico, día y hora")
-    void testExistsByMedicoIdAndDiaSemanaAndHoraInicioAndHoraFin() {
+    @DisplayName("Guardar disponibilidad inactiva y verificar que no se recupere")
+    void guardarDisponibilidadInactiva_noDebeSerRecuperada() {
+        // Arrange
+        Disponibilidad disponibilidad = new Disponibilidad();
+        disponibilidad.setDiaSemana(DiaSemana.JUEVES);
+        disponibilidad.setHoraInicio(LocalTime.of(10, 0));
+        disponibilidad.setHoraFin(LocalTime.of(12, 0));
+        disponibilidad.setNotas("Inactiva");
+        disponibilidad.setMedico(medico);
+        disponibilidad.setEstado(false);
+        disponibilidadRepository.save(disponibilidad);
+        entityManager.flush();
+        entityManager.clear();
+
+        // Act
+        Optional<Disponibilidad> resultado = disponibilidadRepository.findByIdAndEstadoIsTrue(disponibilidad.getId());
+
+        // Assert
+        assertThat(resultado).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Verificar existencia por médico y horario")
+    void verificarExistenciaPorMedicoDiaYHorario() {
+        // Arrange
+        Disponibilidad disponibilidad = new Disponibilidad();
+        disponibilidad.setDiaSemana(DiaSemana.LUNES);
+        disponibilidad.setHoraInicio(LocalTime.of(8, 0));
+        disponibilidad.setHoraFin(LocalTime.of(12, 0));
+        disponibilidad.setNotas("Horario lunes");
+        disponibilidad.setMedico(medico);
+        disponibilidad.setEstado(true);
+        disponibilidadRepository.save(disponibilidad);
+        entityManager.flush();
+        entityManager.clear();
+
+        // Act
         boolean existe = disponibilidadRepository.existsByMedicoIdAndDiaSemanaAndHoraInicioAndHoraFin(
-                medico.getId(),
-                DiaSemana.LUNES,
-                LocalTime.of(8, 0),
-                LocalTime.of(14, 0));
+                medico.getId(), DiaSemana.LUNES, LocalTime.of(8, 0), LocalTime.of(12, 0));
+
+        // Assert
         assertThat(existe).isTrue();
     }
 
     @Test
-    @DisplayName("Listar disponibilidades por médico")
-    void testFindAllByMedicoId() {
-        var lista = disponibilidadRepository.findAllByMedicoId(medico.getId());
-        assertThat(lista).isNotEmpty();
-        assertThat(lista.get(0).getNotas()).isEqualTo("Atención general");
-    }
+    @DisplayName("Contar disponibilidades activas por médico")
+    void contarDisponibilidadesPorMedico() {
+        // Arrange
+        Disponibilidad d1 = crearDisponibilidad(DiaSemana.LUNES, true);
+        Disponibilidad d2 = crearDisponibilidad(DiaSemana.MARTES, true);
+        Disponibilidad d3 = crearDisponibilidad(DiaSemana.MIERCOLES, false); // inactiva
 
-    @Test
-    @DisplayName("Verificar existencia por ID de médico")
-    void testExistsByMedicoId() {
-        boolean existe = disponibilidadRepository.existsByMedicoId(medico.getId());
-        assertThat(existe).isTrue();
-    }
+        disponibilidadRepository.saveAll(List.of(d1, d2, d3));
+        entityManager.flush();
+        entityManager.clear();
 
-    @Test
-    @DisplayName("Contar disponibilidades por médico")
-    void testCountByMedicoId() {
+        // Act
         Long total = disponibilidadRepository.countByMedicoId(medico.getId());
-        assertThat(total).isEqualTo(1);
+
+        // Assert
+        assertThat(total).isEqualTo(2);
     }
 
+    @Test
+    @DisplayName("Listar disponibilidades por ID de médico")
+    void listarPorMedicoId_debeRetornarSoloActivos() {
+        // Arrange
+        crearDisponibilidad(DiaSemana.LUNES, true);
+        crearDisponibilidad(DiaSemana.JUEVES, false); // inactiva
+        entityManager.flush();
+        entityManager.clear();
+
+        // Act
+        List<Disponibilidad> lista = disponibilidadRepository.findAllByMedicoId(medico.getId());
+
+        // Assert
+        assertThat(lista).allMatch(d -> d.getEstado().equals(true));
+    }
+
+    // Método auxiliar para reducir código duplicado
+    private Disponibilidad crearDisponibilidad(DiaSemana dia, boolean estado) {
+        Disponibilidad d = new Disponibilidad();
+        d.setDiaSemana(dia);
+        d.setHoraInicio(LocalTime.of(9, 0));
+        d.setHoraFin(LocalTime.of(12, 0));
+        d.setNotas("Bloque " + dia.name());
+        d.setMedico(medico);
+        d.setEstado(estado);
+        return d;
+    }
 }

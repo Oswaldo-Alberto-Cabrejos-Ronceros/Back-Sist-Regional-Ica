@@ -9,7 +9,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.h2.command.dml.MergeUsing.When;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +24,7 @@ import com.clinicaregional.clinica.enums.DiaSemana;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.DisponibilidadMapper;
 import com.clinicaregional.clinica.repository.DisponibilidadRepository;
+import com.clinicaregional.clinica.repository.HorarioBloqueRepository;
 import com.clinicaregional.clinica.repository.MedicoRepository;
 import com.clinicaregional.clinica.service.impl.DisponibilidadServiceImpl;
 import com.clinicaregional.clinica.util.FiltroEstado;
@@ -36,6 +36,9 @@ public class DisponibilidadServiceImplTest {
 
         @Mock
         private DisponibilidadMapper disponibilidadMapper;
+
+        @Mock
+        private HorarioBloqueRepository horarioBloqueRepository;
 
         @Mock
         private MedicoRepository medicoRepository;
@@ -247,6 +250,109 @@ public class DisponibilidadServiceImplTest {
                 verify(medicoRepository).findByIdAndEstadoIsTrue(99L);
                 verify(disponibilidadRepository).save(disponibilidad);
                 verify(disponibilidadMapper).toResponse(disponibilidadActualizada);
+        }
+
+        @Test
+        @DisplayName("Registrar disponibilidad correctamente")
+        void registrarDisponibilidad_debeRetornarRespuestaCorrecta() {
+                // Arrange
+                DisponibilidadRequest request = new DisponibilidadRequest(
+                                DiaSemana.LUNES,
+                                LocalTime.of(8, 0),
+                                LocalTime.of(12, 0),
+                                "Mañanas del Dr. Pérez",
+                                1L,
+                                45);
+
+                when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
+                when(disponibilidadRepository.existsByMedicoIdAndDiaSemanaAndHoraInicioAndHoraFin(
+                                1L, DiaSemana.LUNES, LocalTime.of(8, 0), LocalTime.of(12, 0)))
+                                .thenReturn(false);
+
+                Disponibilidad entity = Disponibilidad.builder()
+                                .id(10L)
+                                .diaSemana(DiaSemana.LUNES)
+                                .horaInicio(LocalTime.of(8, 0))
+                                .horaFin(LocalTime.of(12, 0))
+                                .notas("Mañanas del Dr. Pérez")
+                                .medico(medico)
+                                .estado(true)
+                                .build();
+
+                when(disponibilidadMapper.toEntity(request)).thenReturn(entity);
+                when(disponibilidadRepository.save(entity)).thenReturn(entity);
+
+                DisponibilidadResponse expectedResponse = new DisponibilidadResponse(
+                                10L, DiaSemana.LUNES, LocalTime.of(8, 0), LocalTime.of(12, 0), "Mañanas del Dr. Pérez",
+                                1L);
+
+                when(disponibilidadMapper.toResponse(entity)).thenReturn(expectedResponse);
+
+                // Act
+                DisponibilidadResponse response = disponibilidadService.registrar(request);
+
+                // Assert
+                assertThat(response).isNotNull();
+                assertThat(response.getId()).isEqualTo(10L);
+                assertThat(response.getDiaSemana()).isEqualTo(DiaSemana.LUNES);
+                assertThat(response.getNotas()).isEqualTo("Mañanas del Dr. Pérez");
+
+                verify(medicoRepository).findByIdAndEstadoIsTrue(1L);
+                verify(disponibilidadRepository).existsByMedicoIdAndDiaSemanaAndHoraInicioAndHoraFin(
+                                1L, DiaSemana.LUNES, LocalTime.of(8, 0), LocalTime.of(12, 0));
+                verify(disponibilidadRepository).save(entity);
+                verify(disponibilidadMapper).toEntity(request);
+                verify(disponibilidadMapper).toResponse(entity);
+        }
+
+        @Test
+        @DisplayName("Registrar disponibilidad con médico inexistente debe lanzar excepción")
+        void registrarDisponibilidad_medicoInexistente_debeLanzarExcepcion() {
+                // Arrange
+                DisponibilidadRequest request = new DisponibilidadRequest(
+                                DiaSemana.LUNES,
+                                LocalTime.of(8, 0),
+                                LocalTime.of(12, 0),
+                                "Turno mañana",
+                                999L,
+                                45);
+
+                when(medicoRepository.findByIdAndEstadoIsTrue(999L)).thenReturn(Optional.empty());
+
+                // Act + Assert
+                ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                                () -> disponibilidadService.registrar(request));
+
+                assertThat(exception.getMessage()).contains("Médico no encontrado con ID: 999");
+                verify(medicoRepository).findByIdAndEstadoIsTrue(999L);
+        }
+
+        @Test
+        @DisplayName("Registrar disponibilidad duplicada debe lanzar excepción")
+        void registrarDisponibilidad_duplicada_debeLanzarExcepcion() {
+                // Arrange
+                DisponibilidadRequest request = new DisponibilidadRequest(
+                                DiaSemana.LUNES,
+                                LocalTime.of(8, 0),
+                                LocalTime.of(12, 0),
+                                "Turno duplicado",
+                                1L,
+                                45);
+
+                when(medicoRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(medico));
+                when(disponibilidadRepository.existsByMedicoIdAndDiaSemanaAndHoraInicioAndHoraFin(
+                                1L, DiaSemana.LUNES, LocalTime.of(8, 0), LocalTime.of(12, 0)))
+                                .thenReturn(true);
+
+                // Act + Assert
+                IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                                () -> disponibilidadService.registrar(request));
+
+                assertThat(exception.getMessage()).contains("Ya existe una disponibilidad para ese médico");
+
+                verify(medicoRepository).findByIdAndEstadoIsTrue(1L);
+                verify(disponibilidadRepository).existsByMedicoIdAndDiaSemanaAndHoraInicioAndHoraFin(
+                                1L, DiaSemana.LUNES, LocalTime.of(8, 0), LocalTime.of(12, 0));
         }
 
 }

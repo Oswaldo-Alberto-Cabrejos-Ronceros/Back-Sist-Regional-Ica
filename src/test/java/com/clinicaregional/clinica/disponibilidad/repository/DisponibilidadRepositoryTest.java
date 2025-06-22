@@ -87,13 +87,7 @@ class DisponibilidadRepositoryTest {
     @DisplayName("Guardar disponibilidad activa y buscar por ID")
     void guardarDisponibilidadActiva_debeEncontrarlaPorId() {
         // Arrange
-        Disponibilidad disponibilidad = new Disponibilidad();
-        disponibilidad.setDiaSemana(DiaSemana.MARTES);
-        disponibilidad.setHoraInicio(LocalTime.of(9, 0));
-        disponibilidad.setHoraFin(LocalTime.of(13, 0));
-        disponibilidad.setNotas("Consulta general");
-        disponibilidad.setMedico(medico);
-        disponibilidad.setEstado(true);
+        Disponibilidad disponibilidad = crearDisponibilidad(DiaSemana.MARTES, true);
         disponibilidad = disponibilidadRepository.save(disponibilidad);
         entityManager.flush();
         entityManager.clear();
@@ -110,13 +104,7 @@ class DisponibilidadRepositoryTest {
     @DisplayName("Guardar disponibilidad inactiva y verificar que no se recupere")
     void guardarDisponibilidadInactiva_noDebeSerRecuperada() {
         // Arrange
-        Disponibilidad disponibilidad = new Disponibilidad();
-        disponibilidad.setDiaSemana(DiaSemana.JUEVES);
-        disponibilidad.setHoraInicio(LocalTime.of(10, 0));
-        disponibilidad.setHoraFin(LocalTime.of(12, 0));
-        disponibilidad.setNotas("Inactiva");
-        disponibilidad.setMedico(medico);
-        disponibilidad.setEstado(false);
+        Disponibilidad disponibilidad = crearDisponibilidad(DiaSemana.MARTES, false);
         disponibilidadRepository.save(disponibilidad);
         entityManager.flush();
         entityManager.clear();
@@ -132,20 +120,14 @@ class DisponibilidadRepositoryTest {
     @DisplayName("Verificar existencia por médico y horario")
     void verificarExistenciaPorMedicoDiaYHorario() {
         // Arrange
-        Disponibilidad disponibilidad = new Disponibilidad();
-        disponibilidad.setDiaSemana(DiaSemana.LUNES);
-        disponibilidad.setHoraInicio(LocalTime.of(8, 0));
-        disponibilidad.setHoraFin(LocalTime.of(12, 0));
-        disponibilidad.setNotas("Horario lunes");
-        disponibilidad.setMedico(medico);
-        disponibilidad.setEstado(true);
+        Disponibilidad disponibilidad = crearDisponibilidad(DiaSemana.LUNES, true);
         disponibilidadRepository.save(disponibilidad);
         entityManager.flush();
         entityManager.clear();
 
         // Act
         boolean existe = disponibilidadRepository.existsByMedicoIdAndDiaSemanaAndHoraInicioAndHoraFin(
-                medico.getId(), DiaSemana.LUNES, LocalTime.of(8, 0), LocalTime.of(12, 0));
+                medico.getId(), DiaSemana.LUNES, LocalTime.of(9, 0), LocalTime.of(12, 0));
 
         // Assert
         assertThat(existe).isTrue();

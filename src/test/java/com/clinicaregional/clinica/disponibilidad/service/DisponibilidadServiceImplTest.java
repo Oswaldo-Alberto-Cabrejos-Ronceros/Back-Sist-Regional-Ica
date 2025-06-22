@@ -52,7 +52,6 @@ public class DisponibilidadServiceImplTest {
         private Disponibilidad disponibilidad;
         private Medico medico;
         private DisponibilidadResponse response;
-        private DisponibilidadRequest disponibilidadRequest;
 
         @BeforeEach
         void setUp() {

@@ -21,7 +21,7 @@ public class CitaController {
     // Registrar una cita
     @PostMapping
     public ResponseEntity<CitaResponse> registrar(@Valid @RequestBody CitaRequest request) {
-        return ResponseEntity.ok(citaService.registrar(request));
+        return ResponseEntity.status(201).body(citaService.registrar(request));
     }
 
     // Obtener una cita por ID

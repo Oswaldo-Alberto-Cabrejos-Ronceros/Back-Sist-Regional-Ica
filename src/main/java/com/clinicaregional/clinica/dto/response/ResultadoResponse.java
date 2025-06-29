@@ -18,6 +18,8 @@ public class ResultadoResponse {
 
     private String notasResultado;
 
+    private Boolean contieneArchivo;
+
     private Long citaId;
 
     private Long historialClinicoId;

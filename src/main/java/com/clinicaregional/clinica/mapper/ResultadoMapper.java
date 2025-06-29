@@ -21,9 +21,10 @@ public class ResultadoMapper {
         return Resultado.builder().diagnostico(resultadoRequest.getDiagnostico()).tratamiento(resultadoRequest.getTratamiento()).notasResultado(resultadoRequest.getNotasResultado())
                 .cita(cita).historialClinico(historialClinico).build();
     }
+
     //de entity a response
     public ResultadoResponse toResponse(Resultado resultado) {
-        return new ResultadoResponse(resultado.getId(),resultado.getDiagnostico(),resultado.getTratamiento(),resultado.getNotasResultado()
-        ,resultado.getCita().getId(),resultado.getHistorialClinico().getId());
+        return new ResultadoResponse(resultado.getId(), resultado.getDiagnostico(), resultado.getTratamiento(), resultado.getNotasResultado(), resultado.getContieneArchivo()
+                , resultado.getCita().getId(), resultado.getHistorialClinico().getId());
     }
 }

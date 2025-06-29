@@ -4,9 +4,14 @@ import com.clinicaregional.clinica.dto.request.ResultadoRequest;
 import com.clinicaregional.clinica.dto.response.ResultadoResponse;
 import com.clinicaregional.clinica.service.ResultadoService;
 
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,9 +27,26 @@ public class ResultadoController {
     }
 
     @PostMapping
-    public ResponseEntity<ResultadoResponse> crearResultado(@RequestBody ResultadoRequest request) {
-        ResultadoResponse creado = resultadoService.crear(request);
+    public ResponseEntity<ResultadoResponse> crearResultado(@RequestBody ResultadoRequest request, @Nullable @RequestParam MultipartFile archivo) {
+        ResultadoResponse creado = resultadoService.crear(request, archivo);
         return ResponseEntity.ok(creado);
+    }
+
+    @GetMapping("/archivo/{resultadoId}")
+    public ResponseEntity<byte[]> getArchivo(@PathVariable Long resultadoId) {
+        byte[] archivo = resultadoService.recuperarArchivoByResultadoId(resultadoId);
+        //configuramos los headers de la respuesta
+        HttpHeaders httpHeaders = new HttpHeaders();
+
+        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        httpHeaders.setContentDispositionFormData("attachment", resultadoId.toString());
+        return new ResponseEntity<>(archivo, httpHeaders, HttpStatus.OK);
+    }
+
+    @PatchMapping("/archivo/{resultadoId}")
+    public ResponseEntity<ResultadoResponse> agregarArchivoResultado(@PathVariable Long resultadoId, @RequestParam MultipartFile archivo) {
+        ResultadoResponse resultadoResponse = resultadoService.agregarArchivoResultado(resultadoId, archivo);
+        return ResponseEntity.ok(resultadoResponse);
     }
 
     @GetMapping("/por-cita/{citaId}")

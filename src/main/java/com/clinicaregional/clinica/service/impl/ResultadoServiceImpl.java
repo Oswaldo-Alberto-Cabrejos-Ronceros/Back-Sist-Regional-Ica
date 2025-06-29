@@ -17,6 +17,7 @@ import com.clinicaregional.clinica.service.CitaService;
 import com.clinicaregional.clinica.mapper.PacienteMapper;
 import com.clinicaregional.clinica.mapper.CitaMapper;
 import com.clinicaregional.clinica.service.ResultadoService;
+import com.clinicaregional.clinica.service.S3Service;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,11 +42,12 @@ public class ResultadoServiceImpl implements ResultadoService {
     private final CitaService citaService;
     private final CitaRepository citaRepository;
     private final CitaMapper citaMapper;
+    private final S3Service s3Service;
 
     @Autowired
     public ResultadoServiceImpl(ResultadoMapper resultadoMapper, ResultadoRepository resultadoRepository,
-            FiltroEstado filtroEstado, PacienteService pacienteService, PacienteMapper pacienteMapper,
-            CitaService citaService, CitaRepository citaRepository, CitaMapper citaMapper) {
+                                FiltroEstado filtroEstado, PacienteService pacienteService, PacienteMapper pacienteMapper,
+                                CitaService citaService, CitaRepository citaRepository, CitaMapper citaMapper, S3Service s3Service) {
         this.citaMapper = citaMapper;
         this.resultadoMapper = resultadoMapper;
         this.resultadoRepository = resultadoRepository;
@@ -53,15 +56,55 @@ public class ResultadoServiceImpl implements ResultadoService {
         this.pacienteMapper = pacienteMapper;
         this.citaService = citaService;
         this.citaRepository = citaRepository;
+        this.s3Service = s3Service;
     }
 
     @Transactional
     @Override
-    public ResultadoResponse crear(ResultadoRequest resultadoRequest) {
+    public ResultadoResponse crear(ResultadoRequest resultadoRequest, MultipartFile archivo) {
         filtroEstado.activarFiltroEstado(true);
         Resultado resultado = resultadoMapper.toEntity(resultadoRequest);
+        if (archivo != null) {
+            String key = s3Service.subirArchivo(archivo, resultado.getHistorialClinico().getId().toString());
+            resultado.setContieneArchivo(true);
+            resultado.setArchivoKey(key);
+        }
         resultado = resultadoRepository.save(resultado);
         return resultadoMapper.toResponse(resultado);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public byte[] recuperarArchivoByResultadoId(Long resultadoId) {
+        filtroEstado.activarFiltroEstado(true);
+        //obtenemos resultado
+        Resultado resultado = resultadoRepository.findByIdAndEstadoIsTrue(resultadoId).orElseThrow(() -> new ResourceNotFoundException("Resultado no encontrado"));
+        //obtenemos si tiene archivo
+        Boolean contieneArchivo = resultado.getContieneArchivo();
+        String archivoKey = resultado.getArchivoKey();
+        if (!contieneArchivo | !archivoKey.isEmpty()) {
+            throw new ResourceNotFoundException("El resultado no contiene archivo");
+        }
+        return s3Service.recuperarArchivo(archivoKey);
+    }
+
+    @Transactional
+    @Override
+    public ResultadoResponse agregarArchivoResultado(Long resultadoId, MultipartFile archivo) {
+        filtroEstado.activarFiltroEstado(true);
+        //obtenemos resultado
+        Resultado resultado = resultadoRepository.findByIdAndEstadoIsTrue(resultadoId).orElseThrow(() -> new ResourceNotFoundException("Resultado no encontrado"));
+        //obtenemos si tiene archivo
+        Boolean contieneArchivo = resultado.getContieneArchivo();
+        String archivoKey = resultado.getArchivoKey();
+        if(contieneArchivo | !archivoKey.isEmpty()) {
+            throw new ResourceNotFoundException("El resultado ya contiene archivos");
+        }
+        String newArchivoKey = s3Service.subirArchivo(archivo, resultado.getHistorialClinico().getId().toString());
+        resultado.setContieneArchivo(true);
+        resultado.setArchivoKey(newArchivoKey);
+        Resultado updated = resultadoRepository.save(resultado);
+        return resultadoMapper.toResponse(updated);
     }
 
     @Transactional(readOnly = true)

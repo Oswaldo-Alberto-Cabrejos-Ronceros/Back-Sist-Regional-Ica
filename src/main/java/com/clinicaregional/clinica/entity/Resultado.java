@@ -24,6 +24,10 @@ public class Resultado extends EntidadConEstado {
 
     private String notasResultado;
 
+    private Boolean contieneArchivo;
+
+    private String archivoKey;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cita_id")
     private Cita cita;

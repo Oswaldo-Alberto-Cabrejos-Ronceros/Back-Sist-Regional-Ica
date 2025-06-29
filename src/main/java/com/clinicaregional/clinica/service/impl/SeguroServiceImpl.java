@@ -8,11 +8,13 @@ import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.SeguroMapper;
 import com.clinicaregional.clinica.repository.SeguroRepository;
+import com.clinicaregional.clinica.service.S3ServicePublic;
 import com.clinicaregional.clinica.service.SeguroService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,37 +25,42 @@ public class SeguroServiceImpl implements SeguroService {
     private final SeguroRepository seguroRepository;
     private final SeguroMapper seguroMapper;
     private final FiltroEstado filtroEstado;
+    private final S3ServicePublic s3Service;
 
     @Autowired
-    public SeguroServiceImpl(SeguroRepository seguroRepository, SeguroMapper seguroMapper,FiltroEstado filtroEstado) {
+    public SeguroServiceImpl(SeguroRepository seguroRepository, SeguroMapper seguroMapper, FiltroEstado filtroEstado, S3ServicePublic s3Service) {
         this.seguroRepository = seguroRepository;
         this.seguroMapper = seguroMapper;
         this.filtroEstado = filtroEstado;
+        this.s3Service = s3Service;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<SeguroDTO> listarSeguros() {
         filtroEstado.activarFiltroEstado(true);
-        return seguroRepository.findAll().stream().map(seguroMapper::mapToSeguroDTO).collect(Collectors.toList());
+        List<SeguroDTO> seguros = seguroRepository.findAll().stream().map(seguroMapper::mapToSeguroDTO).toList();
+        return seguros.stream().map(this::agregarUrlImage).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<SeguroDTO> getSeguroById(Long id) {
-        return seguroRepository.findByIdAndEstadoIsTrue(id).map(seguroMapper::mapToSeguroDTO);
+        Optional<SeguroDTO> seguroDTO = seguroRepository.findByIdAndEstadoIsTrue(id).map(seguroMapper::mapToSeguroDTO);
+        return seguroDTO.map(this::agregarUrlImage);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<SeguroDTO> getSeguroByNombre(String nombre) {
         filtroEstado.activarFiltroEstado(true);
-        return seguroRepository.findByNombre(nombre).map(seguroMapper::mapToSeguroDTO);
+        Optional<SeguroDTO> seguro = seguroRepository.findByNombre(nombre).map(seguroMapper::mapToSeguroDTO);
+        return seguro.map(this::agregarUrlImage);
     }
 
     @Transactional
     @Override
-    public SeguroDTO createSeguro(SeguroDTO seguroDTO) {
+    public SeguroDTO createSeguro(SeguroDTO seguroDTO, MultipartFile imagen) {
         filtroEstado.activarFiltroEstado(true);
 
         if (seguroRepository.existsByNombre(seguroDTO.getNombre())) {
@@ -61,13 +68,18 @@ public class SeguroServiceImpl implements SeguroService {
         }
 
         Seguro seguro = seguroMapper.mapToSeguro(seguroDTO);
+        if (imagen != null) {
+            String key = s3Service.subirArchivo(imagen, "seguro" + seguro.getNombre());
+            seguro.setImagenUrl(key);
+        }
         Seguro savedSeguro = seguroRepository.save(seguro);
-        return seguroMapper.mapToSeguroDTO(savedSeguro);
+        SeguroDTO response = seguroMapper.mapToSeguroDTO(savedSeguro);
+        return this.agregarUrlImage(response);
     }
 
     @Transactional
     @Override
-    public SeguroDTO updateSeguro(Long id, SeguroDTO seguroDTO) {
+    public SeguroDTO updateSeguro(Long id, SeguroDTO seguroDTO, MultipartFile imagen) {
         filtroEstado.activarFiltroEstado(true);
 
         Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id)
@@ -85,8 +97,17 @@ public class SeguroServiceImpl implements SeguroService {
         findSeguro.setImagenUrl(seguroDTO.getImagenUrl());
         findSeguro.setEstadoSeguro(seguroDTO.getEstadoSeguro());
 
+        if (imagen != null) {
+            if (findSeguro.getImagenUrl() != null) {
+                s3Service.eliminarArchivo(findSeguro.getImagenUrl());
+            }
+            String key = s3Service.subirArchivo(imagen, "servicios" + findSeguro.getNombre());
+            findSeguro.setImagenUrl(key);
+        }
+
         Seguro updatedSeguro = seguroRepository.save(findSeguro);
-        return seguroMapper.mapToSeguroDTO(updatedSeguro);
+        SeguroDTO response = seguroMapper.mapToSeguroDTO(updatedSeguro);
+        return this.agregarUrlImage(response);
     }
 
     @Transactional
@@ -99,7 +120,8 @@ public class SeguroServiceImpl implements SeguroService {
         }
         findSeguro.setEstadoSeguro(estadoSeguro);
         Seguro updatedSeguro = seguroRepository.save(findSeguro);
-        return seguroMapper.mapToSeguroDTO(updatedSeguro);
+        SeguroDTO seguroDTO = seguroMapper.mapToSeguroDTO(updatedSeguro);
+        return this.agregarUrlImage(seguroDTO);
     }
 
     @Transactional
@@ -108,7 +130,18 @@ public class SeguroServiceImpl implements SeguroService {
         filtroEstado.activarFiltroEstado(true);
         Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro el seguro con el id: " + id));
         findSeguro.setEstado(false);
+        if(findSeguro.getImagenUrl()!=null){
+            s3Service.eliminarArchivo(findSeguro.getImagenUrl());
+        }
         seguroRepository.save(findSeguro);
     }
 
+    //funcion para obtener el url
+    private SeguroDTO agregarUrlImage(SeguroDTO seguroDTO) {
+        if (seguroDTO.getImagenUrl() != null) {
+            String imageUrl = s3Service.generarUrlPublico(seguroDTO.getImagenUrl());
+            seguroDTO.setImagenUrl(imageUrl);
+        }
+        return seguroDTO;
+    }
 }

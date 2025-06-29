@@ -5,8 +5,10 @@ import com.clinicaregional.clinica.dto.response.EspecialidadResponse;
 import com.clinicaregional.clinica.service.EspecialidadService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,20 +36,22 @@ public class EspecialidadController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<EspecialidadResponse> crearEspecialidad(@RequestBody @Valid EspecialidadRequest especialidadRequest) {
-        EspecialidadResponse response = especialidadService.guardarEspecialidad(especialidadRequest);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<EspecialidadResponse> crearEspecialidad(@RequestPart("especialidadRequest") @Valid EspecialidadRequest especialidadRequest,
+                                                                  @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        EspecialidadResponse response = especialidadService.guardarEspecialidad(especialidadRequest, imagen);
         return ResponseEntity.status(201).body(response); // 201 Created
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EspecialidadResponse> actualizarEspecialidad(
             @PathVariable Long id,
-            @RequestBody @Valid EspecialidadRequest especialidadRequest) {
-        EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest);
+            @RequestPart("especialidadRequest") @Valid EspecialidadRequest especialidadRequest,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest, imagen);
         return ResponseEntity.ok(response);
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarEspecialidad(@PathVariable Long id) {
         especialidadService.eliminarEspecialidad(id);

@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.clinicaregional.clinica.service.ServicioService;
@@ -14,6 +15,7 @@ import com.clinicaregional.clinica.dto.response.ServicioResponse;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -38,17 +40,18 @@ public class ServicioController {
         return ResponseEntity.ok(servicioService.obtenerServiciosPorEspecialidadId(id));
     }
 
-    @PostMapping
-    public ResponseEntity<ServicioResponse> agregarServicio(@RequestBody @Valid ServicioRequest servicioRequest) {
-        ServicioResponse servicioResponse = servicioService.agregarServicio(servicioRequest);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ServicioResponse> agregarServicio(@RequestPart("servicioRequest") @Valid ServicioRequest servicioRequest,
+                                                            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        ServicioResponse servicioResponse = servicioService.agregarServicio(servicioRequest, imagen);
         return ResponseEntity.ok(servicioResponse);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarServicio(@PathVariable Long id,
-                                                @RequestBody @Valid ServicioRequest servicioRequest) {
+    public ResponseEntity<?> actualizarServicio(@PathVariable Long id, @RequestPart("servicioRequest") @Valid ServicioRequest servicioRequest,
+                                                @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
         try {
-            ServicioResponse servicioResponse = servicioService.actualizarServicio(id, servicioRequest);
+            ServicioResponse servicioResponse = servicioService.actualizarServicio(id, servicioRequest, imagen);
             return ResponseEntity.ok(servicioResponse);
         } catch (RuntimeException e) {
             if (e.getMessage() != null && e.getMessage().contains("no encontrada")) {

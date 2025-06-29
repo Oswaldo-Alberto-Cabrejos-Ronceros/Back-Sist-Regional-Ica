@@ -1,4 +1,5 @@
 package com.clinicaregional.clinica.service;
+import com.clinicaregional.clinica.dto.ResultadoArchivoDTO;
 import com.clinicaregional.clinica.dto.request.ResultadoRequest;
 import com.clinicaregional.clinica.dto.response.ResultadoResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,7 +12,7 @@ public interface ResultadoService {
 
     ResultadoResponse crear(ResultadoRequest resultadoRequest, MultipartFile archivo);
 
-    byte[] recuperarArchivoByResultadoId(Long resultadoId);
+    ResultadoArchivoDTO recuperarArchivoByResultadoId(Long resultadoId);
 
     ResultadoResponse agregarArchivoResultado(Long resultadoId, MultipartFile archivo);
 

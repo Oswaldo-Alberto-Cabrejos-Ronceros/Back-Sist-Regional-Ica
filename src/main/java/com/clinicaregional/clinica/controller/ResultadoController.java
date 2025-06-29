@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.controller;
 
+import com.clinicaregional.clinica.dto.ResultadoArchivoDTO;
 import com.clinicaregional.clinica.dto.request.ResultadoRequest;
 import com.clinicaregional.clinica.dto.response.ResultadoResponse;
 import com.clinicaregional.clinica.service.ResultadoService;
@@ -26,21 +27,21 @@ public class ResultadoController {
         this.resultadoService = resultadoService;
     }
 
-    @PostMapping
-    public ResponseEntity<ResultadoResponse> crearResultado(@RequestBody ResultadoRequest request, @Nullable @RequestParam MultipartFile archivo) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResultadoResponse> crearResultado(@RequestPart("request") ResultadoRequest request, @RequestPart(value = "archivo", required = false) MultipartFile archivo) {
         ResultadoResponse creado = resultadoService.crear(request, archivo);
         return ResponseEntity.ok(creado);
     }
 
     @GetMapping("/archivo/{resultadoId}")
     public ResponseEntity<byte[]> getArchivo(@PathVariable Long resultadoId) {
-        byte[] archivo = resultadoService.recuperarArchivoByResultadoId(resultadoId);
+        ResultadoArchivoDTO resultadoArchivoDTO = resultadoService.recuperarArchivoByResultadoId(resultadoId);
         //configuramos los headers de la respuesta
         HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.setContentDispositionFormData("attachment", resultadoId.toString());
-        return new ResponseEntity<>(archivo, httpHeaders, HttpStatus.OK);
+        httpHeaders.setContentDispositionFormData("attachment",resultadoArchivoDTO.getKey());
+        return new ResponseEntity<>(resultadoArchivoDTO.getArchivo(), httpHeaders, HttpStatus.OK);
     }
 
     @PatchMapping("/archivo/{resultadoId}")

@@ -1,5 +1,6 @@
 package com.clinicaregional.clinica.service.impl;
 
+import com.clinicaregional.clinica.dto.ResultadoArchivoDTO;
 import com.clinicaregional.clinica.dto.request.ResultadoRequest;
 import com.clinicaregional.clinica.dto.response.ResultadoResponse;
 import com.clinicaregional.clinica.dto.PacienteDTO;
@@ -68,6 +69,8 @@ public class ResultadoServiceImpl implements ResultadoService {
             String key = s3Service.subirArchivo(archivo, resultado.getHistorialClinico().getId().toString());
             resultado.setContieneArchivo(true);
             resultado.setArchivoKey(key);
+        } else {
+            resultado.setContieneArchivo(false);
         }
         resultado = resultadoRepository.save(resultado);
         return resultadoMapper.toResponse(resultado);
@@ -75,17 +78,18 @@ public class ResultadoServiceImpl implements ResultadoService {
 
     @Transactional(readOnly = true)
     @Override
-    public byte[] recuperarArchivoByResultadoId(Long resultadoId) {
+    public ResultadoArchivoDTO recuperarArchivoByResultadoId(Long resultadoId) {
         filtroEstado.activarFiltroEstado(true);
         //obtenemos resultado
         Resultado resultado = resultadoRepository.findByIdAndEstadoIsTrue(resultadoId).orElseThrow(() -> new ResourceNotFoundException("Resultado no encontrado"));
         //obtenemos si tiene archivo
         Boolean contieneArchivo = resultado.getContieneArchivo();
         String archivoKey = resultado.getArchivoKey();
-        if (!contieneArchivo | !archivoKey.isEmpty()) {
+        if (!contieneArchivo | archivoKey==null) {
             throw new ResourceNotFoundException("El resultado no contiene archivo");
         }
-        return s3Service.recuperarArchivo(archivoKey);
+        byte[] archivo = s3Service.recuperarArchivo(archivoKey);
+        return new ResultadoArchivoDTO(archivoKey, archivo);
     }
 
     @Transactional
@@ -97,7 +101,7 @@ public class ResultadoServiceImpl implements ResultadoService {
         //obtenemos si tiene archivo
         Boolean contieneArchivo = resultado.getContieneArchivo();
         String archivoKey = resultado.getArchivoKey();
-        if(contieneArchivo | !archivoKey.isEmpty()) {
+        if (contieneArchivo | archivoKey!=null) {
             throw new ResourceNotFoundException("El resultado ya contiene archivos");
         }
         String newArchivoKey = s3Service.subirArchivo(archivo, resultado.getHistorialClinico().getId().toString());

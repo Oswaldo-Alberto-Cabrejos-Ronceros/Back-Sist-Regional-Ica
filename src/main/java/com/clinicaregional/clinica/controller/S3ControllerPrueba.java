@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.service.S3Service;
+import com.clinicaregional.clinica.service.S3ServicePublic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class S3ControllerPrueba {
 
     private final S3Service s3Service;
+    private final S3ServicePublic s3ServicePublic;
 
     @Autowired
-    public S3ControllerPrueba(S3Service s3Service) {
+    public S3ControllerPrueba(S3Service s3Service, S3ServicePublic s3ServicePublic) {
         this.s3Service=s3Service;
+        this.s3ServicePublic=s3ServicePublic;
     }
 
     @PostMapping
@@ -42,6 +45,11 @@ public class S3ControllerPrueba {
     public ResponseEntity<Void> eliminarArchivo(@RequestParam String key){
         s3Service.eliminarArchivo(key);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/link-public")
+    public ResponseEntity<String> obtenerLinkPublic(@RequestParam String key){
+        return ResponseEntity.ok(s3ServicePublic.generarUrlPublico(key));
     }
 
 }

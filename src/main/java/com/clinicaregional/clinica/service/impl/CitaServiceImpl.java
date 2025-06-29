@@ -103,6 +103,30 @@ public class CitaServiceImpl implements CitaService {
     }
 
     @Override
+    public List<CitaResponse> listarPorMedico(Long medicoId) {
+        return citaRepository.findByMedicoId(medicoId)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> listarPorMedicoAndEstadoConfirmada(long medicoId) {
+        return citaRepository.findByMedicoIdAndEstadoCita(medicoId, EstadoCita.CONFIRMADA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> listarPorMedicoAndEstadoAtendida(long medicoId) {
+        return citaRepository.findByMedicoIdAndEstadoCita(medicoId, EstadoCita.ATENDIDA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CitaResponse> listarTodas() {
         return citaRepository.findAll()
                 .stream()
@@ -311,5 +335,5 @@ public class CitaServiceImpl implements CitaService {
                 .distinct() // opcional, si hay duplicados
                 .collect(Collectors.toList());
     }
-    
+
 }

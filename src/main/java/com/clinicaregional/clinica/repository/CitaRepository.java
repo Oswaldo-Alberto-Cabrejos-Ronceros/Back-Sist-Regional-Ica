@@ -14,8 +14,12 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     List<Cita> findByEstadoCitaIn(List<EstadoCita> estados);
 
+    List<Cita> findByMedicoId(Long medicoId);
+
     @Query("SELECT DISTINCT c.paciente FROM Cita c WHERE c.medico.id = :medicoId AND c.estadoCita IN :estados")
     List<Paciente> findPacientesByMedicoIdAndEstadoCitaIn(@Param("medicoId") Long medicoId,
             @Param("estados") List<EstadoCita> estados);
+
+    List<Cita> findByMedicoIdAndEstadoCita(Long medicoId, EstadoCita estadoCita);
 
 }

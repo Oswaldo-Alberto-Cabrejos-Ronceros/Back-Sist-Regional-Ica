@@ -56,7 +56,7 @@ public class PacienteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
-                                                      @RequestBody @Valid PacienteDTO pacienteDTO) {
+            @RequestBody @Valid PacienteDTO pacienteDTO) {
         PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
         return ResponseEntity.ok(updatedPaciente);
     }
@@ -70,8 +70,7 @@ public class PacienteController {
     @GetMapping("/paginado")
     public ResponseEntity<PagedResponse<PacienteDTO>> listarPacientesPaginado(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(pacienteService.listarPacientesPaginado(pageable));
     }

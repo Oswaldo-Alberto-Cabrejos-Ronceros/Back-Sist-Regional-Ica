@@ -79,5 +79,4 @@ public class CitaController {
             @PathVariable Long medicoId) {
         return ResponseEntity.ok(citaService.obtenerPacientesPorMedicoConCitasConfirmadasOAtendidas(medicoId));
     }
-
 }

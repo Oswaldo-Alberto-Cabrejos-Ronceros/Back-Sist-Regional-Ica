@@ -91,4 +91,11 @@ public class RolServiceImpl implements RolService {
         rol.setEstado(false); // borrado lógico
         rolRepository.save(rol);
     }
+
+    @Override
+    public RolDTO obtenerRolPorNombre(String nombre) {
+        return rolRepository.findByNombreAndEstadoTrue(nombre)
+                .map(rolMapper::mapToRolDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Rol no encontrado con nombre: " + nombre));
+    }
 }

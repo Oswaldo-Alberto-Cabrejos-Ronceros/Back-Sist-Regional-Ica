@@ -27,6 +27,7 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.MedicoMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.MedicoService;
+import com.clinicaregional.clinica.service.RolService;
 import com.clinicaregional.clinica.service.UsuarioService;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,7 @@ public class MedicoServiceImpl implements MedicoService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
     private final TipoDocumentoService tipoDocumentoService;
+    private final RolService rolService;
     private final FiltroEstado filtroEstado;
 
     @Autowired
@@ -48,12 +50,14 @@ public class MedicoServiceImpl implements MedicoService {
             UsuarioRepository usuarioRepository,
             UsuarioService usuarioService,
             TipoDocumentoService tipoDocumentoService,
+            RolService rolService,
             FiltroEstado filtroEstado) {
         this.medicoRepository = medicoRepository;
         this.medicoMapper = medicoMapper;
         this.usuarioRepository = usuarioRepository;
         this.usuarioService = usuarioService;
         this.tipoDocumentoService = tipoDocumentoService;
+        this.rolService = rolService;
         this.filtroEstado = filtroEstado;
     }
 
@@ -123,14 +127,15 @@ public class MedicoServiceImpl implements MedicoService {
             throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
 
+        RolDTO rolMedico = rolService.obtenerRolPorNombre("MEDICO");
+
+        // Crear usuario
         UsuarioRequestDTO newUsuario = new UsuarioRequestDTO();
         newUsuario.setCorreo(dto.getCorreo());
         newUsuario.setPassword(dto.getPassword());
-        RolDTO rolMedico = new RolDTO();
-        rolMedico.setId(4L); // ID del rol de médico
         newUsuario.setRol(rolMedico);
-        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
 
+        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
         Usuario usuario1 = new Usuario();
         usuario1.setId(usuarioDTO.getId());
 

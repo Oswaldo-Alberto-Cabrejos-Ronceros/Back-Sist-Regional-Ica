@@ -13,6 +13,7 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.AdministradorMapper;
 import com.clinicaregional.clinica.repository.AdministradorRepository;
 import com.clinicaregional.clinica.service.AdministradorService;
+import com.clinicaregional.clinica.service.RolService;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +30,17 @@ public class AdministradorServiceImpl implements AdministradorService {
     private final AdministradorRepository administradorRepository;
     private final AdministradorMapper administradorMapper;
     private final UsuarioService usuarioService;
+    private final RolService rolService;
     private final FiltroEstado filtroEstado;
 
     @Autowired
     public AdministradorServiceImpl(AdministradorRepository administradorRepository,
-                                    AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado) {
+            AdministradorMapper administradorMapper, UsuarioService usuarioService, RolService rolService,
+            FiltroEstado filtroEstado) {
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
         this.usuarioService = usuarioService;
+        this.rolService = rolService;
         this.filtroEstado = filtroEstado;
     }
 
@@ -59,7 +63,8 @@ public class AdministradorServiceImpl implements AdministradorService {
     @Override
     public MyInfoAdministrador getMyInfoAdministrador(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Administrador administrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro Administrador con el id: " + id));
+        Administrador administrador = administradorRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontro Administrador con el id: " + id));
         return administradorMapper.mapToMyInfoAdministrador(administrador);
     }
 
@@ -72,8 +77,8 @@ public class AdministradorServiceImpl implements AdministradorService {
             throw new DuplicateResourceException("Ya existe un administrador con el numero de documento ingresado");
         }
 
-        // Establecer el rol por defecto (ADMIN)
-        registerAdministradorRequest.getUsuario().setRol(new RolDTO(2L, "ADMINISTRADOR"));
+        RolDTO rolAdmin = rolService.obtenerRolPorNombre("ADMIN");
+        registerAdministradorRequest.getUsuario().setRol(rolAdmin);
 
         UsuarioDTO usuarioGuardado = usuarioService.guardar(registerAdministradorRequest.getUsuario());
 

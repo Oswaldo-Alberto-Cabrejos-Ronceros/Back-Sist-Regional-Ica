@@ -36,6 +36,24 @@ public class CitaController {
         return ResponseEntity.ok(citaService.listarTodas());
     }
 
+    // Listar citas por médico
+     @GetMapping("/citas-medico/{medicoId}")
+    public ResponseEntity<List<CitaResponse>> obtenerCitasPorMedico(@PathVariable Long medicoId) {
+        return ResponseEntity.ok(citaService.listarPorMedico(medicoId));
+    }
+    // Listar citas por médico y estado CONFIRMADA
+
+    @GetMapping("/citas-medico-confirmada/{medicoId}")
+    public ResponseEntity<List<CitaResponse>> obtenerCitasPorMedicoConfirmadas(@PathVariable Long medicoId) {
+        return ResponseEntity.ok(citaService.listarPorMedicoAndEstadoConfirmada(medicoId));
+    }
+    // Listar citas por médico y estado ATENDIDA
+
+    @GetMapping("/citas-medico-atendida/{medicoId}")
+    public ResponseEntity<List<CitaResponse>> obtenerCitasPorMedicoAtendidas(@PathVariable Long medicoId) {
+        return ResponseEntity.ok(citaService.listarPorMedicoAndEstadoAtendida(medicoId));
+
+    }
     // Actualizar una cita
     @PutMapping("/{id}")
     public ResponseEntity<CitaResponse> actualizar(@PathVariable Long id,

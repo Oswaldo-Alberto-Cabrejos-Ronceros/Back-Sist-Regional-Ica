@@ -22,6 +22,8 @@ public interface CitaService {
 
     List<CitaResponse> listarPorMedico (Long medicoId);
 
+    List<CitaResponse> listarPorDiaAndEstadoConfirmada(long medicoId);
+
     CitaResponse actualizar(Long id, CitaRequest request);
 
     void eliminar(Long id);

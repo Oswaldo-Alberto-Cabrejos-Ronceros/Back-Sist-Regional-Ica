@@ -20,6 +20,14 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     List<Paciente> findPacientesByMedicoIdAndEstadoCitaIn(@Param("medicoId") Long medicoId,
             @Param("estados") List<EstadoCita> estados);
 
+    @Query("SELECT c FROM Cita c " +
+            "WHERE c.medico.id = :medicoId " +
+            "AND c.estadoCita = :estado " +
+            "AND (c.fecha > CURRENT_DATE OR (c.fecha = CURRENT_DATE AND c.hora >= CURRENT_TIME))")
+    List<Cita> findCitasConfirmadasFuturasPorMedico(
+            @Param("medicoId") Long medicoId,
+            @Param("estado") EstadoCita estado);
+
     List<Cita> findByMedicoIdAndEstadoCita(Long medicoId, EstadoCita estadoCita);
 
 }

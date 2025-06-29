@@ -127,6 +127,15 @@ public class CitaServiceImpl implements CitaService {
     }
 
     @Override
+    public List<CitaResponse> listarPorDiaAndEstadoConfirmada(long medicoId) {
+        return citaRepository
+                .findCitasConfirmadasFuturasPorMedico(medicoId, EstadoCita.CONFIRMADA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CitaResponse> listarTodas() {
         return citaRepository.findAll()
                 .stream()

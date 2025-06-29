@@ -54,6 +54,12 @@ public class CitaController {
         return ResponseEntity.ok(citaService.listarPorMedicoAndEstadoAtendida(medicoId));
 
     }
+
+    // Listar citas por médico y día con estado CONFIRMADA
+    @GetMapping("/citas-medico-confirmada-dia/{medicoId}")
+    public ResponseEntity<List<CitaResponse>> obtenerCitasPorMedicoConfirmadasDia(@PathVariable Long medicoId) {
+        return ResponseEntity.ok(citaService.listarPorDiaAndEstadoConfirmada(medicoId));
+    }   
     // Actualizar una cita
     @PutMapping("/{id}")
     public ResponseEntity<CitaResponse> actualizar(@PathVariable Long id,

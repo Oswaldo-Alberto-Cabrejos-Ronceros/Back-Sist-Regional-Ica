@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -49,15 +50,15 @@ public class PacienteController {
     }
 
     @PostMapping
-    public ResponseEntity<PacienteDTO> createPaciente(@RequestBody @Valid PacienteDTO pacienteDTO) {
-        PacienteDTO savedPaciente = pacienteService.crearPaciente(pacienteDTO);
+    public ResponseEntity<PacienteDTO> createPaciente(@RequestPart("pacienteDTO") @Valid PacienteDTO pacienteDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        PacienteDTO savedPaciente = pacienteService.crearPaciente(pacienteDTO,imagen);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
-                                                      @RequestBody @Valid PacienteDTO pacienteDTO) {
-        PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
+                                                      @RequestPart("pacienteDTO") @Valid PacienteDTO pacienteDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO,imagen);
         return ResponseEntity.ok(updatedPaciente);
     }
 

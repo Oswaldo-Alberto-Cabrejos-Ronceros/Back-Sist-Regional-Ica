@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
+import com.clinicaregional.clinica.dto.response.ProximaCitaResponse;
 import com.clinicaregional.clinica.entity.Cita;
 import com.clinicaregional.clinica.entity.HorarioBloque;
 import com.clinicaregional.clinica.entity.Medico;
@@ -333,6 +334,21 @@ public class CitaServiceImpl implements CitaService {
         return pacientes.stream()
                 .map(pacienteMapper::mapToPacienteResponseDTO)
                 .distinct() // opcional, si hay duplicados
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProximaCitaResponse> obtenerCitasFuturasPorPaciente(Long pacienteId) {
+        List<Cita> citas = citaRepository.findCitasFuturasByPaciente(pacienteId);
+
+        return citas.stream()
+                .map(cita -> new ProximaCitaResponse(
+                        cita.getId(),
+                        cita.getFecha(),
+                        cita.getHora(),
+                        cita.getMedico().getNombres(),
+                        cita.getServicio().getNombre()
+                ))
                 .collect(Collectors.toList());
     }
 

@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.AdministradorDTO;
 import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.dto.response.MyInfoAdministrador;
@@ -13,11 +14,13 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.AdministradorMapper;
 import com.clinicaregional.clinica.repository.AdministradorRepository;
 import com.clinicaregional.clinica.service.AdministradorService;
+import com.clinicaregional.clinica.service.S3ServicePublic;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,29 +33,33 @@ public class AdministradorServiceImpl implements AdministradorService {
     private final AdministradorMapper administradorMapper;
     private final UsuarioService usuarioService;
     private final FiltroEstado filtroEstado;
+    private final S3ServicePublic s3Service;
 
     @Autowired
     public AdministradorServiceImpl(AdministradorRepository administradorRepository,
-                                    AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado) {
+                                    AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado, S3ServicePublic s3Service) {
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
         this.usuarioService = usuarioService;
         this.filtroEstado = filtroEstado;
+        this.s3Service = s3Service;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<AdministradorDTO> listarAdministradores() {
         filtroEstado.activarFiltroEstado(true);
-        return administradorRepository.findAll().stream().map(administradorMapper::mapToAdministradorDTO)
-                .collect(Collectors.toList());
+        List<AdministradorDTO> administradores = administradorRepository.findAll().stream().map(administradorMapper::mapToAdministradorDTO)
+                .toList();
+        return administradores.stream().map(this::agregarUrlImage).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<AdministradorDTO> getAdministradorById(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        return administradorRepository.findByIdAndEstadoIsTrue(id).map(administradorMapper::mapToAdministradorDTO);
+        Optional<AdministradorDTO> administradorDTO = administradorRepository.findByIdAndEstadoIsTrue(id).map(administradorMapper::mapToAdministradorDTO);
+        return administradorDTO.map(this::agregarUrlImage);
     }
 
     @Transactional(readOnly = true)
@@ -60,12 +67,16 @@ public class AdministradorServiceImpl implements AdministradorService {
     public MyInfoAdministrador getMyInfoAdministrador(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Administrador administrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro Administrador con el id: " + id));
+        if (administrador.getImagenUrl() != null) {
+            String imageUrl = s3Service.generarUrlPublico(administrador.getImagenUrl());
+            administrador.setImagenUrl(imageUrl);
+        }
         return administradorMapper.mapToMyInfoAdministrador(administrador);
     }
 
     @Transactional
     @Override
-    public AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest) {
+    public AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest, MultipartFile imagen) {
         filtroEstado.activarFiltroEstado(true);
         if (administradorRepository
                 .existsByNumeroDocumento(registerAdministradorRequest.getAdministrador().getNumeroDocumento())) {
@@ -78,16 +89,21 @@ public class AdministradorServiceImpl implements AdministradorService {
         UsuarioDTO usuarioGuardado = usuarioService.guardar(registerAdministradorRequest.getUsuario());
 
         registerAdministradorRequest.getAdministrador().setUsuarioId(usuarioGuardado.getId());
+        Administrador administrador = administradorMapper.mapToAdministrador(registerAdministradorRequest.getAdministrador());
 
+        if (imagen != null) {
+            String key = s3Service.subirArchivo(imagen, "administrador" + administrador.getNombres());
+            administrador.setImagenUrl(key);
+        }
         Administrador savedAdministrador = administradorRepository
-                .save(administradorMapper.mapToAdministrador(registerAdministradorRequest.getAdministrador()));
+                .save(administrador);
 
-        return administradorMapper.mapToAdministradorDTO(savedAdministrador);
+        return this.agregarUrlImage(administradorMapper.mapToAdministradorDTO(savedAdministrador));
     }
 
     @Transactional
     @Override
-    public AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO) {
+    public AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO, MultipartFile imagen) {
         filtroEstado.activarFiltroEstado(true);
         Administrador findAdministrador = administradorRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe un administrador con el id ingresado"));
@@ -110,9 +126,20 @@ public class AdministradorServiceImpl implements AdministradorService {
         findAdministrador.setFechaContratacion(administradorDTO.getFechaContratacion());
         Usuario usuario = new Usuario();
         usuario.setId(administradorDTO.getUsuarioId());
+        Administrador administrador = administradorMapper.mapToAdministrador(administradorDTO);
+
+        if (imagen != null) {
+            if (administrador.getImagenUrl() != null) {
+                s3Service.eliminarArchivo(administrador.getImagenUrl());
+            }
+            String key = s3Service.subirArchivo(imagen, "administrador" + administrador.getNombres());
+            administrador.setImagenUrl(key);
+        }
+
         Administrador updatedAdministrador = administradorRepository
-                .save(administradorMapper.mapToAdministrador(administradorDTO));
-        return administradorMapper.mapToAdministradorDTO(updatedAdministrador);
+                .save(administrador);
+
+        return this.agregarUrlImage(administradorMapper.mapToAdministradorDTO(updatedAdministrador));
     }
 
     @Transactional
@@ -124,6 +151,18 @@ public class AdministradorServiceImpl implements AdministradorService {
         findAdministrador.setEstado(false); // borrado logico
         usuarioService.eliminar(findAdministrador.getUsuario().getId());
         findAdministrador.setUsuario(null);
+        if (findAdministrador.getImagenUrl() != null) {
+            s3Service.eliminarArchivo(findAdministrador.getImagenUrl());
+        }
         administradorRepository.save(findAdministrador);
+    }
+
+    //funcion para obtener el url
+    private AdministradorDTO agregarUrlImage(AdministradorDTO administradorDTO) {
+        if (administradorDTO.getImagenUrl() != null) {
+            String imageUrl = s3Service.generarUrlPublico(administradorDTO.getImagenUrl());
+            administradorDTO.setImagenUrl(imageUrl);
+        }
+        return administradorDTO;
     }
 }

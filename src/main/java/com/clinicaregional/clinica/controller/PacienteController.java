@@ -29,6 +29,12 @@ public class PacienteController {
         return ResponseEntity.ok(pacienteService.listarPacientes());
     }
 
+    // Listar pacientes sin importar el filtro de estado
+    @GetMapping("/estado")
+    public ResponseEntity<List<PacienteDTO>> listarPacientesPorEstado() {
+        return ResponseEntity.ok(pacienteService.listarPacientesPorEstado());
+    }
+
     @GetMapping("/id/{id}")
     public ResponseEntity<PacienteDTO> getPacienteById(@PathVariable Long id) {
         return pacienteService.getPacientePorId(id)

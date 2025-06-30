@@ -59,6 +59,16 @@ public class PacienteServiceImpl implements PacienteService {
                 .map(pacienteMapper::mapToPacienteDTO)
                 .collect(Collectors.toList());
     }
+    
+    //Listar pacientes sin importar el filtro de estado
+    @Transactional(readOnly = true)
+    @Override
+    public List<PacienteDTO> listarPacientesPorEstado() {
+        return pacienteRepository.findAll()
+                .stream()
+                .map(pacienteMapper::mapToPacienteDTO)
+                .collect(Collectors.toList());
+    }
 
     @Transactional(readOnly = true)
     @Override

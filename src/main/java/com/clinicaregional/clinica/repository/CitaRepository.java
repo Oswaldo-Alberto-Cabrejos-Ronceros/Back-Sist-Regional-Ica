@@ -5,6 +5,7 @@ import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.enums.EstadoCita;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,5 +22,21 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
             @Param("estados") List<EstadoCita> estados);
 
     List<Cita> findByMedicoIdAndEstadoCita(Long medicoId, EstadoCita estadoCita);
+
+    //consulta que obtiene todas las citas CONFIRMADAS de un paciente cuya fecha/hora son posteriores al momento actual
+    //se ordena de forma cronológica por fecha y hora
+    @Query("""
+    SELECT c
+    FROM Cita c
+    WHERE
+        c.paciente.id = :pacienteId
+        AND c.estadoCita = com.clinicaregional.clinica.enums.EstadoCita.CONFIRMADA
+        AND (
+            c.fecha > CURRENT_DATE
+            OR (c.fecha = CURRENT_DATE AND c.hora > CURRENT_TIME)
+        )
+    ORDER BY c.fecha ASC, c.hora ASC
+    """)
+    List<Cita> findCitasFuturasByPaciente(@Param("pacienteId") Long pacienteId);
 
 }

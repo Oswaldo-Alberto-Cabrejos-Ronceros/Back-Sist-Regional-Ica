@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
+import com.clinicaregional.clinica.dto.response.ProximaCitaResponse;
 import com.clinicaregional.clinica.entity.Cita;
 import com.clinicaregional.clinica.entity.HorarioBloque;
 import com.clinicaregional.clinica.entity.Medico;
@@ -46,13 +47,14 @@ public class CitaServiceImpl implements CitaService {
     public CitaResponse registrar(CitaRequest request) {
         // 1. Buscar bloque horario DISPONIBLE
         HorarioBloque bloque = horarioBloqueRepository
-                .findByFechaAndHoraInicioAndEstadoBloque(
+                .findByFechaAndHoraInicioAndEstadoBloqueAndDisponibilidad_Medico_Id(
                         request.getFecha(),
                         request.getHora(),
-                        EstadoBloque.DISPONIBLE)
+                        EstadoBloque.DISPONIBLE,
+                        request.getMedicoId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "No hay bloques DISPONIBLES para la fecha " + request.getFecha() +
-                                " y hora " + request.getHora()));
+                        "No hay bloques DISPONIBLES para el médico " + request.getMedicoId() +
+                                " en la fecha " + request.getFecha() + " y hora " + request.getHora()));
 
         // Verificación crítica: asegurar que el bloque pertenece al médico esperado
         if (!bloque.getDisponibilidad().getMedico().getId().equals(request.getMedicoId())) {
@@ -100,6 +102,39 @@ public class CitaServiceImpl implements CitaService {
         return citaRepository.findById(id)
                 .map(citaMapper::toResponse)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada con ID: " + id));
+    }
+
+    @Override
+    public List<CitaResponse> listarPorMedico(Long medicoId) {
+        return citaRepository.findByMedicoId(medicoId)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> listarPorMedicoAndEstadoConfirmada(long medicoId) {
+        return citaRepository.findByMedicoIdAndEstadoCita(medicoId, EstadoCita.CONFIRMADA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> listarPorMedicoAndEstadoAtendida(long medicoId) {
+        return citaRepository.findByMedicoIdAndEstadoCita(medicoId, EstadoCita.ATENDIDA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> listarPorDiaAndEstadoConfirmada(long medicoId) {
+        return citaRepository
+                .findCitasConfirmadasFuturasPorMedico(medicoId, EstadoCita.CONFIRMADA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -311,5 +346,19 @@ public class CitaServiceImpl implements CitaService {
                 .distinct() // opcional, si hay duplicados
                 .collect(Collectors.toList());
     }
-    
+
+    @Override
+    public List<ProximaCitaResponse> obtenerCitasFuturasPorPaciente(Long pacienteId) {
+        List<Cita> citas = citaRepository.findCitasFuturasByPaciente(pacienteId);
+
+        return citas.stream()
+                .map(cita -> new ProximaCitaResponse(
+                        cita.getId(),
+                        cita.getFecha(),
+                        cita.getHora(),
+                        cita.getMedico().getNombres(),
+                        cita.getServicio().getNombre()))
+                .collect(Collectors.toList());
+    }
+
 }

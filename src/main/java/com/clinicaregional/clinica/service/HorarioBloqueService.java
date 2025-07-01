@@ -16,6 +16,8 @@ public interface HorarioBloqueService {
 
     List<HorarioBloqueResponse> listarPorFecha(LocalDate fecha);
 
+    List<HorarioBloqueResponse> listarPorEspecialidad(Long especialidadId);
+
     HorarioBloqueResponse actualizarEstado(Long id, String nuevoEstado);
 
     boolean estaDisponible(Long id);

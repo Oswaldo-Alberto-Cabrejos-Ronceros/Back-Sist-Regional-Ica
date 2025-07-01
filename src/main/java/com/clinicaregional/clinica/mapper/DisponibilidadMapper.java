@@ -19,6 +19,7 @@ public class DisponibilidadMapper {
         disponibilidad.setHoraInicio(request.getHoraInicio());
         disponibilidad.setHoraFin(request.getHoraFin());
         disponibilidad.setNotas(request.getNotas());
+        disponibilidad.setUbicacion(request.getUbicacion());
         disponibilidad.setMedico(medico);
         return disponibilidad;
     }
@@ -30,7 +31,8 @@ public class DisponibilidadMapper {
                 disponibilidad.getHoraInicio(),
                 disponibilidad.getHoraFin(),
                 disponibilidad.getNotas(),
-                disponibilidad.getMedico().getId()
+                disponibilidad.getMedico().getId(),
+                disponibilidad.getUbicacion()
         );
     }
 

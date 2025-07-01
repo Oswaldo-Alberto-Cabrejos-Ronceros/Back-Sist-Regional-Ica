@@ -24,8 +24,21 @@ public interface HorarioBloqueRepository extends JpaRepository<HorarioBloque, Lo
     Optional<HorarioBloque> findByFechaAndHoraInicioAndEstadoBloque(LocalDate fecha, LocalTime hora,
             EstadoBloque estadoBloque);
 
+    // Solo bloques de una especialidad cuya fecha es hoy o posterior
+
+    List<HorarioBloque> findByDisponibilidadIdAndFechaGreaterThanEqual(Long disponibilidadId, LocalDate fecha);
+
+    // Solo bloques de un médico específico cuya fecha es hoy o posterior
+    List<HorarioBloque> findByDisponibilidad_Medico_IdAndFechaGreaterThanEqual(Long medicoId, LocalDate fecha);
+
     Optional<HorarioBloque> findByCitaId(Long citaId);
 
     Optional<HorarioBloque> findByCita(Cita cita);
+
+    Optional<HorarioBloque> findByFechaAndHoraInicioAndEstadoBloqueAndDisponibilidad_Medico_Id(
+            LocalDate fecha,
+            LocalTime horaInicio,
+            EstadoBloque estadoBloque,
+            Long medicoId);
 
 }

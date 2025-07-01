@@ -24,7 +24,7 @@ public class RecepcionistaController {
 
     @PostMapping
     public ResponseEntity<?> registrar(@RequestBody @Valid RecepcionistaRequest recepcionistaRequest,
-                                       BindingResult result) {
+            BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("Datos inválidos");
         }
@@ -51,7 +51,7 @@ public class RecepcionistaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<RecepcionistaResponse> actualizar(@PathVariable Long id,
-                                                            @RequestBody RecepcionistaRequest recepcionistaRequest) {
+            @RequestBody RecepcionistaRequest recepcionistaRequest) {
         return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionistaRequest));
     }
 

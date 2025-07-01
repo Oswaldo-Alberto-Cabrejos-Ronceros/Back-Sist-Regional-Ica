@@ -41,6 +41,11 @@ public class HorarioBloqueController {
         return ResponseEntity.ok(horarioBloqueService.listarPorFecha(fecha));
     }
 
+    @GetMapping("/especialidad/{id}")
+    public ResponseEntity<List<HorarioBloqueResponse>> listarPorEspecialidad(@PathVariable Long id){
+        return ResponseEntity.ok(horarioBloqueService.listarPorEspecialidad(id));
+    }
+
     @PostMapping
     public ResponseEntity<HorarioBloqueResponse> registrar(@Valid @RequestBody HorarioBloqueRequest request) {
         return ResponseEntity.ok(horarioBloqueService.registrar(request));

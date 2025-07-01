@@ -29,6 +29,12 @@ public class PacienteController {
         return ResponseEntity.ok(pacienteService.listarPacientes());
     }
 
+    // Listar pacientes sin importar el filtro de estado
+    @GetMapping("/estado")
+    public ResponseEntity<List<PacienteDTO>> listarPacientesPorEstado() {
+        return ResponseEntity.ok(pacienteService.listarPacientesPorEstado());
+    }
+
     @GetMapping("/id/{id}")
     public ResponseEntity<PacienteDTO> getPacienteById(@PathVariable Long id) {
         return pacienteService.getPacientePorId(id)
@@ -56,7 +62,7 @@ public class PacienteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
-                                                      @RequestBody @Valid PacienteDTO pacienteDTO) {
+            @RequestBody @Valid PacienteDTO pacienteDTO) {
         PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
         return ResponseEntity.ok(updatedPaciente);
     }
@@ -70,8 +76,7 @@ public class PacienteController {
     @GetMapping("/paginado")
     public ResponseEntity<PagedResponse<PacienteDTO>> listarPacientesPaginado(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(pacienteService.listarPacientesPaginado(pageable));
     }

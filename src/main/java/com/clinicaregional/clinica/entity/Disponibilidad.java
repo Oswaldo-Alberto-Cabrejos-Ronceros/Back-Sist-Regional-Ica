@@ -12,12 +12,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 @Table(name = "disponibilidades")
 @Filter(name = "estadoActivo", condition = "estado = :estado")
 public class Disponibilidad extends EntidadConEstado {
@@ -40,5 +42,8 @@ public class Disponibilidad extends EntidadConEstado {
 
     @OneToMany(mappedBy = "disponibilidad", cascade = CascadeType.ALL)
     private List<HorarioBloque> bloques;
+
+    @Column(length = 150)
+    private String ubicacion;
 
 }

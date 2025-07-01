@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface PacienteService {
     List<PacienteDTO> listarPacientes();
 
+    List<PacienteDTO> listarPacientesPorEstado();
+
     Optional<PacienteDTO> getPacientePorId(Long id);
 
     Optional<PacienteDTO> getPacientePorIdentificacion(String identificacion);

@@ -17,6 +17,7 @@ import com.clinicaregional.clinica.repository.RecepcionistaRepository;
 import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.RecepcionistaService;
+import com.clinicaregional.clinica.service.RolService;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
     private final UsuarioRepository usuarioRepository;
     private final RecepcionistaMapper recepcionistaMapper;
     private final UsuarioService usuarioService;
+    private final RolService rolService;
     private final FiltroEstado filtroEstado;
 
     @Autowired
@@ -46,12 +48,14 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
             UsuarioRepository usuarioRepository,
             RecepcionistaMapper recepcionistaMapper,
             UsuarioService usuarioService,
+            RolService rolService,
             FiltroEstado filtroEstado) {
         this.recepcionistaRepository = recepcionistaRepository;
         this.tipoDocumentoRepository = tipoDocumentoRepository;
         this.usuarioRepository = usuarioRepository;
         this.recepcionistaMapper = recepcionistaMapper;
         this.usuarioService = usuarioService;
+        this.rolService = rolService;
         this.filtroEstado = filtroEstado;
     }
 
@@ -75,9 +79,9 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
     @Transactional(readOnly = true)
     @Override
     public MyInfoRecepcionista obtenerMyInfoRecepcionista(Long id) {
-        Recepcionista recepcionista= recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(()->new ResourceNotFoundException(
-                "No se encontro recepcionista con el id: " + id
-        ));
+        Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No se encontro recepcionista con el id: " + id));
         return recepcionistaMapper.toMyInfoRecepcionista(recepcionista);
     }
 
@@ -89,21 +93,23 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento())) {
             throw new RuntimeException("Ya existe un recepcionista con el mismo número de documento");
         }
-        //guardamos usuario
-        UsuarioRequestDTO newUsuario= new UsuarioRequestDTO();
+        // guardamos usuario
+        RolDTO rolRecepcionista = rolService.obtenerRolPorNombre("RECEPCIONISTA");
+
+        // Crear usuario
+        UsuarioRequestDTO newUsuario = new UsuarioRequestDTO();
         newUsuario.setCorreo(request.getCorreo());
         newUsuario.setPassword(request.getPassword());
-
-        RolDTO rolRecepcinista = new RolDTO();
-        rolRecepcinista.setId(3L);//ROL RECEPCIONISTA
-        newUsuario.setRol(rolRecepcinista);
+        newUsuario.setRol(rolRecepcionista);
 
         UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
+
         Usuario usuario = new Usuario();
         usuario.setId(usuarioDTO.getId());
 
         TipoDocumento tipoDocumento = tipoDocumentoRepository.findByIdAndEstadoIsTrue(request.getTipoDocumentoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
 
         Recepcionista recepcionista = Recepcionista.builder()
                 .nombres(request.getNombres())
@@ -111,6 +117,7 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
                 .numeroDocumento(request.getNumeroDocumento())
                 .telefono(request.getTelefono())
                 .direccion(request.getDireccion())
+                .imagenUrl(request.getImagenUrl())
                 .turnoTrabajo(request.getTurnoTrabajo())
                 .fechaContratacion(request.getFechaContratacion())
                 .usuario(usuario)
@@ -136,10 +143,12 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         }
 
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(request.getUsuarioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + request.getUsuarioId()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Usuario no encontrado con id: " + request.getUsuarioId()));
 
         TipoDocumento tipoDocumento = tipoDocumentoRepository.findByIdAndEstadoIsTrue(request.getTipoDocumentoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Tipo de documento no encontrado con id: " + request.getTipoDocumentoId()));
 
         recepcionistaExistente.setNombres(request.getNombres());
         recepcionistaExistente.setApellidos(request.getApellidos());
@@ -154,13 +163,13 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         return recepcionistaMapper.toResponse(recepcionistaRepository.save(recepcionistaExistente));
     }
 
-
     @Transactional
     @Override
     public void eliminar(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new RuntimeException("Recepcionista no encontrada"));
-        recepcionista.setEstado(false); //borrado
+        Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new RuntimeException("Recepcionista no encontrada"));
+        recepcionista.setEstado(false); // borrado
         usuarioService.eliminar(recepcionista.getUsuario().getId());
         recepcionista.setUsuario(null);
         recepcionistaRepository.save(recepcionista);

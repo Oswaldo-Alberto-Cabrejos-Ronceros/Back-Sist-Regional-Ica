@@ -16,4 +16,6 @@ public interface RolService {
     public RolDTO actualizar(Long id, RolDTO nuevoRol);
 
     public void eliminar(Long id);
+
+    public RolDTO obtenerRolPorNombre(String nombre);
 }

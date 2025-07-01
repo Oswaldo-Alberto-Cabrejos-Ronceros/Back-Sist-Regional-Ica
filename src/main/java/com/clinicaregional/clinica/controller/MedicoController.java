@@ -41,7 +41,6 @@ public class MedicoController {
     }
 
     //para obtener myInfo
-
     @GetMapping("/my-info/{id}")
     public ResponseEntity<MyInfoMedico> obtenerMyInfo(@PathVariable Long id){
         return ResponseEntity.ok(medicoService.obtenerMyInfoMedico(id));

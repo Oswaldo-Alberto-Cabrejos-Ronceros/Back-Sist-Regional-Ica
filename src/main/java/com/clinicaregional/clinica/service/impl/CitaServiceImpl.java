@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
+import com.clinicaregional.clinica.dto.response.ProximaCitaResponse;
 import com.clinicaregional.clinica.entity.Cita;
 import com.clinicaregional.clinica.entity.HorarioBloque;
 import com.clinicaregional.clinica.entity.Medico;
@@ -100,6 +101,39 @@ public class CitaServiceImpl implements CitaService {
         return citaRepository.findById(id)
                 .map(citaMapper::toResponse)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada con ID: " + id));
+    }
+
+    @Override
+    public List<CitaResponse> listarPorMedico(Long medicoId) {
+        return citaRepository.findByMedicoId(medicoId)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> listarPorMedicoAndEstadoConfirmada(long medicoId) {
+        return citaRepository.findByMedicoIdAndEstadoCita(medicoId, EstadoCita.CONFIRMADA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> listarPorMedicoAndEstadoAtendida(long medicoId) {
+        return citaRepository.findByMedicoIdAndEstadoCita(medicoId, EstadoCita.ATENDIDA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CitaResponse> listarPorDiaAndEstadoConfirmada(long medicoId) {
+        return citaRepository
+                .findCitasConfirmadasFuturasPorMedico(medicoId, EstadoCita.CONFIRMADA)
+                .stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -311,5 +345,20 @@ public class CitaServiceImpl implements CitaService {
                 .distinct() // opcional, si hay duplicados
                 .collect(Collectors.toList());
     }
-    
+
+    @Override
+    public List<ProximaCitaResponse> obtenerCitasFuturasPorPaciente(Long pacienteId) {
+        List<Cita> citas = citaRepository.findCitasFuturasByPaciente(pacienteId);
+
+        return citas.stream()
+                .map(cita -> new ProximaCitaResponse(
+                        cita.getId(),
+                        cita.getFecha(),
+                        cita.getHora(),
+                        cita.getMedico().getNombres(),
+                        cita.getServicio().getNombre()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }

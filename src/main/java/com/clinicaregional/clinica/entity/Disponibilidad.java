@@ -42,4 +42,8 @@ public class Disponibilidad extends EntidadConEstado {
 
     @OneToMany(mappedBy = "disponibilidad", cascade = CascadeType.ALL)
     private List<HorarioBloque> bloques;
+
+    @Column(length = 150)
+    private String ubicacion;
+
 }

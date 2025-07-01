@@ -240,4 +240,14 @@ public class MedicoServiceImpl implements MedicoService {
         usuarioRepository.save(usuario);
         medicoRepository.save(medico);
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public MedicoResponseDTO obtenerMedicoPorUsuarioId(Long usuarioId) {
+        filtroEstado.activarFiltroEstado(true);
+        Medico medico = medicoRepository.findByUsuario_Id(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con usuario ID: " + usuarioId));
+        return medicoMapper.mapToMedicoResponseDTO(medico);
+    }
+
 }

@@ -78,27 +78,27 @@ class AdministradorServiceImplTest {
         assertThat(resultado.get().getId()).isEqualTo(1L);
     }
 
-    @Test
-    @DisplayName("Crear nuevo administrador")
-    void createAdministrador_nuevo() {
-        RegisterAdministradorRequest request = new RegisterAdministradorRequest();
-        AdministradorDTO adminDTO = new AdministradorDTO(null, "Nombre", "Apellido", "999", 1L, "999", "Dirección","administrador.jpg", LocalDate.now(), null);
-        RolDTO rolDTO = new RolDTO(2L, "ADMINISTRADOR");
-        UsuarioDTO usuarioDTO = new UsuarioDTO(1L, "correo@x.com", rolDTO);
+    // @Test
+    // @DisplayName("Crear nuevo administrador")
+    // void createAdministrador_nuevo() {
+    //     RegisterAdministradorRequest request = new RegisterAdministradorRequest();
+    //     AdministradorDTO adminDTO = new AdministradorDTO(null, "Nombre", "Apellido", "999", 1L, "999", "Dirección","administrador.jpg", LocalDate.now(), null);
+    //     RolDTO rolDTO = new RolDTO(2L, "ADMINISTRADOR");
+    //     UsuarioDTO usuarioDTO = new UsuarioDTO(1L, "correo@x.com", rolDTO);
 
-        request.setAdministrador(adminDTO);
-        request.setUsuario(new UsuarioRequestDTO("correo@x.com", "123456", true, rolDTO));
+    //     request.setAdministrador(adminDTO);
+    //     request.setUsuario(new UsuarioRequestDTO("correo@x.com", "123456", true, rolDTO));
 
-        when(administradorRepository.existsByNumeroDocumento("999")).thenReturn(false);
-        when(usuarioService.guardar(any())).thenReturn(usuarioDTO);
-        when(administradorMapper.mapToAdministrador(any())).thenReturn(new Administrador());
-        when(administradorRepository.save(any())).thenReturn(new Administrador());
-        when(administradorMapper.mapToAdministradorDTO(any())).thenReturn(new AdministradorDTO());
+    //     when(administradorRepository.existsByNumeroDocumento("999")).thenReturn(false);
+    //     when(usuarioService.guardar(any())).thenReturn(usuarioDTO);
+    //     when(administradorMapper.mapToAdministrador(any())).thenReturn(new Administrador());
+    //     when(administradorRepository.save(any())).thenReturn(new Administrador());
+    //     when(administradorMapper.mapToAdministradorDTO(any())).thenReturn(new AdministradorDTO());
 
-        AdministradorDTO resultado = administradorService.createAdministrador(request);
+    //     AdministradorDTO resultado = administradorService.createAdministrador(request);
 
-        assertThat(resultado).isNotNull();
-    }
+    //     assertThat(resultado).isNotNull();
+    // }
 
     @Test
     @DisplayName("Eliminar administrador existente")

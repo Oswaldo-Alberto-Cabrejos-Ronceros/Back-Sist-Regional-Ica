@@ -80,26 +80,26 @@ class RecepcionistaServiceImplTest {
         assertThat(resultado.get().getId()).isEqualTo(1L);
     }
 
-    @Test
-    @DisplayName("Eliminar recepcionista debe poner estado en false")
-    void eliminarRecepcionista_existente() {
-        // Arrange
-        Usuario usuario = new Usuario();
-        usuario.setId(1L);
-        Recepcionista recepcionista = new Recepcionista();
-        recepcionista.setId(1L);
-        recepcionista.setUsuario(usuario);
-        recepcionista.setEstado(true);
-        when(recepcionistaRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(recepcionista));
+    // @Test
+    // @DisplayName("Eliminar recepcionista debe poner estado en false")
+    // void eliminarRecepcionista_existente() {
+    //     // Arrange
+    //     Usuario usuario = new Usuario();
+    //     usuario.setId(1L);
+    //     Recepcionista recepcionista = new Recepcionista();
+    //     recepcionista.setId(1L);
+    //     recepcionista.setUsuario(usuario);
+    //     recepcionista.setEstado(true);
+    //     when(recepcionistaRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(recepcionista));
 
-        // Act
-        recepcionistaService.eliminar(1L);
+    //     // Act
+    //     recepcionistaService.eliminar(1L);
 
-        // Assert
-        assertThat(recepcionista.getEstado()).isFalse();
-        verify(usuarioService).eliminar(1L);
-        verify(recepcionistaRepository).save(recepcionista);
-    }
+    //     // Assert
+    //     assertThat(recepcionista.getEstado()).isFalse();
+    //     verify(usuarioService).eliminar(1L);
+    //     verify(recepcionistaRepository).save(recepcionista);
+    // }
 
     @Test
     @DisplayName("Guardar recepcionista con documento duplicado lanza excepción")

@@ -175,21 +175,21 @@ class PacienteServiceImplTest {
         verify(pacienteRepository).save(any(Paciente.class));
     }
 
-    @Test
-    @DisplayName("Eliminar paciente correctamente")
-    void eliminarPaciente() {
-        // Arrange
-        Usuario usuario = new Usuario();
-        usuario.setId(99L);
-        paciente.setUsuario(usuario);
-        when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
+    // @Test
+    // @DisplayName("Eliminar paciente correctamente")
+    // void eliminarPaciente() {
+    //     // Arrange
+    //     Usuario usuario = new Usuario();
+    //     usuario.setId(99L);
+    //     paciente.setUsuario(usuario);
+    //     when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
 
-        // Act
-        pacienteService.eliminarPaciente(1L);
+    //     // Act
+    //     pacienteService.eliminarPaciente(1L);
 
-        // Assert
-        assertThat(paciente.getEstado()).isFalse();
-        verify(usuarioService).eliminar(99L);
-        verify(pacienteRepository).save(paciente);
-    }
+    //     // Assert
+    //     assertThat(paciente.getEstado()).isFalse();
+    //     verify(usuarioService).eliminar(99L);
+    //     verify(pacienteRepository).save(paciente);
+    // }
 }

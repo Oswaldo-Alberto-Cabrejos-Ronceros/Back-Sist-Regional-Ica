@@ -31,20 +31,22 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     List<Cita> findByMedicoIdAndEstadoCita(Long medicoId, EstadoCita estadoCita);
 
-    //consulta que obtiene todas las citas CONFIRMADAS de un paciente cuya fecha/hora son posteriores al momento actual
-    //se ordena de forma cronológica por fecha y hora
+    // consulta que obtiene todas las citas CONFIRMADAS de un paciente cuya
+    // fecha/hora son posteriores al momento actual
+    // se ordena de forma cronológica por fecha y hora
     @Query("""
-    SELECT c
-    FROM Cita c
-    WHERE
-        c.paciente.id = :pacienteId
-        AND c.estadoCita = com.clinicaregional.clinica.enums.EstadoCita.CONFIRMADA
-        AND (
-            c.fecha > CURRENT_DATE
-            OR (c.fecha = CURRENT_DATE AND c.hora > CURRENT_TIME)
-        )
-    ORDER BY c.fecha ASC, c.hora ASC
-    """)
+            SELECT c
+            FROM Cita c
+            WHERE
+                c.paciente.id = :pacienteId
+                AND c.estadoCita IN (com.clinicaregional.clinica.enums.EstadoCita.CONFIRMADA,
+                                     com.clinicaregional.clinica.enums.EstadoCita.PENDIENTE)
+                AND (
+                    c.fecha > CURRENT_DATE
+                    OR (c.fecha = CURRENT_DATE AND c.hora > CURRENT_TIME)
+                )
+            ORDER BY c.fecha ASC, c.hora ASC
+            """)
     List<Cita> findCitasFuturasByPaciente(@Param("pacienteId") Long pacienteId);
 
 }

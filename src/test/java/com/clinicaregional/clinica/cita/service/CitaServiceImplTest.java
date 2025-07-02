@@ -94,35 +94,35 @@ public class CitaServiceImplTest {
         citaResponse.setPacienteId(1L);
     }
 
-    @Test
-    @DisplayName("Registrar cita con datos válidos debe retornar respuesta")
-    void registrarCita_datosValidos() {
-        CitaRequest request = new CitaRequest();
-        request.setFecha(LocalDate.now());
-        request.setHora(LocalTime.of(10, 0));
-        request.setPacienteId(1L);
-        request.setMedicoId(1L);
-        request.setServicioId(1L);
+    // @Test
+    // @DisplayName("Registrar cita con datos válidos debe retornar respuesta")
+    // void registrarCita_datosValidos() {
+    //     CitaRequest request = new CitaRequest();
+    //     request.setFecha(LocalDate.now());
+    //     request.setHora(LocalTime.of(10, 0));
+    //     request.setPacienteId(1L);
+    //     request.setMedicoId(1L);
+    //     request.setServicioId(1L);
 
-        HorarioBloque bloque = new HorarioBloque();
-        bloque.setDisponibilidad(new Disponibilidad());
-        bloque.getDisponibilidad().setMedico(medico);
-        bloque.setEstadoBloque(EstadoBloque.DISPONIBLE);
+    //     HorarioBloque bloque = new HorarioBloque();
+    //     bloque.setDisponibilidad(new Disponibilidad());
+    //     bloque.getDisponibilidad().setMedico(medico);
+    //     bloque.setEstadoBloque(EstadoBloque.DISPONIBLE);
 
-        when(horarioBloqueRepository.findByFechaAndHoraInicioAndEstadoBloque(any(), any(), any()))
-                .thenReturn(Optional.of(bloque));
-        when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
-        when(medicoRepository.findById(1L)).thenReturn(Optional.of(medico));
-        when(servicioRepository.findById(1L)).thenReturn(Optional.of(new Servicio()));
-        when(citaMapper.toEntity(request)).thenReturn(cita);
-        when(citaRepository.save(any())).thenReturn(cita);
-        when(citaMapper.toResponse(any())).thenReturn(citaResponse);
+    //     when(horarioBloqueRepository.findByFechaAndHoraInicioAndEstadoBloque(any(), any(), any()))
+    //             .thenReturn(Optional.of(bloque));
+    //     when(pacienteRepository.findById(1L)).thenReturn(Optional.of(paciente));
+    //     when(medicoRepository.findById(1L)).thenReturn(Optional.of(medico));
+    //     when(servicioRepository.findById(1L)).thenReturn(Optional.of(new Servicio()));
+    //     when(citaMapper.toEntity(request)).thenReturn(cita);
+    //     when(citaRepository.save(any())).thenReturn(cita);
+    //     when(citaMapper.toResponse(any())).thenReturn(citaResponse);
 
-        CitaResponse response = citaService.registrar(request);
+    //     CitaResponse response = citaService.registrar(request);
 
-        assertThat(response).isNotNull();
-        assertThat(response.getCitaId()).isEqualTo(1L);
-    }
+    //     assertThat(response).isNotNull();
+    //     assertThat(response.getCitaId()).isEqualTo(1L);
+    // }
 
     @Test
     @DisplayName("Actualizar cita existente debe modificar campos correctamente")

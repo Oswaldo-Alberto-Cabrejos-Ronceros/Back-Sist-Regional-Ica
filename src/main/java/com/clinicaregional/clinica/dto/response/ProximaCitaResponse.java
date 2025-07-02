@@ -8,6 +8,8 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.clinicaregional.clinica.enums.EstadoCita;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -17,7 +19,8 @@ public class ProximaCitaResponse {
     private Long citaId;
     private LocalDate fecha;
     private LocalTime hora;
-    private String medicoNombre;
+    private String medicoNombreCompleto;
     private String servicioNombre;
+    private EstadoCita estadoCita;
 
 }

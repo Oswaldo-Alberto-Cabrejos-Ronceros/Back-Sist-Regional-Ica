@@ -356,9 +356,9 @@ public class CitaServiceImpl implements CitaService {
                         cita.getId(),
                         cita.getFecha(),
                         cita.getHora(),
-                        cita.getMedico().getNombres(),
-                        cita.getServicio().getNombre()))
+                        cita.getMedico().getNombres() + " " + cita.getMedico().getApellidos(),
+                        cita.getServicio().getNombre(),
+                        cita.getEstadoCita()))
                 .collect(Collectors.toList());
     }
-
 }

@@ -25,4 +25,6 @@ public interface UsuarioService {
     UsuarioDTO actualizar(Long id, UsuarioRequestDTO usuarioRequestDTO); // idem
 
     void eliminar(Long id);
+
+    void eliminarUsuarioSinRelaciones(Long usuarioId);
 }

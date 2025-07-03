@@ -125,24 +125,44 @@ public class PacienteServiceImpl implements PacienteService {
     @Transactional
     @Override
     public PacienteDTO actualizarPaciente(Long id, PacienteDTO pacienteDTO) {
-        filtroEstado.activarFiltroEstado(true);
-        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
-
-        if (pacienteRepository.findByNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion()).isPresent()) {
-            throw new DuplicateResourceException("Ya existe un paciente con ese número de identificación");
+        // Validación básica
+        if (pacienteDTO == null) {
+            throw new IllegalArgumentException("El DTO del paciente no puede ser nulo");
         }
 
-        paciente.setNombres(pacienteDTO.getNombres());
-        paciente.setApellidos(pacienteDTO.getApellidos());
-        paciente.setFechaNacimiento(pacienteDTO.getFechaNacimiento());
-        paciente.setSexo(pacienteDTO.getSexo());
-        paciente.setTipoDocumento(paciente.getTipoDocumento());
-        paciente.setNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion());
-        paciente.setTelefono(pacienteDTO.getTelefono());
-        paciente.setDireccion(pacienteDTO.getDireccion());
-        paciente.setTipoSangre(pacienteDTO.getTipoSangre());
-        paciente.setAntecedentes(pacienteDTO.getAntecedentes());
+        filtroEstado.activarFiltroEstado(true);
+
+        // Obtener paciente existente
+        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado con id: " + id));
+
+        // Verificar si se está intentando cambiar el número de identificación
+        if (pacienteDTO.getNumeroIdentificacion() != null &&
+                !pacienteDTO.getNumeroIdentificacion().equals(paciente.getNumeroIdentificacion())) {
+
+            // Solo verificar duplicados si el número está siendo cambiado
+            if (pacienteRepository.findByNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion()).isPresent()) {
+                throw new DuplicateResourceException("Ya existe un paciente con ese número de identificación");
+            }
+            paciente.setNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion());
+        }
+
+        // Actualizar solo los campos permitidos
+        if (pacienteDTO.getTelefono() != null) {
+            paciente.setTelefono(pacienteDTO.getTelefono());
+        }
+
+        if (pacienteDTO.getDireccion() != null) {
+            paciente.setDireccion(pacienteDTO.getDireccion());
+        }
+
+        if (pacienteDTO.getImagenUrl() != null) {
+            paciente.setImagenUrl(pacienteDTO.getImagenUrl());
+        }
+
+        if (pacienteDTO.getAntecedentes() != null) {
+            paciente.setAntecedentes(pacienteDTO.getAntecedentes());
+        }
 
         Paciente updatedPaciente = pacienteRepository.save(paciente);
         return pacienteMapper.mapToPacienteDTO(updatedPaciente);

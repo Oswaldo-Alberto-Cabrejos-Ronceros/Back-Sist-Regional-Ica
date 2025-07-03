@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import com.clinicaregional.clinica.service.PacienteService;
@@ -61,9 +62,11 @@ public class PacienteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
-            @RequestBody @Valid PacienteDTO pacienteDTO) {
-        PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO);
+    public ResponseEntity<PacienteDTO> updatePaciente(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdatePacienteDTO updatePacienteDTO) {
+
+        PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, updatePacienteDTO);
         return ResponseEntity.ok(updatedPaciente);
     }
 

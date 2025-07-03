@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,7 @@ public interface PacienteService {
 
     PacienteDTO crearPaciente(PacienteDTO pacienteDTO);
 
-    PacienteDTO actualizarPaciente(Long id, PacienteDTO pacienteDTO);
+    PacienteDTO actualizarPaciente(Long id, UpdatePacienteDTO updatepacienteDTO);
 
     void eliminarPaciente(Long id);
 

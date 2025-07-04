@@ -57,7 +57,7 @@ public class PacienteController {
     }
 
     // Crear paciente sin usuario
-    @PostMapping("/crear-paciente")
+    @PostMapping("/paciente/datosIniciales")
     public ResponseEntity<PacienteSimpleDTO> createPacienteSimple(@RequestBody @Valid PacienteSimpleDTO pacienteDTO) {
         PacienteSimpleDTO savedPaciente = pacienteService.crearPacienteSimple(pacienteDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);

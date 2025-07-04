@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteSimpleDTO;
 import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
@@ -53,6 +54,13 @@ public class PacienteController {
     @GetMapping("/my-info/{id}")
     public ResponseEntity<MyInfoPaciente> getMyInfoPaciente(@PathVariable Long id) {
         return ResponseEntity.ok(pacienteService.getMyInfoPaciente(id));
+    }
+
+    // Crear paciente sin usuario
+    @PostMapping("/crear-paciente")
+    public ResponseEntity<PacienteSimpleDTO> createPacienteSimple(@RequestBody @Valid PacienteSimpleDTO pacienteDTO) {
+        PacienteSimpleDTO savedPaciente = pacienteService.crearPacienteSimple(pacienteDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
     }
 
     @PostMapping

@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteSimpleDTO;
 import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
@@ -22,6 +23,9 @@ public interface PacienteService {
     MyInfoPaciente getMyInfoPaciente(Long pacienteId);
 
     PacienteDTO crearPaciente(PacienteDTO pacienteDTO);
+
+    //Crear paciente sin usuario
+    PacienteSimpleDTO crearPacienteSimple(PacienteSimpleDTO pacienteSimpleDTO);
 
     PacienteDTO actualizarPaciente(Long id, UpdatePacienteDTO updatepacienteDTO);
 

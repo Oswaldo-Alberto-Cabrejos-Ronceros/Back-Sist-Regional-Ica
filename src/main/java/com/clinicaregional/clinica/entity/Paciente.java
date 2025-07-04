@@ -47,6 +47,8 @@ public class Paciente extends EntidadConEstado {
 
     private String direccion;
 
+    private String email;
+
     private String imagenUrl;
 
     @Enumerated(EnumType.STRING)
@@ -63,6 +65,8 @@ public class Paciente extends EntidadConEstado {
 
     @OneToOne(cascade = CascadeType.ALL)
     private Seguro seguro;
+
+    private String numeroDePoliza;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Usuario usuario;

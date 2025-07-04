@@ -20,7 +20,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "pacientes")
 @SuperBuilder
-//para filtro
+// para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")
 public class Paciente extends EntidadConEstado {
     @Id
@@ -36,6 +36,9 @@ public class Paciente extends EntidadConEstado {
     @Enumerated(EnumType.STRING)
     private Sexo sexo;
 
+    @Column(unique = true)
+    private String email;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private TipoDocumento tipoDocumento;
 
@@ -46,8 +49,6 @@ public class Paciente extends EntidadConEstado {
     private String telefono;
 
     private String direccion;
-
-    private String email;
 
     private String imagenUrl;
 
@@ -63,12 +64,11 @@ public class Paciente extends EntidadConEstado {
     @Enumerated(EnumType.STRING)
     private ModalidadDeAtencion modalidadDeAtencion;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, optional = true)
     private Seguro seguro;
 
     private String numeroDePoliza;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Usuario usuario;
-
 }

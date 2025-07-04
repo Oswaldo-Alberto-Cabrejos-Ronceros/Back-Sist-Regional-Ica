@@ -1,6 +1,6 @@
 package com.clinicaregional.clinica.paciente.service;
 
-import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.TipoDocumento;
@@ -49,7 +49,7 @@ class PacienteServiceTest {
     private PacienteServiceImpl pacienteService;
 
     private Paciente paciente;
-    private PacienteDTO pacienteDTO;
+    private PacienteConUserDTO pacienteDTO;
 
     @BeforeEach
     void setUp() {
@@ -73,7 +73,7 @@ class PacienteServiceTest {
                 .estado(true)
                 .build();
 
-        pacienteDTO = new PacienteDTO();
+        pacienteDTO = new PacienteConUserDTO();
         pacienteDTO.setId(1L);
         pacienteDTO.setNombres("Juan");
         pacienteDTO.setApellidos("Pérez");
@@ -93,7 +93,7 @@ class PacienteServiceTest {
         when(pacienteRepository.findAll()).thenReturn(List.of(paciente));
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
-        List<PacienteDTO> resultado = pacienteService.listarPacientes();
+        List<PacienteConUserDTO> resultado = pacienteService.listarPacientes();
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getNombres()).isEqualTo("Juan");
@@ -106,7 +106,7 @@ class PacienteServiceTest {
         when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
-        Optional<PacienteDTO> resultado = pacienteService.getPacientePorId(1L);
+        Optional<PacienteConUserDTO> resultado = pacienteService.getPacientePorId(1L);
 
         assertThat(resultado).isPresent();
         assertThat(resultado.get().getId()).isEqualTo(1L);
@@ -119,7 +119,7 @@ class PacienteServiceTest {
         when(pacienteRepository.findByNumeroIdentificacion("12345678")).thenReturn(Optional.of(paciente));
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
-        Optional<PacienteDTO> resultado = pacienteService.getPacientePorIdentificacion("12345678");
+        Optional<PacienteConUserDTO> resultado = pacienteService.getPacientePorIdentificacion("12345678");
 
         assertThat(resultado).isPresent();
         assertThat(resultado.get().getNumeroIdentificacion()).isEqualTo("12345678");
@@ -140,12 +140,12 @@ class PacienteServiceTest {
         when(tipoDocumentoService.getTipoDocumentoByIdContext(anyLong()))
                 .thenReturn(Optional.of(tipoDocumento));
 
-        when(pacienteMapper.mapToPaciente(any(PacienteDTO.class))).thenReturn(paciente);
+        when(pacienteMapper.mapToPaciente(any(PacienteConUserDTO.class))).thenReturn(paciente);
         when(pacienteRepository.save(any(Paciente.class))).thenReturn(paciente);
         when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
         // Act
-        PacienteDTO resultado = pacienteService.crearPaciente(pacienteDTO);
+        PacienteConUserDTO resultado = pacienteService.crearPaciente(pacienteDTO);
 
         // Assert
         assertThat(resultado).isNotNull();

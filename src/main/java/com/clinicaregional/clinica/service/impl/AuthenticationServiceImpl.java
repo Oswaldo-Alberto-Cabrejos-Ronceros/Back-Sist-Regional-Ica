@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.AdministradorDTO;
-import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.dto.request.RegisterRequest;
 import com.clinicaregional.clinica.entity.Usuario;
@@ -108,7 +108,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         registerRequest.getPaciente().setUsuario(usuarioGuardado);
 
         // Guardar paciente
-        PacienteDTO pacienteGuardado = pacienteService.crearPaciente(registerRequest.getPaciente());
+        PacienteConUserDTO pacienteGuardado = pacienteService.crearPacientePorWeb(registerRequest.getPaciente());
 
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());

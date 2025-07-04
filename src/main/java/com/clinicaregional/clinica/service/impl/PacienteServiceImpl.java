@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.service.impl;
 
-import com.clinicaregional.clinica.dto.PacienteDTO;
-import com.clinicaregional.clinica.dto.PacienteSimpleDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
+import com.clinicaregional.clinica.dto.PacienteSinUserDTO;
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
@@ -49,8 +49,7 @@ public class PacienteServiceImpl implements PacienteService {
             PacienteMapper pacienteMapper,
             TipoDocumentoService tipoDocumentoService,
             UsuarioService usuarioService,
-            FiltroEstado filtroEstado
-            , SeguroRepository seguroRepository, SeguroMapper seguroMapper) {
+            FiltroEstado filtroEstado, SeguroRepository seguroRepository, SeguroMapper seguroMapper) {
         this.pacienteRepository = pacienteRepository;
         this.pacienteMapper = pacienteMapper;
         this.tipoDocumentoService = tipoDocumentoService;
@@ -62,7 +61,7 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<PacienteDTO> listarPacientes() {
+    public List<PacienteConUserDTO> listarPacientes() {
         filtroEstado.activarFiltroEstado(true);
         return pacienteRepository.findAll()
                 .stream()
@@ -73,7 +72,7 @@ public class PacienteServiceImpl implements PacienteService {
     // Listar pacientes sin importar el filtro de estado
     @Transactional(readOnly = true)
     @Override
-    public List<PacienteDTO> listarPacientesPorEstado() {
+    public List<PacienteConUserDTO> listarPacientesPorEstado() {
         return pacienteRepository.findAll()
                 .stream()
                 .map(pacienteMapper::mapToPacienteDTO)
@@ -82,7 +81,7 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<PacienteDTO> getPacientePorId(Long id) {
+    public Optional<PacienteConUserDTO> getPacientePorId(Long id) {
         filtroEstado.activarFiltroEstado(true);
         return pacienteRepository.findByIdAndEstadoIsTrue(id)
                 .map(pacienteMapper::mapToPacienteDTO);
@@ -91,7 +90,7 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<PacienteDTO> getPacientePorIdentificacion(String identificacion) {
+    public Optional<PacienteConUserDTO> getPacientePorIdentificacion(String identificacion) {
         filtroEstado.activarFiltroEstado(true);
         return pacienteRepository.findByNumeroIdentificacion(identificacion)
                 .map(pacienteMapper::mapToPacienteDTO);
@@ -109,7 +108,7 @@ public class PacienteServiceImpl implements PacienteService {
     // Crear paciente sin usuario
     @Transactional
     @Override
-    public PacienteSimpleDTO crearPacienteSimple(PacienteSimpleDTO pacienteSimpleDTO) {
+    public PacienteSinUserDTO crearPacienteSimple(PacienteSinUserDTO pacienteSimpleDTO) {
         filtroEstado.activarFiltroEstado(true);
 
         if (pacienteRepository.findByNumeroIdentificacion(pacienteSimpleDTO.getNumeroIdentificacion()).isPresent()) {
@@ -121,26 +120,29 @@ public class PacienteServiceImpl implements PacienteService {
                 .orElseThrow(
                         () -> new ResourceNotFoundException("No se encontró un tipo de documento con el id ingresado"));
 
-        Seguro seguro;
-        if (pacienteSimpleDTO.getSeguro() != null && pacienteSimpleDTO.getSeguro().getId() != null) {
-            seguro = seguroRepository.findById(pacienteSimpleDTO.getSeguro().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("No se encontró un seguro con el id ingresado"));
-        } else {
-            seguro = seguroRepository.save(seguroMapper.mapToSeguro(pacienteSimpleDTO.getSeguro()));
+        Seguro seguro = null;
+        if (pacienteSimpleDTO.getSeguro() != null) {
+            if (pacienteSimpleDTO.getSeguro().getId() != null) {
+                seguro = seguroRepository.findById(pacienteSimpleDTO.getSeguro().getId())
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("No se encontró un seguro con el id ingresado"));
+            } else {
+                seguro = seguroRepository.save(seguroMapper.mapToSeguro(pacienteSimpleDTO.getSeguro()));
+            }
         }
 
-        Paciente paciente = pacienteMapper.mapToPacienteSimple(pacienteSimpleDTO);
+        Paciente paciente = pacienteMapper.mapToPacienteSinUser(pacienteSimpleDTO);
         paciente.setTipoDocumento(tipoDocumento);
         paciente.setSeguro(seguro);
 
         Paciente savedPaciente = pacienteRepository.save(paciente);
 
-        return pacienteMapper.mapToPacienteSimpleDTO(savedPaciente);
+        return pacienteMapper.mapToPacienteSinUserDTO(savedPaciente);
     }
 
     @Transactional
     @Override
-    public PacienteDTO crearPaciente(PacienteDTO pacienteDTO) {
+    public PacienteConUserDTO crearPacientePorWeb(PacienteConUserDTO pacienteDTO) {
         filtroEstado.activarFiltroEstado(true);
         if (pacienteRepository.findByNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion()).isPresent()) {
             throw new DuplicateResourceException("Ya existe un paciente con ese número de identificación");
@@ -166,7 +168,7 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Transactional
     @Override
-    public PacienteDTO actualizarPaciente(Long id, UpdatePacienteDTO updatePacienteDTO) {
+    public PacienteConUserDTO actualizarPaciente(Long id, UpdatePacienteDTO updatePacienteDTO) {
         Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado con id: " + id));
 
@@ -223,11 +225,11 @@ public class PacienteServiceImpl implements PacienteService {
     }
 
     @Override
-    public PagedResponse<PacienteDTO> listarPacientesPaginado(Pageable pageable) {
+    public PagedResponse<PacienteConUserDTO> listarPacientesPaginado(Pageable pageable) {
         filtroEstado.activarFiltroEstado(true);
         Page<Paciente> paginaPacientes = pacienteRepository.findAllByEstadoIsTrue(pageable);
 
-        List<PacienteDTO> contenido = paginaPacientes.getContent()
+        List<PacienteConUserDTO> contenido = paginaPacientes.getContent()
                 .stream()
                 .map(pacienteMapper::mapToPacienteDTO)
                 .collect(Collectors.toList());

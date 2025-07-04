@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.paciente.controller;
 
 import com.clinicaregional.clinica.controller.PacienteController;
-import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.enums.Sexo;
 import com.clinicaregional.clinica.enums.TipoSangre;
@@ -51,11 +51,11 @@ class PacienteControllerTest {
         @Autowired
         private ObjectMapper objectMapper;
 
-        private PacienteDTO pacienteDTO;
+        private PacienteConUserDTO pacienteDTO;
 
         @BeforeEach
         void setUp() {
-                pacienteDTO = new PacienteDTO();
+                pacienteDTO = new PacienteConUserDTO();
                 pacienteDTO.setId(1L);
                 pacienteDTO.setNombres("Juan");
                 pacienteDTO.setApellidos("Pérez");

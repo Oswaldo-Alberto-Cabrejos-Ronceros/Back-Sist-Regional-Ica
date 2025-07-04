@@ -1,6 +1,6 @@
 package com.clinicaregional.clinica.dto.request;
 
-import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,5 +17,5 @@ public class RegisterRequest {
     private UsuarioRequestDTO usuario;
 
     @NotNull(message = "Paciente es obligatorio")
-    private PacienteDTO paciente;
+    private PacienteConUserDTO paciente;
 }

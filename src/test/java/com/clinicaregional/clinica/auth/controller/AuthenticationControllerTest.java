@@ -2,7 +2,7 @@
 package com.clinicaregional.clinica.auth.controller;
 
 import com.clinicaregional.clinica.controller.AuthenticationController;
-import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
 import com.clinicaregional.clinica.dto.request.RegisterRequest;
@@ -125,7 +125,7 @@ class AuthenticationControllerTest {
                 usuario.setRol(null); // El servicio lo asigna como PACIENTE internamente
 
                 // 2. Crear PacienteDTO
-                PacienteDTO paciente = new PacienteDTO();
+                PacienteConUserDTO paciente = new PacienteConUserDTO();
                 paciente.setNombres("Juan");
                 paciente.setApellidos("Perez");
                 paciente.setFechaNacimiento(LocalDate.of(1990, 5, 10));

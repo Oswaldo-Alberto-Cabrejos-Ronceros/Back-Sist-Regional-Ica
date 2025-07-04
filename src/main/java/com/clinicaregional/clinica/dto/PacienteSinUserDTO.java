@@ -1,8 +1,9 @@
 package com.clinicaregional.clinica.dto;
 
 import com.clinicaregional.clinica.enums.Sexo;
-import com.clinicaregional.clinica.enums.TipoSangre;
 import com.clinicaregional.clinica.enums.ModalidadDeAtencion;
+
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PacienteSimpleDTO {
+public class PacienteSinUserDTO {
 
     private Long id;
 
@@ -50,23 +51,16 @@ public class PacienteSimpleDTO {
     @NotBlank(message = "La direccion es obligatoria")
     private String direccion;
 
-    private String imagenUrl;
-
     @NotBlank(message = "El Email es obligatorio")
     private String email;
-
-    private TipoSangre tipoSangre;
 
     @NotNull
     private ModalidadDeAtencion modalidadDeAtencion;
 
-    @Size(max = 255, message = "Los antecedentes deben ser menores a 255")
-    private String antecedentes;
-
-    @NotNull
+    @Nullable
     private SeguroDTO seguro;
 
-    @NotBlank(message = "El número de poliza es obligatorio")
+    @Nullable(message = "El número de poliza es obligatorio")
     private String numeroDePoliza;
 
     private String contactoDeEmergenciaNombre;

@@ -55,7 +55,6 @@ public class CitaController {
 
     }
 
-    // Listar citas por médico y día con estado CONFIRMADA
     @GetMapping("/citas-medico-confirmada-dia/{medicoId}")
     public ResponseEntity<List<CitaResponse>> obtenerCitasPorMedicoConfirmadasDia(@PathVariable Long medicoId) {
         return ResponseEntity.ok(citaService.listarPorDiaAndEstadoConfirmada(medicoId));

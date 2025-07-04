@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.entity;
 
 import com.clinicaregional.clinica.enums.Sexo;
 import com.clinicaregional.clinica.enums.TipoSangre;
+import com.clinicaregional.clinica.enums.ModalidadDeAtencion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,6 +53,16 @@ public class Paciente extends EntidadConEstado {
     private TipoSangre tipoSangre;
 
     private String antecedentes;
+
+    private String contactoDeEmergenciaNombre;
+
+    private String contactoDeEmergenciaTelefono;
+
+    @Enumerated(EnumType.STRING)
+    private ModalidadDeAtencion modalidadDeAtencion;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private Seguro seguro;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Usuario usuario;

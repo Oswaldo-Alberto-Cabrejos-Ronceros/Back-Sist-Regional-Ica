@@ -26,6 +26,8 @@ public class SeguroDTO {
 
     private String imagenUrl; //despues agregar imagen predeterminada
 
+    private String numeroDePoliza;
+
     @NotNull(message = "EstadoSeguro es obligatorio")
     private EstadoSeguro estadoSeguro;
 }

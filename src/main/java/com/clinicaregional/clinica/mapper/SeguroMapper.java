@@ -11,6 +11,7 @@ public class SeguroMapper {
                 seguro.getId(),
                 seguro.getNombre(),
                 seguro.getDescripcion(),
+                seguro.getNumeroDePoliza(),
                 seguro.getImagenUrl(),
                 seguro.getEstadoSeguro()
         );
@@ -21,6 +22,7 @@ public class SeguroMapper {
                 seguroDTO.getId(),
                 seguroDTO.getNombre(),
                 seguroDTO.getDescripcion(),
+                seguroDTO.getNumeroDePoliza(),
                 seguroDTO.getImagenUrl(),
                 seguroDTO.getEstadoSeguro()
         );

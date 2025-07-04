@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.controller;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
+import com.clinicaregional.clinica.dto.response.ProximaCitaResponse;
 import com.clinicaregional.clinica.service.CitaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,19 +43,15 @@ public class CitaController {
         return ResponseEntity.ok(citaService.listarPorMedico(medicoId));
     }
     // Listar citas por médico y estado CONFIRMADA
-
     @GetMapping("/citas-medico-confirmada/{medicoId}")
     public ResponseEntity<List<CitaResponse>> obtenerCitasPorMedicoConfirmadas(@PathVariable Long medicoId) {
         return ResponseEntity.ok(citaService.listarPorMedicoAndEstadoConfirmada(medicoId));
     }
     // Listar citas por médico y estado ATENDIDA
-
     @GetMapping("/citas-medico-atendida/{medicoId}")
     public ResponseEntity<List<CitaResponse>> obtenerCitasPorMedicoAtendidas(@PathVariable Long medicoId) {
         return ResponseEntity.ok(citaService.listarPorMedicoAndEstadoAtendida(medicoId));
-
     }
-
     @GetMapping("/citas-medico-confirmada-dia/{medicoId}")
     public ResponseEntity<List<CitaResponse>> obtenerCitasPorMedicoConfirmadasDia(@PathVariable Long medicoId) {
         return ResponseEntity.ok(citaService.listarPorDiaAndEstadoConfirmada(medicoId));
@@ -101,6 +98,12 @@ public class CitaController {
     public ResponseEntity<List<PacienteResponseDTO>> obtenerPacientesPorMedico(
             @PathVariable Long medicoId) {
         return ResponseEntity.ok(citaService.obtenerPacientesPorMedicoConCitasConfirmadasOAtendidas(medicoId));
+    }
+
+    //endpoint para obtener las citas futuras de un paciente por ID
+    @GetMapping("/paciente/{pacienteId}/citas-futuras")
+    public ResponseEntity<List<ProximaCitaResponse>> listarCitasFuturas(@PathVariable Long pacienteId) {
+        return ResponseEntity.ok(citaService.obtenerCitasFuturasPorPaciente(pacienteId));
     }
 
 }

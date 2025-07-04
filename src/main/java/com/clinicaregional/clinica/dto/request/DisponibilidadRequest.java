@@ -41,4 +41,6 @@ public class DisponibilidadRequest {
         return horaInicio != null && horaFin != null && horaInicio.isBefore(horaFin);
     }
 
+    private String ubicacion;
+
 }

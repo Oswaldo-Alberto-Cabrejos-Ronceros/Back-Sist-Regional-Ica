@@ -27,6 +27,7 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.MedicoMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.MedicoService;
+import com.clinicaregional.clinica.service.RolService;
 import com.clinicaregional.clinica.service.UsuarioService;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,7 @@ public class MedicoServiceImpl implements MedicoService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
     private final TipoDocumentoService tipoDocumentoService;
+    private final RolService rolService;
     private final FiltroEstado filtroEstado;
 
     @Autowired
@@ -48,12 +50,14 @@ public class MedicoServiceImpl implements MedicoService {
             UsuarioRepository usuarioRepository,
             UsuarioService usuarioService,
             TipoDocumentoService tipoDocumentoService,
+            RolService rolService,
             FiltroEstado filtroEstado) {
         this.medicoRepository = medicoRepository;
         this.medicoMapper = medicoMapper;
         this.usuarioRepository = usuarioRepository;
         this.usuarioService = usuarioService;
         this.tipoDocumentoService = tipoDocumentoService;
+        this.rolService = rolService;
         this.filtroEstado = filtroEstado;
     }
 
@@ -71,7 +75,8 @@ public class MedicoServiceImpl implements MedicoService {
     @Override
     public List<MedicoResponsePublicDTO> obtenerMedicosPublic() {
         filtroEstado.activarFiltroEstado(true);
-        return medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO).collect(Collectors.toList());
+        return medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -111,11 +116,11 @@ public class MedicoServiceImpl implements MedicoService {
             dto.setNumeroRNE(null); // limpiar por si se envió accidentalmente
         }
 
-        //verificamos que exista tipo documento
+        // verificamos que exista tipo documento
         TipoDocumento tipoDocumento = tipoDocumentoService.getTipoDocumentoByIdContext(dto.getTipoDocumentoId())
                 .orElseThrow(() -> new RuntimeException("No se encontró un tipo de documento con el id ingresado"));
 
-        if(medicoRepository.existsByNumeroDocumento(dto.getNumeroDocumento())) {
+        if (medicoRepository.existsByNumeroDocumento(dto.getNumeroDocumento())) {
             throw new RuntimeException("Ya existe un medico con el numero de documento ingresado");
         }
 
@@ -123,14 +128,15 @@ public class MedicoServiceImpl implements MedicoService {
             throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
 
+        RolDTO rolMedico = rolService.obtenerRolPorNombre("MEDICO");
+
+        // Crear usuario
         UsuarioRequestDTO newUsuario = new UsuarioRequestDTO();
         newUsuario.setCorreo(dto.getCorreo());
         newUsuario.setPassword(dto.getPassword());
-        RolDTO rolMedico = new RolDTO();
-        rolMedico.setId(4L); // ID del rol de médico
         newUsuario.setRol(rolMedico);
-        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
 
+        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
         Usuario usuario1 = new Usuario();
         usuario1.setId(usuarioDTO.getId());
 
@@ -154,7 +160,6 @@ public class MedicoServiceImpl implements MedicoService {
 
         return medicoMapper.mapToMedicoResponseDTO(medicoRepository.save(medico));
     }
-
 
     @Transactional
     @Override
@@ -219,20 +224,42 @@ public class MedicoServiceImpl implements MedicoService {
         return medicoMapper.mapToMedicoResponseDTO(actualizado);
     }
 
-
-
     @Transactional
     @Override
     public void eliminarMedico(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id));
-        medico.setEstado(false); // borrado logico
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-        usuario.setEstado(false);
-        medico.setUsuario(null);
-        usuarioRepository.save(usuario);
+                .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + id));
+
+        // 1. Primero marca el médico como inactivo
+        medico.setEstado(false);
         medicoRepository.save(medico);
+
+        // 2. Desvincula el usuario (si existe)
+        if (medico.getUsuario() != null) {
+            Long usuarioId = medico.getUsuario().getId();
+
+            // 3. Elimina el usuario en una nueva transacción
+            try {
+                usuarioService.eliminarUsuarioSinRelaciones(usuarioId);
+
+                // 4. Actualiza el médico para establecer usuario_id como null
+                medico.setUsuario(null);
+                medicoRepository.save(medico);
+            } catch (Exception e) {
+                // Loggear el error pero continuar
+                System.err.println("Error al eliminar usuario asociado: " + e.getMessage());
+            }
+        }
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public MedicoResponseDTO obtenerMedicoPorUsuarioId(Long usuarioId) {
+        filtroEstado.activarFiltroEstado(true);
+        Medico medico = medicoRepository.findByUsuario_Id(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con usuario ID: " + usuarioId));
+        return medicoMapper.mapToMedicoResponseDTO(medico);
+    }
+
 }

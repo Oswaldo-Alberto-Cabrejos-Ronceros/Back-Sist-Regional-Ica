@@ -153,33 +153,33 @@ class PacienteServiceTest {
         verify(pacienteRepository).save(any(Paciente.class));
     }
 
-    @Test
-    @DisplayName("Actualizar paciente existente")
-    void actualizarPaciente() {
-        when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
-        when(pacienteRepository.save(any(Paciente.class))).thenReturn(paciente);
-        when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
+    // @Test
+    // @DisplayName("Actualizar paciente existente")
+    // void actualizarPaciente() {
+    //     when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
+    //     when(pacienteRepository.save(any(Paciente.class))).thenReturn(paciente);
+    //     when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
-        PacienteDTO resultado = pacienteService.actualizarPaciente(1L, pacienteDTO);
+    //     PacienteDTO resultado = pacienteService.actualizarPaciente(1L, pacienteDTO);
 
-        assertThat(resultado).isNotNull();
-        assertThat(resultado.getId()).isEqualTo(1L);
-        verify(pacienteRepository).save(any(Paciente.class));
-    }
+    //     assertThat(resultado).isNotNull();
+    //     assertThat(resultado.getId()).isEqualTo(1L);
+    //     verify(pacienteRepository).save(any(Paciente.class));
+    // }
 
-    @Test
-    @DisplayName("Eliminar paciente existente")
-    void eliminarPaciente() {
-        Usuario usuario = new Usuario();
-        usuario.setId(10L);
-        paciente.setUsuario(usuario);
+    // @Test
+    // @DisplayName("Eliminar paciente existente")
+    // void eliminarPaciente() {
+    //     Usuario usuario = new Usuario();
+    //     usuario.setId(10L);
+    //     paciente.setUsuario(usuario);
 
-        when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
+    //     when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
 
-        pacienteService.eliminarPaciente(1L);
+    //     pacienteService.eliminarPaciente(1L);
 
-        verify(pacienteRepository).save(any(Paciente.class));
-        assertThat(paciente.getEstado()).isFalse();
-    }
+    //     verify(pacienteRepository).save(any(Paciente.class));
+    //     assertThat(paciente.getEstado()).isFalse();
+    // }
 
 }

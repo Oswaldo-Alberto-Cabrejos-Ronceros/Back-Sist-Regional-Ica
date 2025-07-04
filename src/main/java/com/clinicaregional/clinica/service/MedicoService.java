@@ -23,4 +23,6 @@ public interface MedicoService {
 
         void eliminarMedico(Long id);
 
+        MedicoResponseDTO obtenerMedicoPorUsuarioId(Long usuarioId);
+
 }

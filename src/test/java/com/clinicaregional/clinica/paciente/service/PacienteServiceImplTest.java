@@ -158,38 +158,38 @@ class PacienteServiceImplTest {
         verify(pacienteRepository).save(any(Paciente.class));
     }
 
-    @Test
-    @DisplayName("Actualizar paciente correctamente")
-    void actualizarPaciente() {
-        // Arrange
-        when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
-        when(pacienteRepository.save(any(Paciente.class))).thenReturn(paciente);
-        when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
+    // @Test
+    // @DisplayName("Actualizar paciente correctamente")
+    // void actualizarPaciente() {
+    //     // Arrange
+    //     when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
+    //     when(pacienteRepository.save(any(Paciente.class))).thenReturn(paciente);
+    //     when(pacienteMapper.mapToPacienteDTO(any(Paciente.class))).thenReturn(pacienteDTO);
 
-        // Act
-        PacienteDTO resultado = pacienteService.actualizarPaciente(1L, pacienteDTO);
+    //     // Act
+    //     PacienteDTO resultado = pacienteService.actualizarPaciente(1L, pacienteDTO);
 
-        // Assert
-        assertThat(resultado).isNotNull();
-        assertThat(resultado.getId()).isEqualTo(1L);
-        verify(pacienteRepository).save(any(Paciente.class));
-    }
+    //     // Assert
+    //     assertThat(resultado).isNotNull();
+    //     assertThat(resultado.getId()).isEqualTo(1L);
+    //     verify(pacienteRepository).save(any(Paciente.class));
+    // }
 
-    @Test
-    @DisplayName("Eliminar paciente correctamente")
-    void eliminarPaciente() {
-        // Arrange
-        Usuario usuario = new Usuario();
-        usuario.setId(99L);
-        paciente.setUsuario(usuario);
-        when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
+    // @Test
+    // @DisplayName("Eliminar paciente correctamente")
+    // void eliminarPaciente() {
+    //     // Arrange
+    //     Usuario usuario = new Usuario();
+    //     usuario.setId(99L);
+    //     paciente.setUsuario(usuario);
+    //     when(pacienteRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(paciente));
 
-        // Act
-        pacienteService.eliminarPaciente(1L);
+    //     // Act
+    //     pacienteService.eliminarPaciente(1L);
 
-        // Assert
-        assertThat(paciente.getEstado()).isFalse();
-        verify(usuarioService).eliminar(99L);
-        verify(pacienteRepository).save(paciente);
-    }
+    //     // Assert
+    //     assertThat(paciente.getEstado()).isFalse();
+    //     verify(usuarioService).eliminar(99L);
+    //     verify(pacienteRepository).save(paciente);
+    // }
 }

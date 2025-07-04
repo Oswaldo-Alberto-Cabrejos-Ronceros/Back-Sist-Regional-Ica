@@ -13,6 +13,7 @@ import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -153,28 +154,32 @@ public class UsuarioServiceImpl implements UsuarioService {
         switch (usuario.getRol().getNombre()) {
             case "ADMIN":
                 Administrador administrador = administradorRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Administrador no existe con el id de usuario ingresado"));
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Administrador no existe con el id de usuario ingresado"));
                 administrador.setUsuario(null);
                 administrador.setEstado(false);
                 administradorRepository.save(administrador);
                 break;
             case "PACIENTE":
                 Paciente paciente = pacienteRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Paciente no existe con el id de usuario ingresado"));
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Paciente no existe con el id de usuario ingresado"));
                 paciente.setUsuario(null);
                 paciente.setEstado(false);
                 pacienteRepository.save(paciente);
                 break;
             case "MEDICO":
                 Medico medico = medicoRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Médico no existe con el id de usuario ingresado"));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Médico no existe con el id de usuario ingresado"));
                 medico.setUsuario(null);
                 medico.setEstado(false);
                 medicoRepository.save(medico);
                 break;
             case "RECEPCIONISTA":
                 Recepcionista recepcionista = recepcionistaRepository.findByUsuario_Id(usuario.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Recepcionista no existe con el id de usuario ingresado"));
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Recepcionista no existe con el id de usuario ingresado"));
                 recepcionista.setUsuario(null);
                 recepcionista.setEstado(false);
                 recepcionistaRepository.save(recepcionista);
@@ -184,4 +189,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public void eliminarUsuarioSinRelaciones(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        // Solo marca el usuario como inactivo sin tocar las relaciones
+        usuario.setEstado(false);
+        usuarioRepository.save(usuario);
+    }
 }

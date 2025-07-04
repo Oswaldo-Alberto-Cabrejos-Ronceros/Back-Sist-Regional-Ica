@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.dto.TipoDocumentoDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
+import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import com.clinicaregional.clinica.entity.Paciente;
@@ -59,8 +60,8 @@ public class PacienteServiceImpl implements PacienteService {
                 .map(pacienteMapper::mapToPacienteDTO)
                 .collect(Collectors.toList());
     }
-    
-    //Listar pacientes sin importar el filtro de estado
+
+    // Listar pacientes sin importar el filtro de estado
     @Transactional(readOnly = true)
     @Override
     public List<PacienteDTO> listarPacientesPorEstado() {
@@ -76,7 +77,7 @@ public class PacienteServiceImpl implements PacienteService {
         filtroEstado.activarFiltroEstado(true);
         return pacienteRepository.findByIdAndEstadoIsTrue(id)
                 .map(pacienteMapper::mapToPacienteDTO);
-                
+
     }
 
     @Transactional(readOnly = true)
@@ -89,9 +90,10 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Transactional(readOnly = true)
     @Override
-    //despues agregar validacion de owner
+    // despues agregar validacion de owner
     public MyInfoPaciente getMyInfoPaciente(Long pacienteId) {
-        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(pacienteId).orElseThrow(()->new ResourceNotFoundException("Paciente no encontrado con id" + pacienteId));
+        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(pacienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado con id" + pacienteId));
         return pacienteMapper.mapToMyInfoPaciente(paciente);
     }
 
@@ -103,8 +105,10 @@ public class PacienteServiceImpl implements PacienteService {
             throw new DuplicateResourceException("Ya existe un paciente con ese número de identificación");
         }
 
-        TipoDocumento tipoDocumento = tipoDocumentoService.getTipoDocumentoByIdContext(pacienteDTO.getTipoDocumento().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("No se encontró un tipo de documento con el id ingresado"));
+        TipoDocumento tipoDocumento = tipoDocumentoService
+                .getTipoDocumentoByIdContext(pacienteDTO.getTipoDocumento().getId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("No se encontró un tipo de documento con el id ingresado"));
 
         Paciente paciente = pacienteMapper.mapToPaciente(pacienteDTO);
         paciente.setTipoDocumento(tipoDocumento);
@@ -121,25 +125,26 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Transactional
     @Override
-    public PacienteDTO actualizarPaciente(Long id, PacienteDTO pacienteDTO) {
-        filtroEstado.activarFiltroEstado(true);
+    public PacienteDTO actualizarPaciente(Long id, UpdatePacienteDTO updatePacienteDTO) {
         Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado con id: " + id));
 
-        if (pacienteRepository.findByNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion()).isPresent()) {
-            throw new DuplicateResourceException("Ya existe un paciente con ese número de identificación");
+        // Actualizar solo los campos proporcionados
+        if (updatePacienteDTO.getTelefono() != null) {
+            paciente.setTelefono(updatePacienteDTO.getTelefono());
         }
 
-        paciente.setNombres(pacienteDTO.getNombres());
-        paciente.setApellidos(pacienteDTO.getApellidos());
-        paciente.setFechaNacimiento(pacienteDTO.getFechaNacimiento());
-        paciente.setSexo(pacienteDTO.getSexo());
-        paciente.setTipoDocumento(paciente.getTipoDocumento());
-        paciente.setNumeroIdentificacion(pacienteDTO.getNumeroIdentificacion());
-        paciente.setTelefono(pacienteDTO.getTelefono());
-        paciente.setDireccion(pacienteDTO.getDireccion());
-        paciente.setTipoSangre(pacienteDTO.getTipoSangre());
-        paciente.setAntecedentes(pacienteDTO.getAntecedentes());
+        if (updatePacienteDTO.getDireccion() != null) {
+            paciente.setDireccion(updatePacienteDTO.getDireccion());
+        }
+
+        if (updatePacienteDTO.getImagenUrl() != null) {
+            paciente.setImagenUrl(updatePacienteDTO.getImagenUrl());
+        }
+
+        if (updatePacienteDTO.getAntecedentes() != null) {
+            paciente.setAntecedentes(updatePacienteDTO.getAntecedentes());
+        }
 
         Paciente updatedPaciente = pacienteRepository.save(paciente);
         return pacienteMapper.mapToPacienteDTO(updatedPaciente);
@@ -149,11 +154,31 @@ public class PacienteServiceImpl implements PacienteService {
     @Override
     public void eliminarPaciente(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
-        paciente.setEstado(false); //borrado logico
-        usuarioService.eliminar(paciente.getUsuario().getId());
-        paciente.setUsuario(null);
-        pacienteRepository.save(paciente);
+        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
+
+        // 1. Primero desvincula el usuario (si existe)
+        if (paciente.getUsuario() != null) {
+            Long usuarioId = paciente.getUsuario().getId();
+            paciente.setUsuario(null);
+            pacienteRepository.save(paciente);
+
+            // 2. Luego marca el paciente como inactivo
+            paciente.setEstado(false);
+            pacienteRepository.save(paciente);
+
+            // 3. Finalmente intenta eliminar el usuario en una nueva transacción
+            try {
+                usuarioService.eliminarUsuarioSinRelaciones(usuarioId);
+            } catch (Exception e) {
+                // Loggear el error pero continuar
+                System.err.println("Error al eliminar usuario asociado: " + e.getMessage());
+            }
+        } else {
+            // Si no tiene usuario, solo marcar como inactivo
+            paciente.setEstado(false);
+            pacienteRepository.save(paciente);
+        }
     }
 
     @Override
@@ -172,8 +197,7 @@ public class PacienteServiceImpl implements PacienteService {
                 paginaPacientes.getSize(),
                 paginaPacientes.getTotalElements(),
                 paginaPacientes.getTotalPages(),
-                paginaPacientes.isLast()
-        );
+                paginaPacientes.isLast());
     }
 
 }

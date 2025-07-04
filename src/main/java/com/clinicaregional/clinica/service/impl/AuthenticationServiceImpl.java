@@ -14,6 +14,7 @@ import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.service.AdministradorService;
 import com.clinicaregional.clinica.service.AuthenticationService;
 import com.clinicaregional.clinica.service.PacienteService;
+import com.clinicaregional.clinica.service.RolService;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.security.JwtUtil;
 import io.jsonwebtoken.JwtException;
@@ -37,9 +38,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UsuarioMapper usuarioMapper;
     private final PacienteService pacienteService;
     private final AdministradorService administradorService;
+    private final RolService rolService;
 
     @Autowired
-    public AuthenticationServiceImpl(JwtUtil jwtUtil, UsuarioService usuarioService, UserDetailsServiceImpl userDetailsServiceImpl, UsuarioMapper usuarioMapper, PasswordEncoder passwordEncoder, PacienteService pacienteService, AdministradorService administradorService) {
+    public AuthenticationServiceImpl(JwtUtil jwtUtil, UsuarioService usuarioService,
+            UserDetailsServiceImpl userDetailsServiceImpl, UsuarioMapper usuarioMapper,
+            PasswordEncoder passwordEncoder, PacienteService pacienteService,
+            AdministradorService administradorService, RolService rolService) {
         this.jwtUtil = jwtUtil;
         this.usuarioService = usuarioService;
         this.userDetailsServiceImpl = userDetailsServiceImpl;
@@ -47,6 +52,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         this.passwordEncoder = passwordEncoder;
         this.pacienteService = pacienteService;
         this.administradorService = administradorService;
+        this.rolService = rolService;
     }
 
     @Transactional(readOnly = true)
@@ -89,13 +95,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     @Override
     public AuthenticationResponseDTO registerPaciente(RegisterRequest registerRequest) {
-        // Establecer el rol por defecto (Paciente)
-        registerRequest.getUsuario().setRol(new RolDTO(1L, "PACIENTE"));
+        // ✅ Obtener rol PACIENTE de forma segura
+        RolDTO rolPaciente = rolService.obtenerRolPorNombre("PACIENTE");
 
+        // Asignar rol al usuario
+        registerRequest.getUsuario().setRol(rolPaciente);
+
+        // Guardar usuario
         UsuarioDTO usuarioGuardado = usuarioService.guardar(registerRequest.getUsuario());
 
+        // Asignar usuario al paciente
         registerRequest.getPaciente().setUsuario(usuarioGuardado);
 
+        // Guardar paciente
         PacienteDTO pacienteGuardado = pacienteService.crearPaciente(registerRequest.getPaciente());
 
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());

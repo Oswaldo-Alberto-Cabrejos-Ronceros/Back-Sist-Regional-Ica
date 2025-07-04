@@ -20,5 +20,6 @@ public class DisponibilidadResponse {
     private LocalTime horaFin;
     private String notas;
     private Long medicoId;
+    private String ubicacion;
 
 }

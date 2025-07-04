@@ -41,7 +41,6 @@ public class MedicoController {
     }
 
     //para obtener myInfo
-
     @GetMapping("/my-info/{id}")
     public ResponseEntity<MyInfoMedico> obtenerMyInfo(@PathVariable Long id){
         return ResponseEntity.ok(medicoService.obtenerMyInfoMedico(id));
@@ -65,4 +64,10 @@ public class MedicoController {
         medicoService.eliminarMedico(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/by-user/{usuarioId}")
+    public ResponseEntity<MedicoResponseDTO> obtenerPorUsuarioId(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(medicoService.obtenerMedicoPorUsuarioId(usuarioId));
+    }
+
 }

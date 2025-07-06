@@ -128,8 +128,9 @@ public class MedicoServiceImpl implements MedicoService {
             throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
 
-        RolDTO rolMedico = rolService.obtenerRolPorNombre("MEDICO");
-
+        RolDTO rolMedico = rolService.obtenerRolPorNombre("MEDICO")
+                .orElseThrow(() -> new IllegalStateException(
+                        "Rol MEDICO no encontrado en el sistema"));
         // Crear usuario
         UsuarioRequestDTO newUsuario = new UsuarioRequestDTO();
         newUsuario.setCorreo(dto.getCorreo());

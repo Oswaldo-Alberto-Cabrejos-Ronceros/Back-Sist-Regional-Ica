@@ -5,12 +5,11 @@ import com.clinicaregional.clinica.dto.PacienteSinUserDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
 import com.clinicaregional.clinica.entity.Paciente;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.Period;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class PacienteMapper {
@@ -20,8 +19,7 @@ public class PacienteMapper {
     private final SeguroMapper seguroMapper;
 
     @Autowired
-    public PacienteMapper(TipoDocumentoMapper tipoDocumentoMapper, UsuarioMapper usuarioMapper,
-            SeguroMapper seguroMapper) {
+    public PacienteMapper(TipoDocumentoMapper tipoDocumentoMapper, UsuarioMapper usuarioMapper, SeguroMapper seguroMapper) {
         this.tipoDocumentoMapper = tipoDocumentoMapper;
         this.usuarioMapper = usuarioMapper;
         this.seguroMapper = seguroMapper;
@@ -43,7 +41,13 @@ public class PacienteMapper {
                 paciente.getImagenUrl(),
                 paciente.getTipoSangre(),
                 paciente.getAntecedentes(),
-                paciente.getUsuario() != null ? usuarioMapper.mapToUsuarioDTO(paciente.getUsuario()) : null);
+                paciente.getContactoDeEmergenciaNombre(),
+                paciente.getContactoDeEmergenciaTelefono(),
+                paciente.getModalidadDeAtencion(),
+                paciente.getSeguro(),
+                paciente.getNumeroDePoliza(),
+                paciente.getUsuario()
+        );
     }
 
     public Paciente mapToPaciente(PacienteConUserDTO dto) {
@@ -53,6 +57,7 @@ public class PacienteMapper {
                 .apellidos(dto.getApellidos())
                 .fechaNacimiento(dto.getFechaNacimiento())
                 .sexo(dto.getSexo())
+                .email(dto.getEmail())
                 .tipoDocumento(tipoDocumentoMapper.mapToTipoDocumento(dto.getTipoDocumento()))
                 .numeroIdentificacion(dto.getNumeroIdentificacion())
                 .nacionalidad(dto.getNacionalidad())
@@ -61,7 +66,12 @@ public class PacienteMapper {
                 .imagenUrl(dto.getImagenUrl())
                 .tipoSangre(dto.getTipoSangre())
                 .antecedentes(dto.getAntecedentes())
-                .usuario(dto.getUsuario() != null ? usuarioMapper.mapToUsuario(dto.getUsuario()) : null)
+                .contactoDeEmergenciaNombre(dto.getContactoDeEmergenciaNombre())
+                .contactoDeEmergenciaTelefono(dto.getContactoDeEmergenciaTelefono())
+                .modalidadDeAtencion(dto.getModalidadDeAtencion())
+                .seguro(dto.getSeguro())
+                .numeroDePoliza(dto.getNumeroDePoliza())
+                .usuario(dto.getUsuario())
                 .build();
     }
 
@@ -82,7 +92,8 @@ public class PacienteMapper {
                 paciente.getSeguro() != null ? seguroMapper.mapToSeguroDTO(paciente.getSeguro()) : null,
                 paciente.getNumeroDePoliza(),
                 paciente.getContactoDeEmergenciaNombre(),
-                paciente.getContactoDeEmergenciaTelefono());
+                paciente.getContactoDeEmergenciaTelefono()
+        );
     }
 
     public Paciente mapToPacienteSinUser(PacienteSinUserDTO dto) {
@@ -103,6 +114,7 @@ public class PacienteMapper {
                 .numeroDePoliza(dto.getNumeroDePoliza())
                 .contactoDeEmergenciaNombre(dto.getContactoDeEmergenciaNombre())
                 .contactoDeEmergenciaTelefono(dto.getContactoDeEmergenciaTelefono())
+                .estado(true)
                 .build();
     }
 
@@ -111,12 +123,13 @@ public class PacienteMapper {
                 paciente.getNombres(),
                 paciente.getApellidos(),
                 paciente.getNumeroIdentificacion(),
-                paciente.getUsuario().getCorreo(),
+                paciente.getUsuario() != null ? paciente.getUsuario().getCorreo() : null,
                 paciente.getFechaNacimiento(),
                 paciente.getSexo(),
                 paciente.getNacionalidad(),
                 paciente.getDireccion(),
-                paciente.getImagenUrl());
+                paciente.getImagenUrl()
+        );
     }
 
     public PacienteResponseDTO mapToPacienteResponseDTO(Paciente paciente) {
@@ -127,12 +140,11 @@ public class PacienteMapper {
                 paciente.getTelefono(),
                 paciente.getSexo(),
                 calcularEdad(paciente.getFechaNacimiento()),
-                paciente.getAntecedentes());
+                paciente.getAntecedentes()
+        );
     }
 
     private int calcularEdad(LocalDate fechaNacimiento) {
-        return fechaNacimiento != null
-                ? Period.between(fechaNacimiento, LocalDate.now()).getYears()
-                : 0;
+        return (fechaNacimiento != null) ? Period.between(fechaNacimiento, LocalDate.now()).getYears() : 0;
     }
 }

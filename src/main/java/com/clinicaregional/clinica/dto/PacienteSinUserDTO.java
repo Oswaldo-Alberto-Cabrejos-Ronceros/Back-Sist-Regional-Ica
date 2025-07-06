@@ -43,7 +43,7 @@ public class PacienteSinUserDTO {
 
     @NotNull(message = "La nacionalidad es obligatoria")
     @Size(max = 32, message = "La nacionalidad debe tener menos de 32 palabras")
-    private String nacionalidad ;
+    private String nacionalidad;
 
     @NotBlank(message = "El telefono es obligatorio")
     private String telefono;
@@ -60,7 +60,7 @@ public class PacienteSinUserDTO {
     @Nullable
     private SeguroDTO seguro;
 
-    @Nullable(message = "El número de poliza es obligatorio")
+    @Nullable
     private String numeroDePoliza;
 
     private String contactoDeEmergenciaNombre;

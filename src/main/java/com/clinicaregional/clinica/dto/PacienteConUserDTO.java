@@ -1,8 +1,10 @@
 package com.clinicaregional.clinica.dto;
 
+import com.clinicaregional.clinica.entity.Seguro;
+import com.clinicaregional.clinica.entity.Usuario;
+import com.clinicaregional.clinica.enums.ModalidadDeAtencion;
 import com.clinicaregional.clinica.enums.Sexo;
 import com.clinicaregional.clinica.enums.TipoSangre;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
@@ -57,11 +59,22 @@ public class PacienteConUserDTO {
     @Nullable
     private String imagenUrl;
 
+    @Nullable
     private TipoSangre tipoSangre;
 
     @Size(max = 255, message = "Los antecedentes deben ser menores a 255")
     private String antecedentes;
 
-    private UsuarioDTO usuario;
+    private String contactoDeEmergenciaNombre;
+
+    private String contactoDeEmergenciaTelefono;
+
+    private ModalidadDeAtencion modalidadDeAtencion;
+
+    private Seguro seguro;
+
+    private String numeroDePoliza;
+
+    private Usuario usuario;
 
 }

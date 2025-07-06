@@ -57,17 +57,17 @@ public class PacienteController {
     }
 
     // Crear paciente sin usuario
-    @PostMapping("/paciente/datosIniciales")
+    @PostMapping("/datosIniciales")
     public ResponseEntity<PacienteSinUserDTO> createPacienteSimple(@RequestBody @Valid PacienteSinUserDTO pacienteDTO) {
         PacienteSinUserDTO savedPaciente = pacienteService.crearPacienteSimple(pacienteDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
     }
 
-    @PostMapping
-    public ResponseEntity<PacienteConUserDTO> createPaciente(@RequestBody @Valid PacienteConUserDTO pacienteDTO) {
-        PacienteConUserDTO savedPaciente = pacienteService.crearPaciente(pacienteDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
-    }
+    // @PostMapping
+    // public ResponseEntity<PacienteConUserDTO> createPaciente(@RequestBody @Valid PacienteConUserDTO pacienteDTO) {
+    //     PacienteConUserDTO savedPaciente = pacienteService.crearPacientePorWeb(pacienteDTO);
+    //     return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
+    // }
 
     @PutMapping("/{id}")
     public ResponseEntity<PacienteConUserDTO> updatePaciente(

@@ -20,7 +20,11 @@ import com.clinicaregional.clinica.service.TipoDocumentoService;
 import com.clinicaregional.clinica.mapper.SeguroMapper;
 import com.clinicaregional.clinica.repository.SeguroRepository;
 import com.clinicaregional.clinica.service.UsuarioService;
+import com.clinicaregional.clinica.service.impl.email.BienvenidaEmailService;
 import com.clinicaregional.clinica.util.FiltroEstado;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +37,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 
 @Service
+@Slf4j
 public class PacienteServiceImpl implements PacienteService {
 
     private final PacienteRepository pacienteRepository;
@@ -41,6 +46,7 @@ public class PacienteServiceImpl implements PacienteService {
     private final UsuarioService usuarioService;
     private final FiltroEstado filtroEstado;
     private final SeguroRepository seguroRepository;
+    private final BienvenidaEmailService emailService;
     private final SeguroMapper seguroMapper;
 
     @Autowired
@@ -49,13 +55,15 @@ public class PacienteServiceImpl implements PacienteService {
             PacienteMapper pacienteMapper,
             TipoDocumentoService tipoDocumentoService,
             UsuarioService usuarioService,
-            FiltroEstado filtroEstado, SeguroRepository seguroRepository, SeguroMapper seguroMapper) {
+            FiltroEstado filtroEstado, SeguroRepository seguroRepository, BienvenidaEmailService emailService,
+            SeguroMapper seguroMapper) {
         this.pacienteRepository = pacienteRepository;
         this.pacienteMapper = pacienteMapper;
         this.tipoDocumentoService = tipoDocumentoService;
         this.usuarioService = usuarioService;
         this.filtroEstado = filtroEstado;
         this.seguroRepository = seguroRepository;
+        this.emailService = emailService;
         this.seguroMapper = seguroMapper;
     }
 
@@ -109,33 +117,43 @@ public class PacienteServiceImpl implements PacienteService {
     @Transactional
     @Override
     public PacienteSinUserDTO crearPacienteSimple(PacienteSinUserDTO pacienteSimpleDTO) {
+        
         filtroEstado.activarFiltroEstado(true);
 
+        // Validación de duplicados
         if (pacienteRepository.findByNumeroIdentificacion(pacienteSimpleDTO.getNumeroIdentificacion()).isPresent()) {
             throw new DuplicateResourceException("Ya existe un paciente con ese número de identificación");
         }
 
+        // Obtener tipo de documento
         TipoDocumento tipoDocumento = tipoDocumentoService
                 .getTipoDocumentoByIdContext(pacienteSimpleDTO.getTipoDocumento().getId())
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("No se encontró un tipo de documento con el id ingresado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado"));
 
+        // Manejo del seguro (opcional)
         Seguro seguro = null;
         if (pacienteSimpleDTO.getSeguro() != null) {
-            if (pacienteSimpleDTO.getSeguro().getId() != null) {
-                seguro = seguroRepository.findById(pacienteSimpleDTO.getSeguro().getId())
-                        .orElseThrow(
-                                () -> new ResourceNotFoundException("No se encontró un seguro con el id ingresado"));
-            } else {
-                seguro = seguroRepository.save(seguroMapper.mapToSeguro(pacienteSimpleDTO.getSeguro()));
-            }
+            seguro = pacienteSimpleDTO.getSeguro().getId() != null
+                    ? seguroRepository.findById(pacienteSimpleDTO.getSeguro().getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Seguro no encontrado"))
+                    : seguroRepository.save(seguroMapper.mapToSeguro(pacienteSimpleDTO.getSeguro()));
         }
 
+        // Mapeo y guardado
         Paciente paciente = pacienteMapper.mapToPacienteSinUser(pacienteSimpleDTO);
         paciente.setTipoDocumento(tipoDocumento);
         paciente.setSeguro(seguro);
-
         Paciente savedPaciente = pacienteRepository.save(paciente);
+
+        // Envío de correo de bienvenida (en un try-catch para no afectar el registro si
+        // falla)
+        try {
+            emailService.enviarEmailBienvenida(pacienteMapper.mapToPacienteSinUserDTO(savedPaciente));
+        } catch (Exception e) {
+            log.error("Error al enviar email de bienvenida al paciente {}: {}",
+                    savedPaciente.getId(), e.getMessage());
+            // No relanzamos la excepción para no interrumpir el flujo principal
+        }
 
         return pacienteMapper.mapToPacienteSinUserDTO(savedPaciente);
     }
@@ -243,4 +261,10 @@ public class PacienteServiceImpl implements PacienteService {
                 paginaPacientes.isLast());
     }
 
+    @Override
+    public Optional<PacienteConUserDTO> getPacientePorEmail(String email) {
+        filtroEstado.activarFiltroEstado(true);
+        return pacienteRepository.findByEmail(email)
+                .map(pacienteMapper::mapToPacienteDTO);
+    }
 }

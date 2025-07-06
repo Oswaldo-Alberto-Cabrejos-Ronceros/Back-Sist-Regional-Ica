@@ -1,7 +1,6 @@
 package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.RolDTO;
-import com.clinicaregional.clinica.entity.Rol;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +16,5 @@ public interface RolService {
 
     public void eliminar(Long id);
 
-    public RolDTO obtenerRolPorNombre(String nombre);
+    public Optional<RolDTO> obtenerRolPorNombre(String nombre);
 }

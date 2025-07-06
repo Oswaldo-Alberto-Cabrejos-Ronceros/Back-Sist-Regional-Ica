@@ -33,4 +33,6 @@ public interface PacienteService {
 
     PagedResponse<PacienteConUserDTO> listarPacientesPaginado(Pageable pageable);
 
+    Optional<PacienteConUserDTO> getPacientePorEmail(String email);
+
 }

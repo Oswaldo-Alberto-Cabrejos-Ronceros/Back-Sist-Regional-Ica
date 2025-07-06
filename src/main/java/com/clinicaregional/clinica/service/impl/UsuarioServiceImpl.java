@@ -10,6 +10,9 @@ import com.clinicaregional.clinica.mapper.UsuarioMapper;
 import com.clinicaregional.clinica.repository.*;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
@@ -77,7 +81,20 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Optional<Usuario> obtenerPorCorreo(String correo) {
         filtroEstado.activarFiltroEstado(true);
-        return usuarioRepository.findByCorreo(correo);
+        log.debug("Buscando usuario por correo: {}", correo);
+
+        // Asegúrate de que esta consulta incluya la contraseña
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreoWithRol(correo);
+
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            log.debug("Usuario encontrado - ID: {}, Password null? {}",
+                    usuario.getId(), usuario.getPassword() == null);
+        } else {
+            log.debug("No se encontró usuario con correo: {}", correo);
+        }
+
+        return usuarioOpt;
     }
 
     @Transactional(readOnly = true)
@@ -95,6 +112,17 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioDTO guardar(UsuarioRequestDTO request) {
         filtroEstado.activarFiltroEstado(true);
 
+        // Validación adicional
+        if (request.getCorreo() == null || request.getCorreo().isEmpty()) {
+            throw new BadRequestException("El correo es obligatorio");
+        }
+        if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            throw new BadRequestException("La contraseña es obligatoria");
+        }
+        if (request.getRol() == null || request.getRol().getId() == null) {
+            throw new BadRequestException("El rol es obligatorio");
+        }
+
         if (usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())) {
             throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
@@ -102,11 +130,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
-        rolRepository.findById(request.getRol().getId())
-                .ifPresentOrElse(usuario::setRol,
-                        () -> {
-                            throw new BadRequestException("El rol especificado no existe");
-                        });
+        Rol rol = rolRepository.findById(request.getRol().getId())
+                .orElseThrow(() -> new BadRequestException("El rol especificado no existe"));
+        usuario.setRol(rol);
+
+        // Asegurar que el estado esté activo
+        usuario.setEstado(true);
 
         Usuario usuarioSaved = usuarioRepository.save(usuario);
         return usuarioMapper.mapToUsuarioDTO(usuarioSaved);

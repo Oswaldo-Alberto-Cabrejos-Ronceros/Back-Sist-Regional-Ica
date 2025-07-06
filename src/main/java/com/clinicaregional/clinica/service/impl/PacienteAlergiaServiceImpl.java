@@ -2,7 +2,7 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.AlergiaDTO;
 import com.clinicaregional.clinica.dto.PacienteAlergiaDTO;
-import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
@@ -63,7 +63,7 @@ public class PacienteAlergiaServiceImpl implements PacienteAlergiaService {
     @Override
     public List<PacienteAlergiaDTO> listarPacienteAlergiasPorPaciente(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        PacienteDTO findPaciente = pacienteService.getPacientePorId(id)
+        PacienteConUserDTO findPaciente = pacienteService.getPacientePorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró el paciente con id: " + id));
         Paciente paciente = pacienteMapper.mapToPaciente(findPaciente);
         return pacienteAlergiaRepository.findByPaciente(paciente)
@@ -82,7 +82,7 @@ public class PacienteAlergiaServiceImpl implements PacienteAlergiaService {
     @Override
     public PacienteAlergiaDTO createPacienteAlergia(PacienteAlergiaDTO pacienteAlergiaDTO) {
         filtroEstado.activarFiltroEstado(true);
-        PacienteDTO pacienteDTO = pacienteService.getPacientePorId(pacienteAlergiaDTO.getPacienteId())
+        PacienteConUserDTO pacienteDTO = pacienteService.getPacientePorId(pacienteAlergiaDTO.getPacienteId())
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró paciente con el id ingresado"));
 
         AlergiaDTO alergiaDTO = alergiaService.getAlergiaPorId(pacienteAlergiaDTO.getAlergia().getId())

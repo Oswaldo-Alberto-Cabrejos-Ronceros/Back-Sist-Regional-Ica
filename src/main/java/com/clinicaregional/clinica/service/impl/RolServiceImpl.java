@@ -93,9 +93,8 @@ public class RolServiceImpl implements RolService {
     }
 
     @Override
-    public RolDTO obtenerRolPorNombre(String nombre) {
-        return rolRepository.findByNombreAndEstadoTrue(nombre)
-                .map(rolMapper::mapToRolDTO)
-                .orElseThrow(() -> new ResourceNotFoundException("Rol no encontrado con nombre: " + nombre));
+    public Optional<RolDTO> obtenerRolPorNombre(String nombreRol) {
+        return rolRepository.findByNombreAndEstadoTrue(nombreRol)
+                .map(rolMapper::mapToRolDTO);
     }
 }

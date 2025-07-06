@@ -93,8 +93,10 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
                 if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento())) {
                         throw new RuntimeException("Ya existe un recepcionista con el mismo número de documento");
                 }
-                // guardamos usuario
-                RolDTO rolRecepcionista = rolService.obtenerRolPorNombre("RECEPCIONISTA");
+                // Obtener rol con validación
+                RolDTO rolRecepcionista = rolService.obtenerRolPorNombre("RECEPCIONISTA")
+                                .orElseThrow(() -> new IllegalStateException(
+                                                "Rol RECEPCIONISTA no encontrado en el sistema"));
 
                 // Crear usuario
                 UsuarioRequestDTO newUsuario = new UsuarioRequestDTO();

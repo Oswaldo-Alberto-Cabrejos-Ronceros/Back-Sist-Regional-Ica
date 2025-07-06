@@ -77,7 +77,10 @@ public class AdministradorServiceImpl implements AdministradorService {
             throw new DuplicateResourceException("Ya existe un administrador con el numero de documento ingresado");
         }
 
-        RolDTO rolAdmin = rolService.obtenerRolPorNombre("ADMIN");
+        RolDTO rolAdmin = rolService.obtenerRolPorNombre("ADMIN")
+                .orElseThrow(() -> new IllegalStateException(
+                        "Rol ADMINISTRADOR no encontrado en el sistema"));
+
         registerAdministradorRequest.getUsuario().setRol(rolAdmin);
 
         UsuarioDTO usuarioGuardado = usuarioService.guardar(registerAdministradorRequest.getUsuario());

@@ -1,7 +1,7 @@
 package com.clinicaregional.clinica.service;
 
-import com.clinicaregional.clinica.dto.PacienteDTO;
-import com.clinicaregional.clinica.dto.PacienteSimpleDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
+import com.clinicaregional.clinica.dto.PacienteSinUserDTO;
 import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
@@ -12,25 +12,27 @@ import java.util.Optional;
 
 
 public interface PacienteService {
-    List<PacienteDTO> listarPacientes();
+    List<PacienteConUserDTO> listarPacientes();
 
-    List<PacienteDTO> listarPacientesPorEstado();
+    List<PacienteConUserDTO> listarPacientesPorEstado();
 
-    Optional<PacienteDTO> getPacientePorId(Long id);
+    Optional<PacienteConUserDTO> getPacientePorId(Long id);
 
-    Optional<PacienteDTO> getPacientePorIdentificacion(String identificacion);
+    Optional<PacienteConUserDTO> getPacientePorIdentificacion(String identificacion);
 
     MyInfoPaciente getMyInfoPaciente(Long pacienteId);
 
-    PacienteDTO crearPaciente(PacienteDTO pacienteDTO);
+    PacienteConUserDTO crearPacientePorWeb(PacienteConUserDTO pacienteDTO);
 
     //Crear paciente sin usuario
-    PacienteSimpleDTO crearPacienteSimple(PacienteSimpleDTO pacienteSimpleDTO);
+    PacienteSinUserDTO crearPacienteSimple(PacienteSinUserDTO pacienteSimpleDTO);
 
-    PacienteDTO actualizarPaciente(Long id, UpdatePacienteDTO updatepacienteDTO);
+    PacienteConUserDTO actualizarPaciente(Long id, UpdatePacienteDTO updatepacienteDTO);
 
     void eliminarPaciente(Long id);
 
-    PagedResponse<PacienteDTO> listarPacientesPaginado(Pageable pageable);
+    PagedResponse<PacienteConUserDTO> listarPacientesPaginado(Pageable pageable);
+
+    Optional<PacienteConUserDTO> getPacientePorEmail(String email);
 
 }

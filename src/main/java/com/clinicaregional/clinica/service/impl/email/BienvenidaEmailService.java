@@ -47,7 +47,7 @@ public class BienvenidaEmailService {
                             <style>
                                 body { font-family: Arial, sans-serif; background-color: #f3f4f6; color: #333; margin: 0; padding: 0; }
                                 .container { max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; overflow: hidden; }
-                                .header { background: linear-gradient(135deg, #0369a1 0%%, #0ea5e9 100%%); padding: 20px; color: white; }
+                                .header { background-color: #001f3f; /* Azul marino */ padding: 20px; color: white; }
                                 .logo { border-radius: 50%%; border: 2px solid white; width: 60px; height: 60px; }
                                 .data-table { width: 100%%; font-size: 15px; background-color: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb; }
                                 .btn-primary { display: inline-block; padding: 12px 20px; background-color: #0ea5e9; color: white;
@@ -61,11 +61,11 @@ public class BienvenidaEmailService {
                                     <table width="100%%" style="border-collapse: collapse;">
                                         <tr>
                                             <td style="width: 80px;">
-                                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLecFyB71Pj1Uam50k8cJo_hgSm5FZ-ivnog&s"
+                                                <img src="https://scontent.flim3-2.fna.fbcdn.net/v/t39.30808-6/454614062_122100882722461099_649067528575904421_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeG7SlzeH5mzgCRP7lHaydPnE0JRzhhy7aATQlHOGHLtoFcQl7Trzi3yn--jiRTSNDiHm7VQN4XpNglPkmNQaVKb&_nc_ohc=F1VJMcvA0_QQ7kNvwENx8vk&_nc_oc=AdnXKGaVpHee6VyDAFrzr4vZOkHptcwVfTyVb6K-D4maBl0Bugo9R7tEbnLRr8LNQlE&_nc_zt=23&_nc_ht=scontent.flim3-2.fna&_nc_gid=TdCnCgKJx14p-NpRvxRKwg&oh=00_AfS-lgE7OCrfFftOB2pAhWmaZraCBiuxY5vCqUaeAojOrQ&oe=686FA455"
                                                      alt="Logo Clínica" class="logo">
                                             </td>
-                                            <td style="text-align: center;">
-                                                <h1 style="margin: 0; font-size: 22px; font-weight: 600;">Bienvenido a Clínica Regional Ica</h1>
+                                            <td style="text-align: center; color: white;"> <!-- Texto en blanco -->
+                                                <h1 style="margin: 0; font-size: 22px; font-weight: 600; color: white;">Bienvenido a Clínica Regional Ica</h1>
                                             </td>
                                         </tr>
                                     </table>
@@ -90,11 +90,11 @@ public class BienvenidaEmailService {
                                     </table>
 
                                     <div style="text-align: center; margin: 25px 0;">
-                                        <a href="https://www.clinicaregionalica.com/agendar-cita" class="btn-primary">Agendar mi primera cita</a>
+                                        <a href="https://clinica-regional-ica-git-develop-alyri03s-projects.vercel.app/" class="btn-primary">Agendar mi primera cita</a>
                                     </div>
 
                                     <p style="font-style: italic;">Atentamente,<br>
-                                    <strong>Dr. Carlos Mendoza</strong><br>
+                                    <strong>Dr. Carlos Enrique Navea Méndez/strong><br>
                                     Director Médico<br>
                                     Clínica Regional Ica</p>
                                 </div>

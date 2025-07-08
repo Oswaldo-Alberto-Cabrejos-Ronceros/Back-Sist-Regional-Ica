@@ -56,9 +56,7 @@ public class MedicoServiceImpl implements MedicoService {
             TipoDocumentoService tipoDocumentoService,
 
             RolService rolService,
-            FiltroEstado filtroEstado) {
-/*
-            FiltroEstado filtroEstado, S3ServicePublic s3Service) {*/
+            FiltroEstado filtroEstado,S3ServicePublic s3Service) {
 
         this.medicoRepository = medicoRepository;
         this.medicoMapper = medicoMapper;
@@ -86,9 +84,6 @@ public class MedicoServiceImpl implements MedicoService {
     public List<MedicoResponsePublicDTO> obtenerMedicosPublic() {
         filtroEstado.activarFiltroEstado(true);
 
-        return medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO)
-                .collect(Collectors.toList());
-/*
         List<MedicoResponsePublicDTO> medicos = medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO).toList();
         return medicos.stream().map(medico -> {
             if (medico.getImagen() != null) {
@@ -96,7 +91,7 @@ public class MedicoServiceImpl implements MedicoService {
                 medico.setImagen(imageUrl);
             }
             return medico;
-        }).collect(Collectors.toList());*/
+        }).collect(Collectors.toList());
 
     }
 
@@ -274,19 +269,13 @@ public class MedicoServiceImpl implements MedicoService {
 
         // 1. Primero marca el médico como inactivo
         medico.setEstado(false);
-/*
-                .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id));
-        medico.setEstado(false); // borrado logico
-        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-        usuario.setEstado(false);
-        medico.setUsuario(null);
+
+        medicoRepository.save(medico);
+
+        //borra la imagen si la tiene
         if (medico.getImagen() != null) {
             s3Service.eliminarArchivo(medico.getImagen());
         }
-        usuarioRepository.save(usuario);*/
-
-        medicoRepository.save(medico);
 
         // 2. Desvincula el usuario (si existe)
         if (medico.getUsuario() != null) {
@@ -312,7 +301,7 @@ public class MedicoServiceImpl implements MedicoService {
         filtroEstado.activarFiltroEstado(true);
         Medico medico = medicoRepository.findByUsuario_Id(usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con usuario ID: " + usuarioId));
-        return medicoMapper.mapToMedicoResponseDTO(medico);
+        return this.agregarUrlImage( medicoMapper.mapToMedicoResponseDTO(medico));
     }
 
 

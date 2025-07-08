@@ -42,12 +42,9 @@ public class AdministradorServiceImpl implements AdministradorService {
 
     @Autowired
     public AdministradorServiceImpl(AdministradorRepository administradorRepository,
- dev
             AdministradorMapper administradorMapper, UsuarioService usuarioService, RolService rolService,
-            FiltroEstado filtroEstado) {
-/*
-                                    AdministradorMapper administradorMapper, UsuarioService usuarioService, FiltroEstado filtroEstado, S3ServicePublic s3Service) {
-*/
+            FiltroEstado filtroEstado,S3ServicePublic s3Service) {
+
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
         this.usuarioService = usuarioService;
@@ -80,19 +77,16 @@ public class AdministradorServiceImpl implements AdministradorService {
 
         Administrador administrador = administradorRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontro Administrador con el id: " + id));
-/*
-        Administrador administrador = administradorRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro Administrador con el id: " + id));
         if (administrador.getImagenUrl() != null) {
             String imageUrl = s3Service.generarUrlPublico(administrador.getImagenUrl());
             administrador.setImagenUrl(imageUrl);
-        }*/
-
+        }
         return administradorMapper.mapToMyInfoAdministrador(administrador);
     }
 
     @Transactional
     @Override
-    public AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest, MultipartFile imagen) {
+    public AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest) {
         filtroEstado.activarFiltroEstado(true);
         if (administradorRepository
                 .existsByNumeroDocumento(registerAdministradorRequest.getAdministrador().getNumeroDocumento())) {
@@ -110,10 +104,6 @@ public class AdministradorServiceImpl implements AdministradorService {
         registerAdministradorRequest.getAdministrador().setUsuarioId(usuarioGuardado.getId());
         Administrador administrador = administradorMapper.mapToAdministrador(registerAdministradorRequest.getAdministrador());
 
-        if (imagen != null) {
-            String key = s3Service.subirArchivo(imagen, "administrador" + administrador.getNombres());
-            administrador.setImagenUrl(key);
-        }
         Administrador savedAdministrador = administradorRepository
                 .save(administrador);
 

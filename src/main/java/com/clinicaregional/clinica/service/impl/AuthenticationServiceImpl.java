@@ -3,8 +3,6 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 
-import com.clinicaregional.clinica.dto.PacienteDTO;
-
 import com.clinicaregional.clinica.dto.request.RegisterRequest;
 import com.clinicaregional.clinica.entity.*;
 import com.clinicaregional.clinica.exception.*;
@@ -149,9 +147,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(request.getTipoDocumentoId())
                     .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado"));
-/*
-        PacienteDTO pacienteGuardado = pacienteService.crearPaciente(registerRequest.getPaciente(),null);*/
-
 
             Seguro seguro = request.getSeguroId() != null ? seguroRepository.findById(request.getSeguroId())
                     .orElseThrow(() -> new ResourceNotFoundException("Seguro no encontrado")) : null;

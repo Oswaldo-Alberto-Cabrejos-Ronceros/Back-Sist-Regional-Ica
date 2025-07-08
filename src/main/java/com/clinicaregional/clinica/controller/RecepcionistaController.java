@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,17 +23,12 @@ public class RecepcionistaController {
     private final RecepcionistaService recepcionistaService;
 
     @PostMapping
-
     public ResponseEntity<?> registrar(@RequestBody @Valid RecepcionistaRequest recepcionistaRequest,
-            BindingResult result) {
-/**
-    public ResponseEntity<?> registrar(@RequestPart("recepcionistaRequest") @Valid RecepcionistaRequest recepcionistaRequest,
-                                       BindingResult result,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-**/
+                                       BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("Datos inválidos");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(recepcionistaService.guardar(recepcionistaRequest,imagen));
+        return ResponseEntity.status(HttpStatus.CREATED).body(recepcionistaService.guardar(recepcionistaRequest));
     }
 
     @GetMapping
@@ -57,14 +51,8 @@ public class RecepcionistaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<RecepcionistaResponse> actualizar(@PathVariable Long id,
-
-            @RequestBody RecepcionistaRequest recepcionistaRequest) {
+                                                            @RequestBody RecepcionistaRequest recepcionistaRequest) {
         return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionistaRequest));
-/*
-                                                            @RequestPart("recepcionistaRequest") @Valid RecepcionistaRequest recepcionistaRequest,
-                                                            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionistaRequest,imagen));*/
-
     }
 
     @DeleteMapping("/{id}")

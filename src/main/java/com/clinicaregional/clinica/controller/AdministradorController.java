@@ -39,8 +39,8 @@ public class AdministradorController {
 
 
     @PostMapping
-    public ResponseEntity<AdministradorDTO> createAdministrador(@RequestPart("registerAdministradorRequest") @Valid RegisterAdministradorRequest registerAdministradorRequest,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        AdministradorDTO savedAdministrador = administradorService.createAdministrador(registerAdministradorRequest,imagen);
+    public ResponseEntity<AdministradorDTO> createAdministrador(@RequestPart("registerAdministradorRequest") @Valid RegisterAdministradorRequest registerAdministradorRequest) {
+        AdministradorDTO savedAdministrador = administradorService.createAdministrador(registerAdministradorRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAdministrador);
     }
 

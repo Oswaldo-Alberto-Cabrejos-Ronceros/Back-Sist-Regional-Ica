@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -56,12 +57,17 @@ public class PacienteController {
         return ResponseEntity.ok(pacienteService.getMyInfoPaciente(id));
     }
 
+
     // Crear paciente sin usuario
     @PostMapping("/datosIniciales")
     public ResponseEntity<PacienteSinUserDTO> createPacienteSimple(@RequestBody @Valid PacienteSinUserDTO pacienteDTO) {
         PacienteSinUserDTO savedPaciente = pacienteService.crearPacienteSimple(pacienteDTO);
+    /**
+    public ResponseEntity<PacienteDTO> createPaciente(@RequestPart("pacienteDTO") @Valid PacienteDTO pacienteDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        PacienteDTO savedPaciente = pacienteService.crearPaciente(pacienteDTO,imagen);
+ feat/s3-service
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
-    }
+    }*//
 
     // @PostMapping
     // public ResponseEntity<PacienteConUserDTO> createPaciente(@RequestBody @Valid PacienteConUserDTO pacienteDTO) {
@@ -70,14 +76,20 @@ public class PacienteController {
     // }
 
     @PutMapping("/{id}")
+
     public ResponseEntity<PacienteConUserDTO> updatePaciente(
             @PathVariable Long id,
             @RequestBody @Valid UpdatePacienteDTO updatePacienteDTO) {
 
         PacienteConUserDTO updatedPaciente = pacienteService.actualizarPaciente(id, updatePacienteDTO);
+/**
+    public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
+                                                      @RequestPart("pacienteDTO") @Valid PacienteDTO pacienteDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO,imagen);
+ feat/s3-service
         return ResponseEntity.ok(updatedPaciente);
     }
-
+**/
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePaciente(@PathVariable Long id) {
         pacienteService.eliminarPaciente(id);

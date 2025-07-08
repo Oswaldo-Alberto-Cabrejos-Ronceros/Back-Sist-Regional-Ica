@@ -6,8 +6,10 @@ import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.service.SeguroService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,15 +37,15 @@ public class SeguroController {
         return seguroService.getSeguroByNombre(nombre).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<SeguroDTO> createSeguro(@RequestBody @Valid SeguroDTO seguroDTO) {
-        SeguroDTO savedSeguro = seguroService.createSeguro(seguroDTO);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SeguroDTO> createSeguro(@RequestPart("seguroDTO") @Valid SeguroDTO seguroDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        SeguroDTO savedSeguro = seguroService.createSeguro(seguroDTO,imagen);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSeguro);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SeguroDTO> updateSeguro(@PathVariable Long id, @RequestBody @Valid SeguroDTO seguroDTO) {
-        SeguroDTO updatedSeguro = seguroService.updateSeguro(id, seguroDTO);
+    public ResponseEntity<SeguroDTO> updateSeguro(@PathVariable Long id, @RequestPart("seguroDTO") @Valid SeguroDTO seguroDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        SeguroDTO updatedSeguro = seguroService.updateSeguro(id, seguroDTO,imagen);
         return ResponseEntity.ok(updatedSeguro);
     }
 

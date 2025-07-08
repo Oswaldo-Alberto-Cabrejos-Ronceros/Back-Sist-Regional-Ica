@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -38,14 +39,14 @@ public class AdministradorController {
 
 
     @PostMapping
-    public ResponseEntity<AdministradorDTO> createAdministrador(@RequestBody @Valid RegisterAdministradorRequest registerAdministradorRequest) {
-        AdministradorDTO savedAdministrador = administradorService.createAdministrador(registerAdministradorRequest);
+    public ResponseEntity<AdministradorDTO> createAdministrador(@RequestPart("registerAdministradorRequest") @Valid RegisterAdministradorRequest registerAdministradorRequest,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        AdministradorDTO savedAdministrador = administradorService.createAdministrador(registerAdministradorRequest,imagen);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAdministrador);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AdministradorDTO> updateAministrador(@PathVariable Long id, @RequestBody @Valid AdministradorDTO administradorDTO) {
-        AdministradorDTO updatedAdministrador = administradorService.updateAdministrador(id, administradorDTO);
+    public ResponseEntity<AdministradorDTO> updateAministrador(@PathVariable Long id, @RequestPart("administradorDTO") @Valid AdministradorDTO administradorDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        AdministradorDTO updatedAdministrador = administradorService.updateAdministrador(id, administradorDTO,imagen);
         return ResponseEntity.ok(updatedAdministrador);
     }
 

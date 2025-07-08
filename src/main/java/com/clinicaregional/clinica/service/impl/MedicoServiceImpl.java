@@ -3,9 +3,11 @@ package com.clinicaregional.clinica.service.impl;
 import java.util.stream.Collectors;
 import java.util.List;
 
+import com.clinicaregional.clinica.dto.AdministradorDTO;
 import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoMedico;
 import com.clinicaregional.clinica.entity.TipoDocumento;
+import com.clinicaregional.clinica.service.S3ServicePublic;
 import com.clinicaregional.clinica.service.TipoDocumentoService;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
@@ -31,6 +33,7 @@ import com.clinicaregional.clinica.service.RolService;
 import com.clinicaregional.clinica.service.UsuarioService;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class MedicoServiceImpl implements MedicoService {
@@ -42,6 +45,7 @@ public class MedicoServiceImpl implements MedicoService {
     private final TipoDocumentoService tipoDocumentoService;
     private final RolService rolService;
     private final FiltroEstado filtroEstado;
+    private final S3ServicePublic s3Service;
 
     @Autowired
     public MedicoServiceImpl(
@@ -50,8 +54,12 @@ public class MedicoServiceImpl implements MedicoService {
             UsuarioRepository usuarioRepository,
             UsuarioService usuarioService,
             TipoDocumentoService tipoDocumentoService,
+
             RolService rolService,
             FiltroEstado filtroEstado) {
+/*
+            FiltroEstado filtroEstado, S3ServicePublic s3Service) {*/
+
         this.medicoRepository = medicoRepository;
         this.medicoMapper = medicoMapper;
         this.usuarioRepository = usuarioRepository;
@@ -59,32 +67,46 @@ public class MedicoServiceImpl implements MedicoService {
         this.tipoDocumentoService = tipoDocumentoService;
         this.rolService = rolService;
         this.filtroEstado = filtroEstado;
+        this.s3Service = s3Service;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<MedicoResponseDTO> obtenerMedicos() {
         filtroEstado.activarFiltroEstado(true);
-        return medicoRepository.findAll()
+        List<MedicoResponseDTO> medicos = medicoRepository.findAll()
                 .stream()
                 .map(medicoMapper::mapToMedicoResponseDTO)
-                .collect(Collectors.toList());
+                .toList();
+        return medicos.stream().map(this::agregarUrlImage).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<MedicoResponsePublicDTO> obtenerMedicosPublic() {
         filtroEstado.activarFiltroEstado(true);
+
         return medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO)
                 .collect(Collectors.toList());
+/*
+        List<MedicoResponsePublicDTO> medicos = medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO).toList();
+        return medicos.stream().map(medico -> {
+            if (medico.getImagen() != null) {
+                String imageUrl = s3Service.generarUrlPublico(medico.getImagen());
+                medico.setImagen(imageUrl);
+            }
+            return medico;
+        }).collect(Collectors.toList());*/
+
     }
 
     @Transactional
     @Override
     public MedicoResponseDTO obtenerMedicoPorId(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        return medicoMapper.mapToMedicoResponseDTO(medicoRepository.findByIdAndEstadoIsTrue(id)
+        MedicoResponseDTO medicoResponseDTO = medicoMapper.mapToMedicoResponseDTO(medicoRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id)));
+        return this.agregarUrlImage(medicoResponseDTO);
     }
 
     @Transactional(readOnly = true)
@@ -92,12 +114,16 @@ public class MedicoServiceImpl implements MedicoService {
     public MyInfoMedico obtenerMyInfoMedico(Long id) {
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id));
+        if (medico.getImagen() != null) {
+            String imageUrl = s3Service.generarUrlPublico(medico.getImagen());
+            medico.setImagen(imageUrl);
+        }
         return medicoMapper.mapToMyInfoMedico(medico);
     }
 
     @Transactional
     @Override
-    public MedicoResponseDTO guardarMedico(MedicoRequestDTO dto) {
+    public MedicoResponseDTO guardarMedico(MedicoRequestDTO dto, MultipartFile imagen) {
         filtroEstado.activarFiltroEstado(true);
 
         if (medicoRepository.existsByNumeroColegiatura(dto.getNumeroColegiatura())) {
@@ -158,13 +184,17 @@ public class MedicoServiceImpl implements MedicoService {
                 .usuario(usuario1)
                 .estado(true)
                 .build();
-
-        return medicoMapper.mapToMedicoResponseDTO(medicoRepository.save(medico));
+        if (imagen != null) {
+            String key = s3Service.subirArchivo(imagen, "medico" + medico.getNombres());
+            medico.setImagen(key);
+        }
+        Medico medicoSaved = medicoRepository.save(medico);
+        return this.agregarUrlImage(medicoMapper.mapToMedicoResponseDTO(medicoSaved));
     }
 
     @Transactional
     @Override
-    public MedicoResponseDTO actualizarMedico(Long id, MedicoRequestDTO dto) {
+    public MedicoResponseDTO actualizarMedico(Long id, MedicoRequestDTO dto, MultipartFile imagen) {
         filtroEstado.activarFiltroEstado(true);
 
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
@@ -221,19 +251,41 @@ public class MedicoServiceImpl implements MedicoService {
         medico.setTipoContrato(dto.getTipoContrato());
         medico.setTipoMedico(dto.getTipoMedico());
 
+        if (imagen != null) {
+            if (medico.getImagen() != null) {
+                s3Service.eliminarArchivo(medico.getImagen());
+            }
+            String key = s3Service.subirArchivo(imagen, "medico" + medico.getNombres());
+            medico.setImagen(key);
+        }
+
         Medico actualizado = medicoRepository.save(medico);
-        return medicoMapper.mapToMedicoResponseDTO(actualizado);
+        return this.agregarUrlImage(medicoMapper.mapToMedicoResponseDTO(actualizado));
     }
+
 
     @Transactional
     @Override
     public void eliminarMedico(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
+
                 .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + id));
 
         // 1. Primero marca el médico como inactivo
         medico.setEstado(false);
+/*
+                .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id));
+        medico.setEstado(false); // borrado logico
+        Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        usuario.setEstado(false);
+        medico.setUsuario(null);
+        if (medico.getImagen() != null) {
+            s3Service.eliminarArchivo(medico.getImagen());
+        }
+        usuarioRepository.save(usuario);*/
+
         medicoRepository.save(medico);
 
         // 2. Desvincula el usuario (si existe)
@@ -261,6 +313,16 @@ public class MedicoServiceImpl implements MedicoService {
         Medico medico = medicoRepository.findByUsuario_Id(usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con usuario ID: " + usuarioId));
         return medicoMapper.mapToMedicoResponseDTO(medico);
+    }
+
+
+    //funcion para obtener el url
+    private MedicoResponseDTO agregarUrlImage(MedicoResponseDTO medicoResponseDTO) {
+        if (medicoResponseDTO.getImagen() != null) {
+            String imageUrl = s3Service.generarUrlPublico(medicoResponseDTO.getImagen());
+            medicoResponseDTO.setImagen(imageUrl);
+        }
+        return medicoResponseDTO;
     }
 
 }

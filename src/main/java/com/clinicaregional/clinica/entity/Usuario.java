@@ -24,6 +24,8 @@ public class Usuario extends EntidadConEstado{
     private Long id;
 
     private String correo;
+
+    @Column(nullable = false)
     private String password;
 
     @ManyToOne(fetch = FetchType.EAGER)

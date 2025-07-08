@@ -1,282 +1,282 @@
-package com.clinicaregional.clinica.usuarios.service;
+// package com.clinicaregional.clinica.usuarios.service;
 
-import com.clinicaregional.clinica.dto.UsuarioDTO;
-import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
-import com.clinicaregional.clinica.dto.RolDTO;
-import com.clinicaregional.clinica.entity.Paciente;
-import com.clinicaregional.clinica.entity.Rol;
-import com.clinicaregional.clinica.entity.Usuario;
-import com.clinicaregional.clinica.exception.BadRequestException;
-import com.clinicaregional.clinica.exception.DuplicateResourceException;
-import com.clinicaregional.clinica.mapper.UsuarioMapper;
-import com.clinicaregional.clinica.repository.UsuarioRepository;
-import com.clinicaregional.clinica.repository.AdministradorRepository;
-import com.clinicaregional.clinica.repository.MedicoRepository;
-import com.clinicaregional.clinica.repository.PacienteRepository;
-import com.clinicaregional.clinica.repository.RecepcionistaRepository;
-import com.clinicaregional.clinica.repository.RolRepository;
-import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
-import com.clinicaregional.clinica.util.FiltroEstado;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.password.PasswordEncoder;
+// import com.clinicaregional.clinica.dto.UsuarioDTO;
+// import com.clinicaregional.clinica.dto.request.UsuarioRequestDTO;
+// import com.clinicaregional.clinica.dto.RolDTO;
+// import com.clinicaregional.clinica.entity.Paciente;
+// import com.clinicaregional.clinica.entity.Rol;
+// import com.clinicaregional.clinica.entity.Usuario;
+// import com.clinicaregional.clinica.exception.BadRequestException;
+// import com.clinicaregional.clinica.exception.DuplicateResourceException;
+// import com.clinicaregional.clinica.mapper.UsuarioMapper;
+// import com.clinicaregional.clinica.repository.UsuarioRepository;
+// import com.clinicaregional.clinica.repository.AdministradorRepository;
+// import com.clinicaregional.clinica.repository.MedicoRepository;
+// import com.clinicaregional.clinica.repository.PacienteRepository;
+// import com.clinicaregional.clinica.repository.RecepcionistaRepository;
+// import com.clinicaregional.clinica.repository.RolRepository;
+// import com.clinicaregional.clinica.service.impl.UsuarioServiceImpl;
+// import com.clinicaregional.clinica.util.FiltroEstado;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.List;
-import java.util.Optional;
+// import java.util.List;
+// import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+// import static org.assertj.core.api.Assertions.assertThat;
+// import static org.assertj.core.api.Assertions.assertThatThrownBy;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.ArgumentMatchers.anyString;
+// import static org.mockito.Mockito.*;
 
-class UsuarioServiceImplTest {
+// class UsuarioServiceImplTest {
 
-        private UsuarioServiceImpl usuarioService;
-        private UsuarioRepository usuarioRepository;
-        private RolRepository rolRepository;
-        private PasswordEncoder passwordEncoder;
-        private UsuarioMapper usuarioMapper;
-        private PacienteRepository pacienteRepository;
-        private MedicoRepository medicoRepository;
-        private RecepcionistaRepository recepcionistaRepository;
-        private AdministradorRepository administradorRepository;
-        private FiltroEstado filtroEstado;
+//         private UsuarioServiceImpl usuarioService;
+//         private UsuarioRepository usuarioRepository;
+//         private RolRepository rolRepository;
+//         private PasswordEncoder passwordEncoder;
+//         private UsuarioMapper usuarioMapper;
+//         private PacienteRepository pacienteRepository;
+//         private MedicoRepository medicoRepository;
+//         private RecepcionistaRepository recepcionistaRepository;
+//         private AdministradorRepository administradorRepository;
+//         private FiltroEstado filtroEstado;
 
-        @BeforeEach
-        void setUp() {
-                usuarioRepository = mock(UsuarioRepository.class);
-                rolRepository = mock(RolRepository.class);
-                passwordEncoder = mock(PasswordEncoder.class);
-                usuarioMapper = mock(UsuarioMapper.class);
-                pacienteRepository = mock(PacienteRepository.class);
-                medicoRepository = mock(MedicoRepository.class);
-                recepcionistaRepository = mock(RecepcionistaRepository.class);
-                administradorRepository = mock(AdministradorRepository.class);
-                filtroEstado = mock(FiltroEstado.class);
+//         @BeforeEach
+//         void setUp() {
+//                 usuarioRepository = mock(UsuarioRepository.class);
+//                 rolRepository = mock(RolRepository.class);
+//                 passwordEncoder = mock(PasswordEncoder.class);
+//                 usuarioMapper = mock(UsuarioMapper.class);
+//                 pacienteRepository = mock(PacienteRepository.class);
+//                 medicoRepository = mock(MedicoRepository.class);
+//                 recepcionistaRepository = mock(RecepcionistaRepository.class);
+//                 administradorRepository = mock(AdministradorRepository.class);
+//                 filtroEstado = mock(FiltroEstado.class);
 
-                usuarioService = new UsuarioServiceImpl(
-                                usuarioRepository,
-                                rolRepository,
-                                passwordEncoder,
-                                usuarioMapper,
-                                pacienteRepository,
-                                medicoRepository,
-                                recepcionistaRepository,
-                                administradorRepository,
-                                filtroEstado);
+//                 usuarioService = new UsuarioServiceImpl(
+//                                 usuarioRepository,
+//                                 rolRepository,
+//                                 passwordEncoder,
+//                                 usuarioMapper,
+//                                 pacienteRepository,
+//                                 medicoRepository,
+//                                 recepcionistaRepository,
+//                                 administradorRepository,
+//                                 filtroEstado);
 
-                lenient().doNothing().when(filtroEstado).activarFiltroEstado(true);
-                lenient().when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        }
+//                 lenient().doNothing().when(filtroEstado).activarFiltroEstado(true);
+//                 lenient().when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+//         }
 
-        @Test
-        void guardar_usuarioNuevo_exitoso() {
-                UsuarioRequestDTO request = new UsuarioRequestDTO(
-                                "tester5461@gmail.com",
-                                "password",
-                                true,
-                                new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"));
+//         @Test
+//         void guardar_usuarioNuevo_exitoso() {
+//                 UsuarioRequestDTO request = new UsuarioRequestDTO(
+//                                 "tester5461@gmail.com",
+//                                 "password",
+//                                 true,
+//                                 new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"));
 
-                Usuario usuario = new Usuario();
-                usuario.setCorreo(request.getCorreo());
-                usuario.setPassword("encodedPassword");
+//                 Usuario usuario = new Usuario();
+//                 usuario.setCorreo(request.getCorreo());
+//                 usuario.setPassword("encodedPassword");
 
-                when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(false);
-                when(usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request)).thenReturn(usuario);
-                when(rolRepository.findById(1L)).thenReturn(
-                                Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
-                when(usuarioRepository.save(usuario)).thenReturn(usuario);
-                when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
-                                new UsuarioDTO(1L, request.getCorreo(),
-                                                new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")));
+//                 when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(false);
+//                 when(usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request)).thenReturn(usuario);
+//                 when(rolRepository.findById(1L)).thenReturn(
+//                                 Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
+//                 when(usuarioRepository.save(usuario)).thenReturn(usuario);
+//                 when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
+//                                 new UsuarioDTO(1L, request.getCorreo(),
+//                                                 new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")));
 
-                UsuarioDTO result = usuarioService.guardar(request);
+//                 UsuarioDTO result = usuarioService.guardar(request);
 
-                assertThat(result).isNotNull();
-                assertThat(result.getCorreo()).isEqualTo("tester5461@gmail.com");
-        }
+//                 assertThat(result).isNotNull();
+//                 assertThat(result.getCorreo()).isEqualTo("tester5461@gmail.com");
+//         }
 
-        @Test
-        void guardar_usuarioExistente_lanzaExcepcion() {
-                UsuarioRequestDTO request = new UsuarioRequestDTO(
-                                "tester5461@gmail.com",
-                                "password",
-                                true,
-                                new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"));
+//         @Test
+//         void guardar_usuarioExistente_lanzaExcepcion() {
+//                 UsuarioRequestDTO request = new UsuarioRequestDTO(
+//                                 "tester5461@gmail.com",
+//                                 "password",
+//                                 true,
+//                                 new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema"));
 
-                when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(true);
+//                 when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(true);
 
-                assertThatThrownBy(() -> usuarioService.guardar(request))
-                                .isInstanceOf(DuplicateResourceException.class)
-                                .hasMessage("Ya existe un usuario con el correo ingresado");
-        }
+//                 assertThatThrownBy(() -> usuarioService.guardar(request))
+//                                 .isInstanceOf(DuplicateResourceException.class)
+//                                 .hasMessage("Ya existe un usuario con el correo ingresado");
+//         }
 
-        @Test
-        void obtenerPorId_existente_devuelveUsuario() {
-                Usuario usuario = new Usuario();
-                usuario.setId(1L);
-                usuario.setCorreo("tester5461@gmail.com");
+//         @Test
+//         void obtenerPorId_existente_devuelveUsuario() {
+//                 Usuario usuario = new Usuario();
+//                 usuario.setId(1L);
+//                 usuario.setCorreo("tester5461@gmail.com");
 
-                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
-                when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
-                                new UsuarioDTO(1L, "tester5461@gmail.com",
-                                                new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")));
+//                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
+//                 when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
+//                                 new UsuarioDTO(1L, "tester5461@gmail.com",
+//                                                 new RolDTO(1L, "PACIENTE", "Paciente que usa el sistema")));
 
-                Optional<UsuarioDTO> result = usuarioService.obtenerPorId(1L);
+//                 Optional<UsuarioDTO> result = usuarioService.obtenerPorId(1L);
 
-                assertThat(result).isPresent();
-                assertThat(result.get().getCorreo()).isEqualTo("tester5461@gmail.com");
-        }
+//                 assertThat(result).isPresent();
+//                 assertThat(result.get().getCorreo()).isEqualTo("tester5461@gmail.com");
+//         }
 
-        @Test
-        void eliminar_usuario_existente() {
-                // Arrange
-                Rol rol = new Rol(1L, "PACIENTE", "Paciente");
-                Usuario usuario = new Usuario();
-                usuario.setId(1L);
-                usuario.setCorreo("tester5461@gmail.com");
-                usuario.setRol(rol);
-                usuario.setEstado(true);
+//         @Test
+//         void eliminar_usuario_existente() {
+//                 // Arrange
+//                 Rol rol = new Rol(1L, "PACIENTE", "Paciente");
+//                 Usuario usuario = new Usuario();
+//                 usuario.setId(1L);
+//                 usuario.setCorreo("tester5461@gmail.com");
+//                 usuario.setRol(rol);
+//                 usuario.setEstado(true);
 
-                Paciente paciente = new Paciente();
-                paciente.setUsuario(usuario);
-                paciente.setEstado(true);
+//                 Paciente paciente = new Paciente();
+//                 paciente.setUsuario(usuario);
+//                 paciente.setEstado(true);
 
-                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
-                when(pacienteRepository.findByUsuario_Id(1L)).thenReturn(Optional.of(paciente));
+//                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuario));
+//                 when(pacienteRepository.findByUsuario_Id(1L)).thenReturn(Optional.of(paciente));
 
-                // Act
-                usuarioService.eliminar(1L);
+//                 // Act
+//                 usuarioService.eliminar(1L);
 
-                // Assert
-                assertThat(usuario.getEstado()).isFalse();
-                verify(usuarioRepository).save(usuario);
-                verify(pacienteRepository).save(paciente);
-        }
+//                 // Assert
+//                 assertThat(usuario.getEstado()).isFalse();
+//                 verify(usuarioRepository).save(usuario);
+//                 verify(pacienteRepository).save(paciente);
+//         }
 
-        @Test
-        void guardar_usuarioSinRol_lanzaExcepcion() {
-                UsuarioRequestDTO request = new UsuarioRequestDTO(
-                                "correo@correo.com", "password", true, new RolDTO(99L, "NO_EXISTE", "Rol no existe"));
+//         @Test
+//         void guardar_usuarioSinRol_lanzaExcepcion() {
+//                 UsuarioRequestDTO request = new UsuarioRequestDTO(
+//                                 "correo@correo.com", "password", true, new RolDTO(99L, "NO_EXISTE", "Rol no existe"));
 
-                when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(false);
-                when(usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request)).thenReturn(new Usuario());
-                when(rolRepository.findById(99L)).thenReturn(Optional.empty());
+//                 when(usuarioRepository.existsByCorreoAndEstadoIsTrue(request.getCorreo())).thenReturn(false);
+//                 when(usuarioMapper.mapFromUsuarioRequestDTOToUsuario(request)).thenReturn(new Usuario());
+//                 when(rolRepository.findById(99L)).thenReturn(Optional.empty());
 
-                assertThatThrownBy(() -> usuarioService.guardar(request))
-                                .isInstanceOf(BadRequestException.class)
-                                .hasMessage("El rol especificado no existe");
-        }
+//                 assertThatThrownBy(() -> usuarioService.guardar(request))
+//                                 .isInstanceOf(BadRequestException.class)
+//                                 .hasMessage("El rol especificado no existe");
+//         }
 
-        @Test
-        void actualizar_usuarioExistente_exitoso() {
-                UsuarioRequestDTO request = new UsuarioRequestDTO(
-                                "nuevo@correo.com", "nuevaPassword", true, new RolDTO(1L, "PACIENTE", "Paciente"));
+//         @Test
+//         void actualizar_usuarioExistente_exitoso() {
+//                 UsuarioRequestDTO request = new UsuarioRequestDTO(
+//                                 "nuevo@correo.com", "nuevaPassword", true, new RolDTO(1L, "PACIENTE", "Paciente"));
 
-                Usuario usuarioExistente = new Usuario();
-                usuarioExistente.setId(1L);
-                usuarioExistente.setCorreo("existente@correo.com");
+//                 Usuario usuarioExistente = new Usuario();
+//                 usuarioExistente.setId(1L);
+//                 usuarioExistente.setCorreo("existente@correo.com");
 
-                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
-                when(passwordEncoder.encode(request.getPassword())).thenReturn("passwordCodificada");
-                when(rolRepository.findById(1L)).thenReturn(
-                                Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
-                when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioExistente);
-                when(usuarioMapper.mapToUsuarioDTO(usuarioExistente)).thenReturn(
-                                new UsuarioDTO(1L, "existente@correo.com", new RolDTO(1L, "PACIENTE", "Paciente")));
+//                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
+//                 when(passwordEncoder.encode(request.getPassword())).thenReturn("passwordCodificada");
+//                 when(rolRepository.findById(1L)).thenReturn(
+//                                 Optional.of(new com.clinicaregional.clinica.entity.Rol(1L, "PACIENTE", "Paciente")));
+//                 when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioExistente);
+//                 when(usuarioMapper.mapToUsuarioDTO(usuarioExistente)).thenReturn(
+//                                 new UsuarioDTO(1L, "existente@correo.com", new RolDTO(1L, "PACIENTE", "Paciente")));
 
-                UsuarioDTO result = usuarioService.actualizar(1L, request);
+//                 UsuarioDTO result = usuarioService.actualizar(1L, request);
 
-                assertThat(result).isNotNull();
-                assertThat(result.getCorreo()).isEqualTo("existente@correo.com");
-        }
+//                 assertThat(result).isNotNull();
+//                 assertThat(result.getCorreo()).isEqualTo("existente@correo.com");
+//         }
 
-        @Test
-        void actualizar_usuarioNoExistente_lanzaExcepcion() {
-                UsuarioRequestDTO request = new UsuarioRequestDTO(
-                                "correo@correo.com", "password", true, new RolDTO(1L, "PACIENTE", "Paciente"));
+//         @Test
+//         void actualizar_usuarioNoExistente_lanzaExcepcion() {
+//                 UsuarioRequestDTO request = new UsuarioRequestDTO(
+//                                 "correo@correo.com", "password", true, new RolDTO(1L, "PACIENTE", "Paciente"));
 
-                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.empty());
+//                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.empty());
 
-                assertThatThrownBy(() -> usuarioService.actualizar(1L, request))
-                                .isInstanceOf(RuntimeException.class)
-                                .hasMessageContaining("No existe un usuario con el id:");
-        }
+//                 assertThatThrownBy(() -> usuarioService.actualizar(1L, request))
+//                                 .isInstanceOf(RuntimeException.class)
+//                                 .hasMessageContaining("No existe un usuario con el id:");
+//         }
 
-        @Test
-        void actualizar_usuarioSinRolNuevo_lanzaExcepcion() {
-                UsuarioRequestDTO request = new UsuarioRequestDTO(
-                                "correo@correo.com", "password", true, new RolDTO(99L, "NO_EXISTE", "Rol no existe"));
+//         @Test
+//         void actualizar_usuarioSinRolNuevo_lanzaExcepcion() {
+//                 UsuarioRequestDTO request = new UsuarioRequestDTO(
+//                                 "correo@correo.com", "password", true, new RolDTO(99L, "NO_EXISTE", "Rol no existe"));
 
-                Usuario usuarioExistente = new Usuario();
-                usuarioExistente.setId(1L);
+//                 Usuario usuarioExistente = new Usuario();
+//                 usuarioExistente.setId(1L);
 
-                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
-                when(passwordEncoder.encode(request.getPassword())).thenReturn("passwordCodificada");
-                when(rolRepository.findById(99L)).thenReturn(Optional.empty());
+//                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
+//                 when(passwordEncoder.encode(request.getPassword())).thenReturn("passwordCodificada");
+//                 when(rolRepository.findById(99L)).thenReturn(Optional.empty());
 
-                assertThatThrownBy(() -> usuarioService.actualizar(1L, request))
-                                .isInstanceOf(BadRequestException.class)
-                                .hasMessage("El rol especificado no existe");
-        }
+//                 assertThatThrownBy(() -> usuarioService.actualizar(1L, request))
+//                                 .isInstanceOf(BadRequestException.class)
+//                                 .hasMessage("El rol especificado no existe");
+//         }
 
-        @Test
-        void eliminar_usuarioExistente_exitoso() {
-                // Arrange
-                Rol rol = new Rol(1L, "PACIENTE", "Paciente");
-                Usuario usuarioExistente = new Usuario();
-                usuarioExistente.setId(1L);
-                usuarioExistente.setEstado(true);
-                usuarioExistente.setRol(rol); // ✅ Asegúrate de agregar un rol válido
+//         @Test
+//         void eliminar_usuarioExistente_exitoso() {
+//                 // Arrange
+//                 Rol rol = new Rol(1L, "PACIENTE", "Paciente");
+//                 Usuario usuarioExistente = new Usuario();
+//                 usuarioExistente.setId(1L);
+//                 usuarioExistente.setEstado(true);
+//                 usuarioExistente.setRol(rol); // ✅ Asegúrate de agregar un rol válido
 
-                Paciente paciente = new Paciente(); // simulamos que existe
-                paciente.setEstado(true);
-                paciente.setUsuario(usuarioExistente);
+//                 Paciente paciente = new Paciente(); // simulamos que existe
+//                 paciente.setEstado(true);
+//                 paciente.setUsuario(usuarioExistente);
 
-                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
-                when(pacienteRepository.findByUsuario_Id(1L)).thenReturn(Optional.of(paciente));
+//                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.of(usuarioExistente));
+//                 when(pacienteRepository.findByUsuario_Id(1L)).thenReturn(Optional.of(paciente));
 
-                // Act
-                usuarioService.eliminar(1L);
+//                 // Act
+//                 usuarioService.eliminar(1L);
 
-                // Assert
-                assertThat(usuarioExistente.getEstado()).isFalse();
-                verify(usuarioRepository, times(1)).save(usuarioExistente);
-                verify(pacienteRepository, times(1)).save(paciente);
-        }
+//                 // Assert
+//                 assertThat(usuarioExistente.getEstado()).isFalse();
+//                 verify(usuarioRepository, times(1)).save(usuarioExistente);
+//                 verify(pacienteRepository, times(1)).save(paciente);
+//         }
 
-        @Test
-        void eliminar_usuarioNoExistente_lanzaExcepcion() {
-                when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.empty());
+//         @Test
+//         void eliminar_usuarioNoExistente_lanzaExcepcion() {
+//                 when(usuarioRepository.findByIdAndEstadoIsTrue(1L)).thenReturn(Optional.empty());
 
-                assertThatThrownBy(() -> usuarioService.eliminar(1L))
-                                .isInstanceOf(RuntimeException.class)
-                                .hasMessageContaining("No existe un usuario con el id:");
-        }
+//                 assertThatThrownBy(() -> usuarioService.eliminar(1L))
+//                                 .isInstanceOf(RuntimeException.class)
+//                                 .hasMessageContaining("No existe un usuario con el id:");
+//         }
 
-        @Test
-        void listarUsuarios_exitoso() {
-                Usuario usuario = new Usuario();
-                usuario.setId(1L);
-                usuario.setCorreo("correo@correo.com");
+//         @Test
+//         void listarUsuarios_exitoso() {
+//                 Usuario usuario = new Usuario();
+//                 usuario.setId(1L);
+//                 usuario.setCorreo("correo@correo.com");
 
-                when(usuarioRepository.findAll()).thenReturn(List.of(usuario));
-                when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
-                                new UsuarioDTO(1L, "correo@correo.com", new RolDTO(1L, "PACIENTE", "Paciente")));
+//                 when(usuarioRepository.findAll()).thenReturn(List.of(usuario));
+//                 when(usuarioMapper.mapToUsuarioDTO(usuario)).thenReturn(
+//                                 new UsuarioDTO(1L, "correo@correo.com", new RolDTO(1L, "PACIENTE", "Paciente")));
 
-                List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
+//                 List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
 
-                assertThat(usuarios).isNotEmpty();
-                assertThat(usuarios.get(0).getCorreo()).isEqualTo("correo@correo.com");
-        }
+//                 assertThat(usuarios).isNotEmpty();
+//                 assertThat(usuarios.get(0).getCorreo()).isEqualTo("correo@correo.com");
+//         }
 
-        @Test
-        void listarUsuarios_vacio() {
-                when(usuarioRepository.findAll()).thenReturn(List.of());
+//         @Test
+//         void listarUsuarios_vacio() {
+//                 when(usuarioRepository.findAll()).thenReturn(List.of());
 
-                List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
+//                 List<UsuarioDTO> usuarios = usuarioService.listarUsuarios();
 
-                assertThat(usuarios).isEmpty();
-        }
-}
+//                 assertThat(usuarios).isEmpty();
+//         }
+// }

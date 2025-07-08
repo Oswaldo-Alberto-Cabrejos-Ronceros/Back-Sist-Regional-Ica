@@ -1,70 +1,105 @@
 package com.clinicaregional.clinica.service.impl;
 
 
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
+
 import com.clinicaregional.clinica.dto.PacienteDTO;
+
 import com.clinicaregional.clinica.dto.request.RegisterRequest;
-import com.clinicaregional.clinica.entity.Usuario;
-import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.entity.*;
+import com.clinicaregional.clinica.exception.*;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.response.AuthenticationResponseDTO;
 import com.clinicaregional.clinica.dto.request.LoginRequestDTO;
+import com.clinicaregional.clinica.mapper.PacienteMapper;
 import com.clinicaregional.clinica.mapper.UsuarioMapper;
-import com.clinicaregional.clinica.service.AdministradorService;
-import com.clinicaregional.clinica.service.AuthenticationService;
-import com.clinicaregional.clinica.service.PacienteService;
-import com.clinicaregional.clinica.service.UsuarioService;
+import com.clinicaregional.clinica.repository.*;
 import com.clinicaregional.clinica.security.JwtUtil;
+import com.clinicaregional.clinica.service.*;
+import com.clinicaregional.clinica.service.impl.email.RegistroCompletoEmailService;
+
 import io.jsonwebtoken.JwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final JwtUtil jwtUtil;
-    private final UsuarioService usuarioService;
+    private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final UsuarioMapper usuarioMapper;
-    private final PacienteService pacienteService;
-    private final AdministradorService administradorService;
+    private final PacienteMapper pacienteMapper;
+    private final JavaMailSender mailSender;
+    private final RegistroCompletoEmailService emailRegistroService;
+    private final PacienteRepository pacienteRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
+    private final TipoDocumentoRepository tipoDocumentoRepository;
+    private final SeguroRepository seguroRepository;
 
     @Autowired
-    public AuthenticationServiceImpl(JwtUtil jwtUtil, UsuarioService usuarioService, UserDetailsServiceImpl userDetailsServiceImpl, UsuarioMapper usuarioMapper, PasswordEncoder passwordEncoder, PacienteService pacienteService, AdministradorService administradorService) {
+    public AuthenticationServiceImpl(
+            JwtUtil jwtUtil,
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder,
+            UsuarioMapper usuarioMapper,
+            PacienteMapper pacienteMapper,
+            JavaMailSender mailSender,
+            RegistroCompletoEmailService emailRegistroService,
+            PacienteRepository pacienteRepository,
+            UsuarioRepository usuarioRepository,
+            RolRepository rolRepository,
+            TipoDocumentoRepository tipoDocumentoRepository,
+            SeguroRepository seguroRepository) {
+
         this.jwtUtil = jwtUtil;
-        this.usuarioService = usuarioService;
-        this.userDetailsServiceImpl = userDetailsServiceImpl;
-        this.usuarioMapper = usuarioMapper;
+        this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
-        this.pacienteService = pacienteService;
-        this.administradorService = administradorService;
+        this.usuarioMapper = usuarioMapper;
+        this.pacienteMapper = pacienteMapper;
+        this.mailSender = mailSender;
+        this.emailRegistroService = emailRegistroService;
+        this.pacienteRepository = pacienteRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.tipoDocumentoRepository = tipoDocumentoRepository;
+        this.seguroRepository = seguroRepository;
     }
 
     @Transactional(readOnly = true)
     @Override
     public AuthenticationResponseDTO authenticateUser(LoginRequestDTO loginRequestDTO) {
-        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(loginRequestDTO.getCorreo());
-        System.out.println(userDetails);
-        System.out.println(userDetails.getPassword());
-        System.out.println(loginRequestDTO.getCorreo());
-        System.out.println(loginRequestDTO.getPassword());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequestDTO.getCorreo());
+
         if (passwordEncoder.matches(loginRequestDTO.getPassword(), userDetails.getPassword())) {
-            // generamos token
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails.getUsername(),
+                    null,
+                    userDetails.getAuthorities());
+
             String jwtToken = jwtUtil.generateAccessToken(authentication);
-            // generamos refresh token
             String refreshToken = jwtUtil.generateRefreshToken(authentication);
-            // obtenemos al usuario
-            Usuario usuario = usuarioService.obtenerPorCorreo(userDetails.getUsername()).orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-            UsuarioDTO usuarioDTO = usuarioMapper.mapToUsuarioDTO(usuario);
-            return usuarioMapper.mapToAuthenticationResponseDTO(usuarioDTO, jwtToken, refreshToken);
+
+            Usuario usuario = usuarioRepository.findByCorreo(userDetails.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+            return new AuthenticationResponseDTO(
+                    usuario.getId(),
+                    usuario.getRol().getNombre(),
+                    jwtToken,
+                    refreshToken);
         } else {
             throw new BadCredentialsException("Credenciales incorrectas");
         }
@@ -73,35 +108,119 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional(readOnly = true)
     @Override
     public String refreshToken(String refreshToken) {
-        boolean isValid = jwtUtil.validateToken(refreshToken);
-        if (isValid) {
+        if (jwtUtil.validateToken(refreshToken)) {
             String email = jwtUtil.getEmailFromJwt(refreshToken);
-            UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails.getUsername(),
+                    null,
+                    userDetails.getAuthorities());
             return jwtUtil.generateAccessToken(authentication);
-        } else {
-            throw new JwtException("Error al validad token de refresco");
+        }
+        throw new JwtException("Error al validar token de refresco");
+    }
+
+    @Override
+    @Transactional
+    public AuthenticationResponseDTO registerPaciente(RegisterRequest request) {
+        try {
+            // Validaciones básicas
+            if (request == null) {
+                throw new IllegalArgumentException("La solicitud de registro no puede ser nula");
+            }
+            if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+                throw new IllegalArgumentException("La contraseña no puede ser nula o vacía");
+            }
+
+            log.info("Registrando nuevo paciente con documento: {}", request.getNumeroDocumento());
+
+            // Validar duplicados
+            if (pacienteRepository.existsByNumeroIdentificacion(request.getNumeroDocumento())) {
+                throw new DuplicateResourceException("Ya existe un paciente con este número de documento");
+            }
+            if (usuarioRepository.existsByCorreo(request.getEmail())) {
+                throw new DuplicateResourceException("El email ya está registrado");
+            }
+
+            // Obtener entidades relacionadas
+            Rol rolPaciente = rolRepository.findByNombreAndEstadoTrue("PACIENTE")
+                    .orElseThrow(() -> new ResourceNotFoundException("Rol PACIENTE no encontrado"));
+
+
+            TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(request.getTipoDocumentoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado"));
+/*
+        PacienteDTO pacienteGuardado = pacienteService.crearPaciente(registerRequest.getPaciente(),null);*/
+
+
+            Seguro seguro = request.getSeguroId() != null ? seguroRepository.findById(request.getSeguroId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Seguro no encontrado")) : null;
+
+            // Crear y guardar usuario
+            Usuario usuario = new Usuario();
+            usuario.setCorreo(request.getEmail());
+            usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+            usuario.setRol(rolPaciente);
+            usuario.setEstado(true);
+            usuario = usuarioRepository.save(usuario);
+
+            // Crear y guardar paciente
+            Paciente paciente = new Paciente();
+            paciente.setNombres(request.getNombres());
+            paciente.setApellidos(request.getApellidos());
+            paciente.setFechaNacimiento(request.getFechaNacimiento());
+            paciente.setSexo(request.getSexo());
+            paciente.setEmail(request.getEmail());
+            paciente.setTipoDocumento(tipoDocumento);
+            paciente.setNumeroIdentificacion(request.getNumeroDocumento());
+            paciente.setTelefono(request.getTelefono());
+            paciente.setDireccion(request.getDireccion());
+            paciente.setModalidadDeAtencion(request.getModalidadAtencion());
+            paciente.setSeguro(seguro);
+            paciente.setNumeroDePoliza(request.getNumeroPoliza());
+            paciente.setContactoDeEmergenciaNombre(request.getContactoEmergenciaNombre());
+            paciente.setContactoDeEmergenciaTelefono(request.getContactoEmergenciaTelefono());
+            paciente.setUsuario(usuario);
+            paciente.setEstado(true);
+            Paciente pacienteGuardado = pacienteRepository.save(paciente);
+
+            // Generar tokens
+            UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getCorreo());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities());
+
+            String jwtToken = jwtUtil.generateAccessToken(authentication);
+            String refreshToken = jwtUtil.generateRefreshToken(authentication);
+
+            // Enviar email de confirmación
+            try {
+                enviarEmailConfirmacion(
+                        pacienteMapper.mapToPacienteDTO(pacienteGuardado),
+                        usuarioMapper.mapToUsuarioDTO(usuario));
+                log.info("Email de confirmación enviado a: {}", usuario.getCorreo());
+            } catch (EmailSendingException e) {
+                log.error("Error al enviar email de confirmación", e);
+            }
+
+            return new AuthenticationResponseDTO(
+                    usuario.getId(),
+                    rolPaciente.getNombre(),
+                    jwtToken,
+                    refreshToken);
+
+        } catch (Exception e) {
+            log.error("Error en el registro de paciente", e);
+            throw e;
         }
     }
 
-    @Transactional
-    @Override
-    public AuthenticationResponseDTO registerPaciente(RegisterRequest registerRequest) {
-        // Establecer el rol por defecto (Paciente)
-        registerRequest.getUsuario().setRol(new RolDTO(1L, "PACIENTE"));
-
-        UsuarioDTO usuarioGuardado = usuarioService.guardar(registerRequest.getUsuario());
-
-        registerRequest.getPaciente().setUsuario(usuarioGuardado);
-
-        PacienteDTO pacienteGuardado = pacienteService.crearPaciente(registerRequest.getPaciente(),null);
-
-        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usuarioGuardado.getCorreo());
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null, userDetails.getAuthorities());
-
-        String jwtToken = jwtUtil.generateAccessToken(authentication);
-        String refreshToken = jwtUtil.generateRefreshToken(authentication);
-
-        return usuarioMapper.mapToAuthenticationResponseDTO(usuarioGuardado, jwtToken, refreshToken);
+    private void enviarEmailConfirmacion(PacienteConUserDTO paciente, UsuarioDTO usuario) {
+        try {
+            emailRegistroService.enviarConfirmacionRegistro(paciente, usuario);
+        } catch (EmailSendingException e) {
+            log.error("Error al enviar email de confirmación: {}", e.getMessage());
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.clinicaregional.clinica.controller;
 
-import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
+import com.clinicaregional.clinica.dto.PacienteSinUserDTO;
+import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import com.clinicaregional.clinica.service.PacienteService;
@@ -26,19 +28,25 @@ public class PacienteController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PacienteDTO>> listarPacientes() {
+    public ResponseEntity<List<PacienteConUserDTO>> listarPacientes() {
         return ResponseEntity.ok(pacienteService.listarPacientes());
     }
 
+    // Listar pacientes sin importar el filtro de estado
+    @GetMapping("/estado")
+    public ResponseEntity<List<PacienteConUserDTO>> listarPacientesPorEstado() {
+        return ResponseEntity.ok(pacienteService.listarPacientesPorEstado());
+    }
+
     @GetMapping("/id/{id}")
-    public ResponseEntity<PacienteDTO> getPacienteById(@PathVariable Long id) {
+    public ResponseEntity<PacienteConUserDTO> getPacienteById(@PathVariable Long id) {
         return pacienteService.getPacientePorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/num-identificacion/{numIdentificacion}")
-    public ResponseEntity<PacienteDTO> getPacienteByNumIdentificacion(@PathVariable String numIdentificacion) {
+    public ResponseEntity<PacienteConUserDTO> getPacienteByNumIdentificacion(@PathVariable String numIdentificacion) {
         return pacienteService.getPacientePorIdentificacion(numIdentificacion)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -49,19 +57,39 @@ public class PacienteController {
         return ResponseEntity.ok(pacienteService.getMyInfoPaciente(id));
     }
 
-    @PostMapping
+
+    // Crear paciente sin usuario
+    @PostMapping("/datosIniciales")
+    public ResponseEntity<PacienteSinUserDTO> createPacienteSimple(@RequestBody @Valid PacienteSinUserDTO pacienteDTO) {
+        PacienteSinUserDTO savedPaciente = pacienteService.crearPacienteSimple(pacienteDTO);
+    /**
     public ResponseEntity<PacienteDTO> createPaciente(@RequestPart("pacienteDTO") @Valid PacienteDTO pacienteDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
         PacienteDTO savedPaciente = pacienteService.crearPaciente(pacienteDTO,imagen);
+ feat/s3-service
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
-    }
+    }*//
+
+    // @PostMapping
+    // public ResponseEntity<PacienteConUserDTO> createPaciente(@RequestBody @Valid PacienteConUserDTO pacienteDTO) {
+    //     PacienteConUserDTO savedPaciente = pacienteService.crearPacientePorWeb(pacienteDTO);
+    //     return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
+    // }
 
     @PutMapping("/{id}")
+
+    public ResponseEntity<PacienteConUserDTO> updatePaciente(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdatePacienteDTO updatePacienteDTO) {
+
+        PacienteConUserDTO updatedPaciente = pacienteService.actualizarPaciente(id, updatePacienteDTO);
+/**
     public ResponseEntity<PacienteDTO> updatePaciente(@PathVariable Long id,
                                                       @RequestPart("pacienteDTO") @Valid PacienteDTO pacienteDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
         PacienteDTO updatedPaciente = pacienteService.actualizarPaciente(id, pacienteDTO,imagen);
+ feat/s3-service
         return ResponseEntity.ok(updatedPaciente);
     }
-
+**/
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePaciente(@PathVariable Long id) {
         pacienteService.eliminarPaciente(id);
@@ -69,10 +97,9 @@ public class PacienteController {
     }
 
     @GetMapping("/paginado")
-    public ResponseEntity<PagedResponse<PacienteDTO>> listarPacientesPaginado(
+    public ResponseEntity<PagedResponse<PacienteConUserDTO>> listarPacientesPaginado(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(pacienteService.listarPacientesPaginado(pageable));
     }

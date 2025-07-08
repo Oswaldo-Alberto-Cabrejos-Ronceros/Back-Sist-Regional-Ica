@@ -29,6 +29,7 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.MedicoMapper;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.MedicoService;
+import com.clinicaregional.clinica.service.RolService;
 import com.clinicaregional.clinica.service.UsuarioService;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,7 @@ public class MedicoServiceImpl implements MedicoService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
     private final TipoDocumentoService tipoDocumentoService;
+    private final RolService rolService;
     private final FiltroEstado filtroEstado;
     private final S3ServicePublic s3Service;
 
@@ -52,12 +54,18 @@ public class MedicoServiceImpl implements MedicoService {
             UsuarioRepository usuarioRepository,
             UsuarioService usuarioService,
             TipoDocumentoService tipoDocumentoService,
-            FiltroEstado filtroEstado, S3ServicePublic s3Service) {
+
+            RolService rolService,
+            FiltroEstado filtroEstado) {
+/*
+            FiltroEstado filtroEstado, S3ServicePublic s3Service) {*/
+
         this.medicoRepository = medicoRepository;
         this.medicoMapper = medicoMapper;
         this.usuarioRepository = usuarioRepository;
         this.usuarioService = usuarioService;
         this.tipoDocumentoService = tipoDocumentoService;
+        this.rolService = rolService;
         this.filtroEstado = filtroEstado;
         this.s3Service = s3Service;
     }
@@ -77,6 +85,10 @@ public class MedicoServiceImpl implements MedicoService {
     @Override
     public List<MedicoResponsePublicDTO> obtenerMedicosPublic() {
         filtroEstado.activarFiltroEstado(true);
+
+        return medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO)
+                .collect(Collectors.toList());
+/*
         List<MedicoResponsePublicDTO> medicos = medicoRepository.findAll().stream().map(medicoMapper::mapToMedicoResponsePublicDTO).toList();
         return medicos.stream().map(medico -> {
             if (medico.getImagen() != null) {
@@ -84,7 +96,8 @@ public class MedicoServiceImpl implements MedicoService {
                 medico.setImagen(imageUrl);
             }
             return medico;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList());*/
+
     }
 
     @Transactional
@@ -129,7 +142,7 @@ public class MedicoServiceImpl implements MedicoService {
             dto.setNumeroRNE(null); // limpiar por si se envió accidentalmente
         }
 
-        //verificamos que exista tipo documento
+        // verificamos que exista tipo documento
         TipoDocumento tipoDocumento = tipoDocumentoService.getTipoDocumentoByIdContext(dto.getTipoDocumentoId())
                 .orElseThrow(() -> new RuntimeException("No se encontró un tipo de documento con el id ingresado"));
 
@@ -141,14 +154,16 @@ public class MedicoServiceImpl implements MedicoService {
             throw new DuplicateResourceException("Ya existe un usuario con el correo ingresado");
         }
 
+        RolDTO rolMedico = rolService.obtenerRolPorNombre("MEDICO")
+                .orElseThrow(() -> new IllegalStateException(
+                        "Rol MEDICO no encontrado en el sistema"));
+        // Crear usuario
         UsuarioRequestDTO newUsuario = new UsuarioRequestDTO();
         newUsuario.setCorreo(dto.getCorreo());
         newUsuario.setPassword(dto.getPassword());
-        RolDTO rolMedico = new RolDTO();
-        rolMedico.setId(4L); // ID del rol de médico
         newUsuario.setRol(rolMedico);
-        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
 
+        UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
         Usuario usuario1 = new Usuario();
         usuario1.setId(usuarioDTO.getId());
 
@@ -176,7 +191,6 @@ public class MedicoServiceImpl implements MedicoService {
         Medico medicoSaved = medicoRepository.save(medico);
         return this.agregarUrlImage(medicoMapper.mapToMedicoResponseDTO(medicoSaved));
     }
-
 
     @Transactional
     @Override
@@ -255,6 +269,12 @@ public class MedicoServiceImpl implements MedicoService {
     public void eliminarMedico(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Medico medico = medicoRepository.findByIdAndEstadoIsTrue(id)
+
+                .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con ID: " + id));
+
+        // 1. Primero marca el médico como inactivo
+        medico.setEstado(false);
+/*
                 .orElseThrow(() -> new ResourceNotFoundException("Medico no encontrado con ID: " + id));
         medico.setEstado(false); // borrado logico
         Usuario usuario = usuarioRepository.findByIdAndEstadoIsTrue(medico.getUsuario().getId())
@@ -264,9 +284,37 @@ public class MedicoServiceImpl implements MedicoService {
         if (medico.getImagen() != null) {
             s3Service.eliminarArchivo(medico.getImagen());
         }
-        usuarioRepository.save(usuario);
+        usuarioRepository.save(usuario);*/
+
         medicoRepository.save(medico);
+
+        // 2. Desvincula el usuario (si existe)
+        if (medico.getUsuario() != null) {
+            Long usuarioId = medico.getUsuario().getId();
+
+            // 3. Elimina el usuario en una nueva transacción
+            try {
+                usuarioService.eliminarUsuarioSinRelaciones(usuarioId);
+
+                // 4. Actualiza el médico para establecer usuario_id como null
+                medico.setUsuario(null);
+                medicoRepository.save(medico);
+            } catch (Exception e) {
+                // Loggear el error pero continuar
+                System.err.println("Error al eliminar usuario asociado: " + e.getMessage());
+            }
+        }
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public MedicoResponseDTO obtenerMedicoPorUsuarioId(Long usuarioId) {
+        filtroEstado.activarFiltroEstado(true);
+        Medico medico = medicoRepository.findByUsuario_Id(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con usuario ID: " + usuarioId));
+        return medicoMapper.mapToMedicoResponseDTO(medico);
+    }
+
 
     //funcion para obtener el url
     private MedicoResponseDTO agregarUrlImage(MedicoResponseDTO medicoResponseDTO) {

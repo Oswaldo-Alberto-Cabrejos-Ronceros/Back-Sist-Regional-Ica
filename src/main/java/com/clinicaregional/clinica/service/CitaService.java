@@ -5,6 +5,7 @@ import com.clinicaregional.clinica.dto.response.CitaResponse;
 import com.clinicaregional.clinica.dto.response.PacienteResponseDTO;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.enums.EstadoCita;
+import com.clinicaregional.clinica.dto.response.ProximaCitaResponse;
 
 import java.util.List;
 
@@ -15,6 +16,14 @@ public interface CitaService {
     CitaResponse obtenerPorId(Long id);
 
     List<CitaResponse> listarTodas();
+
+     List<CitaResponse> listarPorMedicoAndEstadoConfirmada(long medicoId);
+
+    List<CitaResponse> listarPorMedicoAndEstadoAtendida(long medicoId);
+
+    List<CitaResponse> listarPorMedico (Long medicoId);
+
+    List<CitaResponse> listarPorDiaAndEstadoConfirmada(long medicoId);
 
     CitaResponse actualizar(Long id, CitaRequest request);
 
@@ -29,4 +38,6 @@ public interface CitaService {
     CitaResponse reprogramarCita(Long citaId, CitaRequest nuevaCitaRequest);
 
     List<PacienteResponseDTO> obtenerPacientesPorMedicoConCitasConfirmadasOAtendidas(Long medicoId);
+
+    List<ProximaCitaResponse> obtenerCitasFuturasPorPaciente(Long pacienteId);
 }

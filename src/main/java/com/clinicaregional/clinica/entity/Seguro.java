@@ -27,7 +27,7 @@ public class Seguro extends EntidadConEstado{
     private String descripcion;
 
     private String imagenUrl;
-
+    
     @Enumerated(EnumType.STRING)
     private EstadoSeguro estadoSeguro;
 }

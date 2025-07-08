@@ -58,7 +58,7 @@
 //         void setUp() {
 //                 administradorDTO = new AdministradorDTO(
 //                                 1L, "Diego", "Aguilar", "12345678", 1L, "999999999",
-//                                 "Av. Siempre Viva", LocalDate.of(2020, 1, 1), 1L);
+//                                 "Av. Siempre Viva","administrador.jpg", LocalDate.of(2020, 1, 1), 1L);
 
 //                 usuarioRequestDTO = new UsuarioRequestDTO(
 //                                 "admin@clinica.pe", "Admin123", true, new RolDTO(2L, "ADMIN"));

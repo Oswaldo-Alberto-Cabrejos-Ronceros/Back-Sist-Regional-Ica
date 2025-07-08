@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.entity;
 
 import com.clinicaregional.clinica.enums.Sexo;
 import com.clinicaregional.clinica.enums.TipoSangre;
+import com.clinicaregional.clinica.enums.ModalidadDeAtencion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "pacientes")
 @SuperBuilder
-//para filtro
+// para filtro
 @Filter(name = "estadoActivo", condition = "estado = :estado")
 public class Paciente extends EntidadConEstado {
     @Id
@@ -34,6 +35,9 @@ public class Paciente extends EntidadConEstado {
 
     @Enumerated(EnumType.STRING)
     private Sexo sexo;
+
+    @Column(unique = true)
+    private String email;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private TipoDocumento tipoDocumento;
@@ -53,7 +57,18 @@ public class Paciente extends EntidadConEstado {
 
     private String antecedentes;
 
+    private String contactoDeEmergenciaNombre;
+
+    private String contactoDeEmergenciaTelefono;
+
+    @Enumerated(EnumType.STRING)
+    private ModalidadDeAtencion modalidadDeAtencion;
+
+    @ManyToOne(cascade = CascadeType.ALL, optional = true)
+    private Seguro seguro;
+
+    private String numeroDePoliza;
+
     @OneToOne(cascade = CascadeType.ALL)
     private Usuario usuario;
-
 }

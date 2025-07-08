@@ -12,11 +12,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 public class DisponibilidadRequest {
 
     @NotNull(message = "Día de la semana es obligatorio")
@@ -38,5 +40,7 @@ public class DisponibilidadRequest {
     public boolean isHoraInicioAntesQueFin() {
         return horaInicio != null && horaFin != null && horaInicio.isBefore(horaFin);
     }
+
+    private String ubicacion;
 
 }

@@ -2,7 +2,7 @@ package com.clinicaregional.clinica.pacienteAlergia.service;
 
 import com.clinicaregional.clinica.dto.AlergiaDTO;
 import com.clinicaregional.clinica.dto.PacienteAlergiaDTO;
-import com.clinicaregional.clinica.dto.PacienteDTO;
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 import com.clinicaregional.clinica.entity.Alergia;
 import com.clinicaregional.clinica.entity.Paciente;
 import com.clinicaregional.clinica.entity.PacienteAlergia;
@@ -104,12 +104,12 @@ class PacienteAlergiaServiceImplTest {
     @DisplayName("Listar relaciones Paciente-Alergia por paciente ID")
     void listarPacienteAlergiasPorPaciente() {
         // Arrange
-        PacienteDTO pacienteDTO = new PacienteDTO();
+        PacienteConUserDTO pacienteDTO = new PacienteConUserDTO();
         pacienteDTO.setId(1L);
         pacienteDTO.setNombres("Juan Perez");
 
         when(pacienteService.getPacientePorId(1L)).thenReturn(Optional.of(pacienteDTO));
-        when(pacienteMapper.mapToPaciente(any(PacienteDTO.class))).thenReturn(new Paciente());
+        when(pacienteMapper.mapToPaciente(any(PacienteConUserDTO.class))).thenReturn(new Paciente());
         when(pacienteAlergiaRepository.findByPaciente(any(Paciente.class))).thenReturn(List.of(pacienteAlergia));
         when(pacienteAlergiaMapper.mapToPacienteAlergiaDTO(any())).thenReturn(pacienteAlergiaDTO);
 
@@ -140,7 +140,7 @@ class PacienteAlergiaServiceImplTest {
     @DisplayName("Crear nueva relación Paciente-Alergia")
     void createPacienteAlergia() {
         // Arrange
-        PacienteDTO pacienteDTO = new PacienteDTO();
+        PacienteConUserDTO pacienteDTO = new PacienteConUserDTO();
         pacienteDTO.setId(1L);
         pacienteDTO.setNombres("Juan Perez");
 
@@ -156,7 +156,7 @@ class PacienteAlergiaServiceImplTest {
 
         when(pacienteService.getPacientePorId(anyLong())).thenReturn(Optional.of(pacienteDTO));
         when(alergiaService.getAlergiaPorId(anyLong())).thenReturn(Optional.of(alergiaDTO));
-        when(pacienteMapper.mapToPaciente(any(PacienteDTO.class))).thenReturn(paciente);
+        when(pacienteMapper.mapToPaciente(any(PacienteConUserDTO.class))).thenReturn(paciente);
         when(alergiaMapper.mapToAlergia(any(AlergiaDTO.class))).thenReturn(alergia);
         when(pacienteAlergiaMapper.mapToPacienteAlergia(any())).thenReturn(pacienteAlergia);
         when(pacienteAlergiaRepository.save(any())).thenReturn(pacienteAlergia);

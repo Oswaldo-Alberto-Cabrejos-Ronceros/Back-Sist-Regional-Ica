@@ -6,6 +6,7 @@ import com.clinicaregional.clinica.dto.request.UpdatePacienteDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoPaciente;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public interface PacienteService {
     //Crear paciente sin usuario
     PacienteSinUserDTO crearPacienteSimple(PacienteSinUserDTO pacienteSimpleDTO);
 
-    PacienteConUserDTO actualizarPaciente(Long id, UpdatePacienteDTO updatepacienteDTO);
+    PacienteConUserDTO actualizarPaciente(Long id, UpdatePacienteDTO updatepacienteDTO, MultipartFile imagen);
 
     void eliminarPaciente(Long id);
 

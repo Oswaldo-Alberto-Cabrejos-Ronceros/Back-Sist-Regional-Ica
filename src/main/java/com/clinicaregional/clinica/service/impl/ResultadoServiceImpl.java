@@ -1,9 +1,9 @@
 package com.clinicaregional.clinica.service.impl;
 
+import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 import com.clinicaregional.clinica.dto.ResultadoArchivoDTO;
 import com.clinicaregional.clinica.dto.request.ResultadoRequest;
 import com.clinicaregional.clinica.dto.response.ResultadoResponse;
-import com.clinicaregional.clinica.dto.PacienteDTO;
 import com.clinicaregional.clinica.entity.Cita;
 import com.clinicaregional.clinica.dto.request.CitaRequest;
 import com.clinicaregional.clinica.dto.response.CitaResponse;
@@ -127,7 +127,7 @@ public class ResultadoServiceImpl implements ResultadoService {
     @Override
     public List<ResultadoResponse> listarPorHistorialClinicoDePaciente(Long Id) {
         filtroEstado.activarFiltroEstado(true);
-        PacienteDTO paciente = pacienteService.getPacientePorId(Id)
+        PacienteConUserDTO paciente = pacienteService.getPacientePorId(Id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado con id: " + Id));
         Paciente pacienteEntity = pacienteMapper.mapToPaciente(paciente);
         return resultadoRepository.findAllByHistorialClinico_Paciente_Id(pacienteEntity.getId())

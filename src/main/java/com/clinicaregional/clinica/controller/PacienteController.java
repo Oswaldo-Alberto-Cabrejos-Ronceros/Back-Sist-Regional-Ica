@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -67,14 +68,13 @@ public class PacienteController {
     // public ResponseEntity<PacienteConUserDTO> createPaciente(@RequestBody @Valid PacienteConUserDTO pacienteDTO) {
     //     PacienteConUserDTO savedPaciente = pacienteService.crearPacientePorWeb(pacienteDTO);
     //     return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
-    // }
+    // }UpdatePacienteDTO
 
     @PutMapping("/{id}")
-    public ResponseEntity<PacienteConUserDTO> updatePaciente(
-            @PathVariable Long id,
-            @RequestBody @Valid UpdatePacienteDTO updatePacienteDTO) {
+    public ResponseEntity<PacienteConUserDTO> updatePaciente(@PathVariable Long id,
+                                                             @RequestPart("pacienteDTO") @Valid UpdatePacienteDTO updatePacienteDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
 
-        PacienteConUserDTO updatedPaciente = pacienteService.actualizarPaciente(id, updatePacienteDTO);
+        PacienteConUserDTO updatedPaciente = pacienteService.actualizarPaciente(id, updatePacienteDTO,imagen);
         return ResponseEntity.ok(updatedPaciente);
     }
 

@@ -65,16 +65,19 @@ public class PacienteController {
     }
 
     // @PostMapping
-    // public ResponseEntity<PacienteConUserDTO> createPaciente(@RequestBody @Valid PacienteConUserDTO pacienteDTO) {
-    //     PacienteConUserDTO savedPaciente = pacienteService.crearPacientePorWeb(pacienteDTO);
-    //     return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
+    // public ResponseEntity<PacienteConUserDTO> createPaciente(@RequestBody @Valid
+    // PacienteConUserDTO pacienteDTO) {
+    // PacienteConUserDTO savedPaciente =
+    // pacienteService.crearPacientePorWeb(pacienteDTO);
+    // return ResponseEntity.status(HttpStatus.CREATED).body(savedPaciente);
     // }UpdatePacienteDTO
 
     @PutMapping("/{id}")
-    public ResponseEntity<PacienteConUserDTO> updatePaciente(@PathVariable Long id,
-                                                             @RequestPart("pacienteDTO") @Valid UpdatePacienteDTO updatePacienteDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+    public ResponseEntity<PacienteConUserDTO> updatePaciente(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdatePacienteDTO updatePacienteDTO) {
 
-        PacienteConUserDTO updatedPaciente = pacienteService.actualizarPaciente(id, updatePacienteDTO,imagen);
+        PacienteConUserDTO updatedPaciente = pacienteService.actualizarPaciente(id, updatePacienteDTO);
         return ResponseEntity.ok(updatedPaciente);
     }
 

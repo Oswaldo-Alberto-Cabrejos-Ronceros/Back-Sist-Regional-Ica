@@ -18,7 +18,6 @@ import com.clinicaregional.clinica.repository.TipoDocumentoRepository;
 import com.clinicaregional.clinica.repository.UsuarioRepository;
 import com.clinicaregional.clinica.service.RecepcionistaService;
 import com.clinicaregional.clinica.service.RolService;
-import com.clinicaregional.clinica.service.S3ServicePublic;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +41,6 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
     private final UsuarioService usuarioService;
     private final RolService rolService;
     private final FiltroEstado filtroEstado;
-    private final S3ServicePublic s3Service;
 
     @Autowired
     public RecepcionistaServiceImpl(
@@ -52,7 +50,7 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
             RecepcionistaMapper recepcionistaMapper,
             UsuarioService usuarioService,
             RolService rolService,
-            FiltroEstado filtroEstado, S3ServicePublic s3Service) {
+            FiltroEstado filtroEstado) {
         this.recepcionistaRepository = recepcionistaRepository;
         this.tipoDocumentoRepository = tipoDocumentoRepository;
         this.usuarioRepository = usuarioRepository;
@@ -60,45 +58,37 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         this.usuarioService = usuarioService;
         this.rolService = rolService;
         this.filtroEstado = filtroEstado;
-        this.s3Service = s3Service;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<RecepcionistaResponse> listar() {
         filtroEstado.activarFiltroEstado(true);
-
-        List<RecepcionistaResponse> recepcionistas = recepcionistaRepository.findAll()
+        return recepcionistaRepository.findAll()
                 .stream()
                 .map(recepcionistaMapper::toResponse)
-                .toList();
-
-        return recepcionistas.stream().map(this::agregarUrlImage).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<RecepcionistaResponse> obtenerPorId(Long id) {
-
-        Optional<RecepcionistaResponse> recepcionistaResponse = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
+        return recepcionistaRepository.findByIdAndEstadoIsTrue(id)
                 .map(recepcionistaMapper::toResponse);
-
-        return recepcionistaResponse.map(this::agregarUrlImage);
     }
 
     @Transactional(readOnly = true)
     @Override
     public MyInfoRecepcionista obtenerMyInfoRecepcionista(Long id) {
-        Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException(
-                "No se encontro recepcionista con el id: " + id
-        ));
+        Recepcionista recepcionista = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No se encontro recepcionista con el id: " + id));
         return recepcionistaMapper.toMyInfoRecepcionista(recepcionista);
     }
 
-
     @Transactional
     @Override
-    public RecepcionistaResponse guardar(RecepcionistaRequest request, MultipartFile imagen) {
+    public RecepcionistaResponse guardar(RecepcionistaRequest request) {
         filtroEstado.activarFiltroEstado(true);
 
         if (recepcionistaRepository.existsByNumeroDocumento(request.getNumeroDocumento())) {
@@ -139,18 +129,12 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
                 .tipoDocumento(tipoDocumento)
                 .estado(true)
                 .build();
-        if (imagen != null) {
-            String key = s3Service.subirArchivo(imagen, "recepcionista" + recepcionista.getNombres());
-            recepcionista.setImagenUrl(key);
-        }
-
-        Recepcionista recepcionistaSaved = recepcionistaRepository.save(recepcionista);
-        return this.agregarUrlImage(recepcionistaMapper.toResponse(recepcionistaSaved));
+        return recepcionistaMapper.toResponse(recepcionistaRepository.save(recepcionista));
     }
 
     @Transactional
     @Override
-    public RecepcionistaResponse actualizar(Long id, RecepcionistaRequest request, MultipartFile imagen) {
+    public RecepcionistaResponse actualizar(Long id, RecepcionistaRequest request) {
         filtroEstado.activarFiltroEstado(true);
 
         Recepcionista recepcionistaExistente = recepcionistaRepository.findByIdAndEstadoIsTrue(id)
@@ -160,7 +144,7 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         boolean documentoDuplicado = recepcionistaRepository
                 .existsByNumeroDocumento(request.getNumeroDocumento())
                 && !recepcionistaExistente.getNumeroDocumento()
-                .equalsIgnoreCase(request.getNumeroDocumento());
+                        .equalsIgnoreCase(request.getNumeroDocumento());
 
         if (documentoDuplicado) {
             throw new DuplicateResourceException(
@@ -187,18 +171,8 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         recepcionistaExistente.setFechaContratacion(request.getFechaContratacion());
         recepcionistaExistente.setTipoDocumento(tipoDocumento);
         recepcionistaExistente.setUsuario(usuario);
-        if (imagen != null) {
-            if (recepcionistaExistente.getImagenUrl() != null) {
-                s3Service.eliminarArchivo(recepcionistaExistente.getImagenUrl());
-            }
-            String key = s3Service.subirArchivo(imagen, "recepcionista" + recepcionistaExistente.getNombres());
-            recepcionistaExistente.setImagenUrl(key);
-        }
 
-
-        Recepcionista recepcionista = recepcionistaRepository.save(recepcionistaExistente);
-
-        return this.agregarUrlImage(recepcionistaMapper.toResponse(recepcionista));
+        return recepcionistaMapper.toResponse(recepcionistaRepository.save(recepcionistaExistente));
     }
 
     @Transactional
@@ -212,11 +186,6 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
         // 1. Primero marca el recepcionista como inactivo
         recepcionista.setEstado(false);
         recepcionistaRepository.save(recepcionista);
-
-        //borramos imagen
-        if (recepcionista.getImagenUrl() != null) {
-            s3Service.eliminarArchivo(recepcionista.getImagenUrl());
-        }
 
         // 2. Manejo del usuario asociado (si existe)
         if (recepcionista.getUsuario() != null) {
@@ -234,15 +203,6 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
                 System.err.println("Error al eliminar usuario asociado: " + e.getMessage());
             }
         }
-    }
-
-    //funcion para obtener el url
-    private RecepcionistaResponse agregarUrlImage(RecepcionistaResponse recepcionistaResponse) {
-        if (recepcionistaResponse.getImagenUrl() != null) {
-            String imageUrl = s3Service.generarUrlPublico(recepcionistaResponse.getImagenUrl());
-            recepcionistaResponse.setImagenUrl(imageUrl);
-        }
-        return recepcionistaResponse;
     }
 
 }

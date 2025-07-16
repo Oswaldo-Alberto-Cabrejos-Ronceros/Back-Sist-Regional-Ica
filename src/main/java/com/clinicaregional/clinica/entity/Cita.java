@@ -30,7 +30,7 @@ public class Cita {
 
     private LocalTime hora;
 
-
+    @Enumerated(EnumType.STRING)
     private EstadoCita estadoCita;
 
     private String notas;

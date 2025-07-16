@@ -24,12 +24,12 @@ public class RecepcionistaController {
     private final RecepcionistaService recepcionistaService;
 
     @PostMapping
-    public ResponseEntity<?> registrar(@RequestPart("recepcionistaRequest") @Valid RecepcionistaRequest recepcionistaRequest,
-                                       BindingResult result,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+    public ResponseEntity<?> registrar(@RequestBody @Valid RecepcionistaRequest recepcionistaRequest,
+            BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.badRequest().body("Datos inválidos");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(recepcionistaService.guardar(recepcionistaRequest,imagen));
+        return ResponseEntity.status(HttpStatus.CREATED).body(recepcionistaService.guardar(recepcionistaRequest));
     }
 
     @GetMapping
@@ -52,9 +52,8 @@ public class RecepcionistaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<RecepcionistaResponse> actualizar(@PathVariable Long id,
-                                                            @RequestPart("recepcionistaRequest") @Valid RecepcionistaRequest recepcionistaRequest,
-                                                            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionistaRequest,imagen));
+            @RequestBody RecepcionistaRequest recepcionistaRequest) {
+        return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionistaRequest));
     }
 
     @DeleteMapping("/{id}")

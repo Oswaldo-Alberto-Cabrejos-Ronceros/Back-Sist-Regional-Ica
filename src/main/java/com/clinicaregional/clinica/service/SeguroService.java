@@ -2,7 +2,6 @@ package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.enums.EstadoSeguro;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,9 +13,9 @@ public interface SeguroService {
 
     Optional<SeguroDTO> getSeguroByNombre(String nombre);
 
-    SeguroDTO createSeguro(SeguroDTO seguroDTO, MultipartFile imagen);
+    SeguroDTO createSeguro(SeguroDTO seguroDTO);
 
-    SeguroDTO updateSeguro(Long id,SeguroDTO seguroDTO, MultipartFile imagen);
+    SeguroDTO updateSeguro(Long id, SeguroDTO seguroDTO);
 
     SeguroDTO updateEstadoSeguro(Long id, EstadoSeguro estadoSeguro);
 

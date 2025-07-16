@@ -36,19 +36,18 @@ public class EspecialidadController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<EspecialidadResponse> crearEspecialidad(@RequestPart("especialidadRequest") @Valid EspecialidadRequest especialidadRequest,
-                                                                  @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        EspecialidadResponse response = especialidadService.guardarEspecialidad(especialidadRequest, imagen);
+    @PostMapping
+    public ResponseEntity<EspecialidadResponse> crearEspecialidad(
+            @RequestBody @Valid EspecialidadRequest especialidadRequest) {
+        EspecialidadResponse response = especialidadService.guardarEspecialidad(especialidadRequest);
         return ResponseEntity.status(201).body(response); // 201 Created
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EspecialidadResponse> actualizarEspecialidad(
             @PathVariable Long id,
-            @RequestPart("especialidadRequest") @Valid EspecialidadRequest especialidadRequest,
-            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest, imagen);
+            @RequestBody @Valid EspecialidadRequest especialidadRequest) {
+        EspecialidadResponse response = especialidadService.actualizarEspecialidad(id, especialidadRequest);
         return ResponseEntity.ok(response);
     }
 

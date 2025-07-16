@@ -8,7 +8,6 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.EspecialidadMapper;
 import com.clinicaregional.clinica.repository.EspecialidadRepository;
 import com.clinicaregional.clinica.service.EspecialidadService;
-import com.clinicaregional.clinica.service.S3ServicePublic;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,17 +25,15 @@ public class EspecialidadServiceImpl implements EspecialidadService {
     private final EspecialidadRepository especialidadRepository;
     private final EspecialidadMapper especialidadMapper;
     private final FiltroEstado filtroEstado;
-    private final S3ServicePublic s3Service;
 
     @Transactional(readOnly = true)
     @Override
     public List<EspecialidadResponse> listarEspecialidades() {
         filtroEstado.activarFiltroEstado(true);
-        List<EspecialidadResponse> especialidades = especialidadRepository.findAll()
+        return especialidadRepository.findAll()
                 .stream()
                 .map(especialidadMapper::toResponse)
-                .toList();
-        return especialidades.stream().map(this::agregarUrlImage).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -45,29 +42,24 @@ public class EspecialidadServiceImpl implements EspecialidadService {
         filtroEstado.activarFiltroEstado(true);
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe una especialidad con el id " + id));
-        EspecialidadResponse especialidadResponse = especialidadMapper.toResponse(especialidad);
-        return Optional.of(this.agregarUrlImage(especialidadResponse));
+        return Optional.of(especialidadMapper.toResponse(especialidad));
     }
 
     @Transactional
     @Override
-    public EspecialidadResponse guardarEspecialidad(EspecialidadRequest especialidadRequest, MultipartFile imagen) {
+    public EspecialidadResponse guardarEspecialidad(EspecialidadRequest especialidadRequest) {
         filtroEstado.activarFiltroEstado(true);
         if (especialidadRepository.existsByNombre(especialidadRequest.getNombre())) {
             throw new DuplicateResourceException("Ya existe una especialidad con el nombre ingresado");
         }
         Especialidad especialidad = especialidadMapper.toEntity(especialidadRequest);
-        if (imagen != null) {
-            String key = s3Service.subirArchivo(imagen, "especialidad" + especialidad.getNombre());
-            especialidad.setImagen(key);
-        }
         Especialidad savedEspecialidad = especialidadRepository.save(especialidad);
-        return this.agregarUrlImage(especialidadMapper.toResponse(savedEspecialidad));
+        return especialidadMapper.toResponse(savedEspecialidad);
     }
 
     @Transactional
     @Override
-    public EspecialidadResponse actualizarEspecialidad(Long id, EspecialidadRequest especialidadRequest, MultipartFile imagen) {
+    public EspecialidadResponse actualizarEspecialidad(Long id, EspecialidadRequest especialidadRequest) {
         filtroEstado.activarFiltroEstado(true);
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Especialidad no encontrada con ID: " + id));
@@ -79,16 +71,8 @@ public class EspecialidadServiceImpl implements EspecialidadService {
         especialidad.setDescripcion(especialidadRequest.getDescripcion());
         especialidad.setImagen(especialidadRequest.getImagen());
 
-        if (imagen != null) {
-            if (especialidad.getImagen() != null) {
-                s3Service.eliminarArchivo(especialidad.getImagen());
-            }
-            String key = s3Service.subirArchivo(imagen, "servicios" + especialidad.getNombre());
-            especialidad.setImagen(key);
-        }
-
         Especialidad updatedEspecialidad = especialidadRepository.save(especialidad);
-        return this.agregarUrlImage(especialidadMapper.toResponse(updatedEspecialidad));
+        return especialidadMapper.toResponse(updatedEspecialidad);
     }
 
     @Transactional
@@ -98,18 +82,6 @@ public class EspecialidadServiceImpl implements EspecialidadService {
         Especialidad especialidad = especialidadRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Especialidad no encontrada"));
         especialidad.setEstado(false); // borrado lógico
-        if (especialidad.getImagen() != null) {
-            s3Service.eliminarArchivo(especialidad.getImagen());
-        }
         especialidadRepository.save(especialidad);
-    }
-
-    //funcion para obtener el url
-    private EspecialidadResponse agregarUrlImage(EspecialidadResponse especialidadResponse) {
-        if (especialidadResponse.getImagen() != null) {
-            String imageUrl = s3Service.generarUrlPublico(especialidadResponse.getImagen());
-            especialidadResponse.setImagen(imageUrl);
-        }
-        return especialidadResponse;
     }
 }

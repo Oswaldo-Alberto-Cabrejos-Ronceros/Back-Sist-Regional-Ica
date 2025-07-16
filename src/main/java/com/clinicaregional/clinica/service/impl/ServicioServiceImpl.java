@@ -4,7 +4,6 @@ import com.clinicaregional.clinica.entity.Especialidad;
 import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.service.EspecialidadService;
-import com.clinicaregional.clinica.service.S3ServicePublic;
 import org.springframework.stereotype.Service;
 import com.clinicaregional.clinica.dto.request.ServicioRequest;
 import com.clinicaregional.clinica.dto.response.ServicioResponse;
@@ -31,26 +30,21 @@ public class ServicioServiceImpl implements ServicioService {
     private final ServicioMapper servicioMapper;
     private final FiltroEstado filtroEstado;
     private final EspecialidadService especialidadService;
-    private final S3ServicePublic s3Service;
 
     public ServicioServiceImpl(ServicioRepository servicioRepository, ServicioMapper servicioMapper,
-                               FiltroEstado filtroEstado, EspecialidadService especialidadService, S3ServicePublic s3Service) {
+            FiltroEstado filtroEstado, EspecialidadService especialidadService) {
         this.servicioRepository = servicioRepository;
         this.servicioMapper = servicioMapper;
         this.filtroEstado = filtroEstado;
         this.especialidadService = especialidadService;
-        this.s3Service = s3Service;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ServicioResponse> obtenerServicios() {
         filtroEstado.activarFiltroEstado(true);
-        List<ServicioResponse> servicios = servicioRepository.findAll().stream()
+        return servicioRepository.findAll().stream()
                 .map(servicioMapper::mapToServicioResponse)
-                .toList();
-        return servicios.stream()
-                .map(this::agregarUrlImage)
                 .collect(Collectors.toList());
     }
 
@@ -58,30 +52,26 @@ public class ServicioServiceImpl implements ServicioService {
     @Override
     public List<ServicioResponse> obtenerServiciosPorEspecialidadId(Long especialidadId) {
         filtroEstado.activarFiltroEstado(true);
-        especialidadService.getEspecialidadById(especialidadId).orElseThrow(() -> new ResourceNotFoundException("No se encontro especialidad con el id:" + especialidadId));
-        List<ServicioResponse> servicios = servicioRepository.findAllByEspecialidad_Id(especialidadId).stream()
+        especialidadService.getEspecialidadById(especialidadId).orElseThrow(
+                () -> new ResourceNotFoundException("No se encontro especialidad con el id:" + especialidadId));
+        return servicioRepository.findAllByEspecialidad_Id(especialidadId).stream()
                 .map(servicioMapper::mapToServicioResponse)
-                .toList();
-        return servicios.stream().map(this::agregarUrlImage).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
-    public ServicioResponse agregarServicio(ServicioRequest servicioRequest, MultipartFile archivo) {
+    public ServicioResponse agregarServicio(ServicioRequest servicioRequest) {
         filtroEstado.activarFiltroEstado(true);
         if (servicioRepository.existsByNombre(servicioRequest.getNombre())) {
             throw new DuplicateResourceException("Ya existe un servicio con el nombre ingresado");
         }
-        especialidadService.getEspecialidadById(servicioRequest.getEspecialidadId()).orElseThrow(() -> new ResourceNotFoundException("No se encontro especialidad con el id:" + servicioRequest.getEspecialidadId()));
+        especialidadService.getEspecialidadById(servicioRequest.getEspecialidadId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No se encontro especialidad con el id:" + servicioRequest.getEspecialidadId()));
         Servicio servicio = servicioMapper.mapToServicio(servicioRequest);
-        if(archivo!=null){
-            String key = s3Service.subirArchivo(archivo, "servicios" + servicioRequest.getNombre());
-            servicio.setImagenUrl(key);
-        }
         Servicio savedServicio = servicioRepository.save(servicio);
-        ServicioResponse servicioResponse = servicioMapper.mapToServicioResponse(savedServicio);
-
-        return this.agregarUrlImage(servicioResponse);
+        return servicioMapper.mapToServicioResponse(savedServicio);
     }
 
     @Transactional
@@ -91,15 +81,13 @@ public class ServicioServiceImpl implements ServicioService {
         Servicio servicio = servicioRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
         servicio.setEstado(false);
-        if(servicio.getImagenUrl()!=null){
-            s3Service.eliminarArchivo(servicio.getImagenUrl());
-        }
         servicioRepository.save(servicio);
     }
 
+    
     @Transactional
     @Override
-    public ServicioResponse actualizarServicio(Long id, ServicioRequest servicioRequest, MultipartFile archivo) {
+    public ServicioResponse actualizarServicio(Long id, ServicioRequest servicioRequest) {
         filtroEstado.activarFiltroEstado(true);
         Servicio servicio = servicioRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
@@ -113,18 +101,11 @@ public class ServicioServiceImpl implements ServicioService {
         Especialidad especialidad = new Especialidad();
         especialidad.setId(servicioRequest.getEspecialidadId());
         servicio.setEspecialidad(especialidad);
-        if(archivo!=null){
-            if(servicio.getImagenUrl()!=null){
-                s3Service.eliminarArchivo(servicio.getImagenUrl());
-            }
-            String key = s3Service.subirArchivo(archivo, "servicios" + servicioRequest.getNombre());
-            servicio.setImagenUrl(key);
-        }
         Servicio updatedServicio = servicioRepository.save(servicio);
-        ServicioResponse response = servicioMapper.mapToServicioResponse(updatedServicio);
-        return this.agregarUrlImage(response);
+        return servicioMapper.mapToServicioResponse(updatedServicio);
     }
 
+   
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<ServicioResponse> obtenerServiciosPaginado(Pageable pageable) {
@@ -136,8 +117,6 @@ public class ServicioServiceImpl implements ServicioService {
                 .map(servicioMapper::mapToServicioResponse)
                 .collect(Collectors.toList());
 
-        List<ServicioResponse> contenidoWithUrlImage = contenido.stream().map(this::agregarUrlImage).toList();
-
         return new PagedResponse<>(
                 contenido,
                 servicioPage.getNumber(),
@@ -148,13 +127,4 @@ public class ServicioServiceImpl implements ServicioService {
         );
     }
 
-
-    //funcion para obtener el url
-    private ServicioResponse agregarUrlImage(ServicioResponse servicioResponse) {
-        if(servicioResponse.getImagenUrl()!=null){
-            String imageUrl = s3Service.generarUrlPublico(servicioResponse.getImagenUrl());
-            servicioResponse.setImagenUrl(imageUrl);
-        }
-        return servicioResponse;
-    }
 }

@@ -16,7 +16,6 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.PacienteMapper;
 import com.clinicaregional.clinica.repository.PacienteRepository;
 import com.clinicaregional.clinica.service.PacienteService;
-import com.clinicaregional.clinica.service.S3ServicePublic;
 import com.clinicaregional.clinica.service.TipoDocumentoService;
 import com.clinicaregional.clinica.mapper.SeguroMapper;
 import com.clinicaregional.clinica.repository.SeguroRepository;
@@ -29,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +48,7 @@ public class PacienteServiceImpl implements PacienteService {
     private final SeguroRepository seguroRepository;
     private final BienvenidaEmailService emailService;
     private final SeguroMapper seguroMapper;
-    private final S3ServicePublic s3Service;
+
     @Autowired
     public PacienteServiceImpl(
             PacienteRepository pacienteRepository,
@@ -58,7 +56,7 @@ public class PacienteServiceImpl implements PacienteService {
             TipoDocumentoService tipoDocumentoService,
             UsuarioService usuarioService,
             FiltroEstado filtroEstado, SeguroRepository seguroRepository, BienvenidaEmailService emailService,
-            SeguroMapper seguroMapper, S3ServicePublic s3Service) {
+            SeguroMapper seguroMapper) {
         this.pacienteRepository = pacienteRepository;
         this.pacienteMapper = pacienteMapper;
         this.tipoDocumentoService = tipoDocumentoService;
@@ -67,62 +65,50 @@ public class PacienteServiceImpl implements PacienteService {
         this.seguroRepository = seguroRepository;
         this.emailService = emailService;
         this.seguroMapper = seguroMapper;
-        this.s3Service = s3Service;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<PacienteConUserDTO> listarPacientes() {
         filtroEstado.activarFiltroEstado(true);
-        List<PacienteConUserDTO> pacientes = pacienteRepository.findAll()
+        return pacienteRepository.findAll()
                 .stream()
                 .map(pacienteMapper::mapToPacienteDTO)
-                .toList();
-        return pacientes.stream().map(this::agregarUrlImage).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     // Listar pacientes sin importar el filtro de estado
     @Transactional(readOnly = true)
     @Override
     public List<PacienteConUserDTO> listarPacientesPorEstado() {
-        List<PacienteConUserDTO> pacientes = pacienteRepository.findAll()
+        return pacienteRepository.findAll()
                 .stream()
                 .map(pacienteMapper::mapToPacienteDTO)
-                .toList();
-        return pacientes.stream().map(this::agregarUrlImage).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public Optional<PacienteConUserDTO> getPacientePorId(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Optional<PacienteConUserDTO> paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
+        return pacienteRepository.findByIdAndEstadoIsTrue(id)
                 .map(pacienteMapper::mapToPacienteDTO);
-        return paciente.map(this::agregarUrlImage);
-
     }
-
 
     @Transactional(readOnly = true)
     @Override
     public Optional<PacienteConUserDTO> getPacientePorIdentificacion(String identificacion) {
         filtroEstado.activarFiltroEstado(true);
-        Optional<PacienteConUserDTO> paciente = pacienteRepository.findByNumeroIdentificacion(identificacion)
+        return pacienteRepository.findByNumeroIdentificacion(identificacion)
                 .map(pacienteMapper::mapToPacienteDTO);
-        return paciente.map(this::agregarUrlImage);
     }
-
-
 
     @Transactional(readOnly = true)
     @Override
     // despues agregar validacion de owner
     public MyInfoPaciente getMyInfoPaciente(Long pacienteId) {
-        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(pacienteId).orElseThrow(()->new ResourceNotFoundException("Paciente no encontrado con id" + pacienteId));
-        if (paciente.getImagenUrl() != null) {
-            String imageUrl = s3Service.generarUrlPublico(paciente.getImagenUrl());
-            paciente.setImagenUrl(imageUrl);
-        }
+        Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(pacienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado con id" + pacienteId));
         return pacienteMapper.mapToMyInfoPaciente(paciente);
     }
 
@@ -148,7 +134,7 @@ public class PacienteServiceImpl implements PacienteService {
         if (pacienteSimpleDTO.getSeguro() != null) {
             seguro = pacienteSimpleDTO.getSeguro().getId() != null
                     ? seguroRepository.findById(pacienteSimpleDTO.getSeguro().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Seguro no encontrado"))
+                            .orElseThrow(() -> new ResourceNotFoundException("Seguro no encontrado"))
                     : seguroRepository.save(seguroMapper.mapToSeguro(pacienteSimpleDTO.getSeguro()));
         }
 
@@ -199,7 +185,7 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Transactional
     @Override
-    public PacienteConUserDTO actualizarPaciente(Long id, UpdatePacienteDTO updatePacienteDTO, MultipartFile imagen) {
+    public PacienteConUserDTO actualizarPaciente(Long id, UpdatePacienteDTO updatePacienteDTO) {
         Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado con id: " + id));
 
@@ -220,16 +206,8 @@ public class PacienteServiceImpl implements PacienteService {
             paciente.setAntecedentes(updatePacienteDTO.getAntecedentes());
         }
 
-        if (imagen != null) {
-            if (paciente.getImagenUrl() != null) {
-                s3Service.eliminarArchivo(paciente.getImagenUrl());
-            }
-            String key = s3Service.subirArchivo(imagen, "paciente" + paciente.getNombres());
-            paciente.setImagenUrl(key);
-        }
-
         Paciente updatedPaciente = pacienteRepository.save(paciente);
-        return this.agregarUrlImage(pacienteMapper.mapToPacienteDTO(updatedPaciente));
+        return pacienteMapper.mapToPacienteDTO(updatedPaciente);
     }
 
     @Transactional
@@ -238,9 +216,6 @@ public class PacienteServiceImpl implements PacienteService {
         filtroEstado.activarFiltroEstado(true);
         Paciente paciente = pacienteRepository.findByIdAndEstadoIsTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
-        if (paciente.getImagenUrl() != null) {
-            s3Service.eliminarArchivo(paciente.getImagenUrl());
-        }
 
         // 1. Primero desvincula el usuario (si existe)
         if (paciente.getUsuario() != null) {
@@ -266,6 +241,7 @@ public class PacienteServiceImpl implements PacienteService {
         }
     }
 
+
     @Override
     public PagedResponse<PacienteConUserDTO> listarPacientesPaginado(Pageable pageable) {
         filtroEstado.activarFiltroEstado(true);
@@ -274,16 +250,15 @@ public class PacienteServiceImpl implements PacienteService {
         List<PacienteConUserDTO> contenido = paginaPacientes.getContent()
                 .stream()
                 .map(pacienteMapper::mapToPacienteDTO)
-                .toList();
-        List<PacienteConUserDTO> contenidoWithUrlImage = contenido.stream().map(this::agregarUrlImage).toList();
+                .collect(Collectors.toList());
+
         return new PagedResponse<>(
-                contenidoWithUrlImage,
+                contenido,
                 paginaPacientes.getNumber(),
                 paginaPacientes.getSize(),
                 paginaPacientes.getTotalElements(),
                 paginaPacientes.getTotalPages(),
-                paginaPacientes.isLast()
-        );
+                paginaPacientes.isLast());
     }
 
     @Override
@@ -293,12 +268,4 @@ public class PacienteServiceImpl implements PacienteService {
                 .map(pacienteMapper::mapToPacienteDTO);
     }
 
-    //funcion para obtener el url
-    private PacienteConUserDTO agregarUrlImage(PacienteConUserDTO pacienteDTO) {
-        if (pacienteDTO.getImagenUrl() != null) {
-            String imageUrl = s3Service.generarUrlPublico(pacienteDTO.getImagenUrl());
-            pacienteDTO.setImagenUrl(imageUrl);
-        }
-        return pacienteDTO;
-    }
 }

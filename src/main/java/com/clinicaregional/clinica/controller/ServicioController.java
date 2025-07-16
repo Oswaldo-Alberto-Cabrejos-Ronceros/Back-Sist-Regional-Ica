@@ -40,18 +40,17 @@ public class ServicioController {
         return ResponseEntity.ok(servicioService.obtenerServiciosPorEspecialidadId(id));
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ServicioResponse> agregarServicio(@RequestPart("servicioRequest") @Valid ServicioRequest servicioRequest,
-                                                            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        ServicioResponse servicioResponse = servicioService.agregarServicio(servicioRequest, imagen);
+    @PostMapping
+    public ResponseEntity<ServicioResponse> agregarServicio(@RequestBody @Valid ServicioRequest servicioRequest) {
+        ServicioResponse servicioResponse = servicioService.agregarServicio(servicioRequest);
         return ResponseEntity.ok(servicioResponse);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarServicio(@PathVariable Long id, @RequestPart("servicioRequest") @Valid ServicioRequest servicioRequest,
-                                                @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+    public ResponseEntity<?> actualizarServicio(@PathVariable Long id,
+            @RequestBody @Valid ServicioRequest servicioRequest) {
         try {
-            ServicioResponse servicioResponse = servicioService.actualizarServicio(id, servicioRequest, imagen);
+            ServicioResponse servicioResponse = servicioService.actualizarServicio(id, servicioRequest);
             return ResponseEntity.ok(servicioResponse);
         } catch (RuntimeException e) {
             if (e.getMessage() != null && e.getMessage().contains("no encontrada")) {
@@ -78,8 +77,7 @@ public class ServicioController {
     @GetMapping("/paginado")
     public ResponseEntity<PagedResponse<ServicioResponse>> listarServiciosPaginado(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(servicioService.obtenerServiciosPaginado(pageable));
     }

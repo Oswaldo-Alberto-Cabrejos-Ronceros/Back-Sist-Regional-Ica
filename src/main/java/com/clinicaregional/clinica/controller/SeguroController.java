@@ -37,15 +37,15 @@ public class SeguroController {
         return seguroService.getSeguroByNombre(nombre).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SeguroDTO> createSeguro(@RequestPart("seguroDTO") @Valid SeguroDTO seguroDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        SeguroDTO savedSeguro = seguroService.createSeguro(seguroDTO,imagen);
+     @PostMapping
+    public ResponseEntity<SeguroDTO> createSeguro(@RequestBody @Valid SeguroDTO seguroDTO) {
+        SeguroDTO savedSeguro = seguroService.createSeguro(seguroDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSeguro);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SeguroDTO> updateSeguro(@PathVariable Long id, @RequestPart("seguroDTO") @Valid SeguroDTO seguroDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        SeguroDTO updatedSeguro = seguroService.updateSeguro(id, seguroDTO,imagen);
+    public ResponseEntity<SeguroDTO> updateSeguro(@PathVariable Long id, @RequestBody @Valid SeguroDTO seguroDTO) {
+        SeguroDTO updatedSeguro = seguroService.updateSeguro(id, seguroDTO);
         return ResponseEntity.ok(updatedSeguro);
     }
 

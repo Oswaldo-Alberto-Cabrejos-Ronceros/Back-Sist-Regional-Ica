@@ -28,7 +28,7 @@ public interface PacienteService {
     //Crear paciente sin usuario
     PacienteSinUserDTO crearPacienteSimple(PacienteSinUserDTO pacienteSimpleDTO);
 
-    PacienteConUserDTO actualizarPaciente(Long id, UpdatePacienteDTO updatepacienteDTO, MultipartFile imagen);
+    PacienteConUserDTO actualizarPaciente(Long id, UpdatePacienteDTO updatepacienteDTO);
 
     void eliminarPaciente(Long id);
 

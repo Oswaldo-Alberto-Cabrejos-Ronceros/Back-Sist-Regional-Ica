@@ -13,9 +13,9 @@ public interface EspecialidadService {
 
     Optional<EspecialidadResponse> getEspecialidadById(Long id);
 
-    EspecialidadResponse guardarEspecialidad(EspecialidadRequest especialidadRequest, MultipartFile imagen);
+    EspecialidadResponse guardarEspecialidad(EspecialidadRequest especialidadRequest);
 
-    EspecialidadResponse actualizarEspecialidad(Long id, EspecialidadRequest especialidadRequest, MultipartFile imagen);
+    EspecialidadResponse actualizarEspecialidad(Long id, EspecialidadRequest especialidadRequest);
 
     void eliminarEspecialidad(Long id);
 }

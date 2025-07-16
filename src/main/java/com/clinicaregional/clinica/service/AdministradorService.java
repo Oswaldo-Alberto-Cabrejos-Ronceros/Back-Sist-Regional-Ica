@@ -10,9 +10,14 @@ import java.util.Optional;
 
 public interface AdministradorService {
     List<AdministradorDTO> listarAdministradores();
+
     Optional<AdministradorDTO> getAdministradorById(Long id);
+
     MyInfoAdministrador getMyInfoAdministrador(Long id);
+
     AdministradorDTO createAdministrador(RegisterAdministradorRequest registerAdministradorRequest);
-    AdministradorDTO updateAdministrador(Long id,AdministradorDTO administradorDTO, MultipartFile imagen);
+
+    AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO);
+
     void deleteAdministrador(Long id);
 }

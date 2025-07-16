@@ -1,18 +1,12 @@
 package com.clinicaregional.clinica.controller;
 
-import com.clinicaregional.clinica.dto.ResultadoArchivoDTO;
 import com.clinicaregional.clinica.dto.request.ResultadoRequest;
 import com.clinicaregional.clinica.dto.response.ResultadoResponse;
 import com.clinicaregional.clinica.service.ResultadoService;
 
-import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,27 +21,10 @@ public class ResultadoController {
         this.resultadoService = resultadoService;
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResultadoResponse> crearResultado(@RequestPart("request") ResultadoRequest request, @RequestPart(value = "archivo", required = false) MultipartFile archivo) {
-        ResultadoResponse creado = resultadoService.crear(request, archivo);
+    @PostMapping
+    public ResponseEntity<ResultadoResponse> crearResultado(@RequestBody ResultadoRequest request) {
+        ResultadoResponse creado = resultadoService.crear(request);
         return ResponseEntity.ok(creado);
-    }
-
-    @GetMapping("/archivo/{resultadoId}")
-    public ResponseEntity<byte[]> getArchivo(@PathVariable Long resultadoId) {
-        ResultadoArchivoDTO resultadoArchivoDTO = resultadoService.recuperarArchivoByResultadoId(resultadoId);
-        //configuramos los headers de la respuesta
-        HttpHeaders httpHeaders = new HttpHeaders();
-
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.setContentDispositionFormData("attachment",resultadoArchivoDTO.getKey());
-        return new ResponseEntity<>(resultadoArchivoDTO.getArchivo(), httpHeaders, HttpStatus.OK);
-    }
-
-    @PatchMapping("/archivo/{resultadoId}")
-    public ResponseEntity<ResultadoResponse> agregarArchivoResultado(@PathVariable Long resultadoId, @RequestParam MultipartFile archivo) {
-        ResultadoResponse resultadoResponse = resultadoService.agregarArchivoResultado(resultadoId, archivo);
-        return ResponseEntity.ok(resultadoResponse);
     }
 
     @GetMapping("/por-cita/{citaId}")
@@ -63,7 +40,8 @@ public class ResultadoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResultadoResponse> actualizarResultado(@PathVariable Long id, @RequestBody ResultadoRequest request) {
+    public ResponseEntity<ResultadoResponse> actualizarResultado(@PathVariable Long id,
+            @RequestBody ResultadoRequest request) {
         ResultadoResponse actualizado = resultadoService.actualizar(id, request);
         return ResponseEntity.ok(actualizado);
     }
@@ -73,5 +51,4 @@ public class ResultadoController {
         resultadoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-
 }

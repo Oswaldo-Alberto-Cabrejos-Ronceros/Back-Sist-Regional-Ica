@@ -30,7 +30,7 @@ public class MedicoController {
         return ResponseEntity.ok(medicoService.obtenerMedicos());
     }
 
-    //para obtener datos publicos de los medicos
+    // para obtener datos publicos de los medicos
     @GetMapping("/public")
     public ResponseEntity<List<MedicoResponsePublicDTO>> obtenerTodosPublico() {
         return ResponseEntity.ok(medicoService.obtenerMedicosPublic());
@@ -41,22 +41,22 @@ public class MedicoController {
         return ResponseEntity.ok(medicoService.obtenerMedicoPorId(id));
     }
 
-    //para obtener myInfo
+    // para obtener myInfo
     @GetMapping("/my-info/{id}")
     public ResponseEntity<MyInfoMedico> obtenerMyInfo(@PathVariable Long id) {
         return ResponseEntity.ok(medicoService.obtenerMyInfoMedico(id));
     }
 
     @PostMapping
-    public ResponseEntity<MedicoResponseDTO> crear(@RequestPart("dto") @Valid MedicoRequestDTO dto, @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        MedicoResponseDTO creado = medicoService.guardarMedico(dto, imagen);
+    public ResponseEntity<MedicoResponseDTO> crear(@RequestBody @Valid MedicoRequestDTO dto) {
+        MedicoResponseDTO creado = medicoService.guardarMedico(dto);
         return ResponseEntity.status(201).body(creado);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<MedicoResponseDTO> actualizar(@PathVariable Long id,
-                                                        @RequestPart("dto") @Valid MedicoRequestDTO dto, @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto, imagen);
+            @RequestBody @Valid MedicoRequestDTO dto) {
+        MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto);
         return ResponseEntity.ok(actualizado);
     }
 

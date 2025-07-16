@@ -28,25 +28,27 @@ public class AdministradorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AdministradorDTO> getAdministradorPorId(@PathVariable Long id) {
-        return administradorService.getAdministradorById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return administradorService.getAdministradorById(id).map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/my-info/{id}")
-    public ResponseEntity<MyInfoAdministrador> getMyInfoAdministrador(@PathVariable Long id){
+    public ResponseEntity<MyInfoAdministrador> getMyInfoAdministrador(@PathVariable Long id) {
         MyInfoAdministrador myInfoAdministrador = administradorService.getMyInfoAdministrador(id);
         return ResponseEntity.ok(myInfoAdministrador);
     }
 
-
     @PostMapping
-    public ResponseEntity<AdministradorDTO> createAdministrador(@RequestPart("registerAdministradorRequest") @Valid RegisterAdministradorRequest registerAdministradorRequest) {
+    public ResponseEntity<AdministradorDTO> createAdministrador(
+            @RequestPart("registerAdministradorRequest") @Valid RegisterAdministradorRequest registerAdministradorRequest) {
         AdministradorDTO savedAdministrador = administradorService.createAdministrador(registerAdministradorRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedAdministrador);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AdministradorDTO> updateAministrador(@PathVariable Long id, @RequestPart("administradorDTO") @Valid AdministradorDTO administradorDTO,@RequestPart(value = "imagen", required = false) MultipartFile imagen) {
-        AdministradorDTO updatedAdministrador = administradorService.updateAdministrador(id, administradorDTO,imagen);
+    public ResponseEntity<AdministradorDTO> updateAministrador(@PathVariable Long id,
+            @RequestBody @Valid AdministradorDTO administradorDTO) {
+        AdministradorDTO updatedAdministrador = administradorService.updateAdministrador(id, administradorDTO);
         return ResponseEntity.ok(updatedAdministrador);
     }
 

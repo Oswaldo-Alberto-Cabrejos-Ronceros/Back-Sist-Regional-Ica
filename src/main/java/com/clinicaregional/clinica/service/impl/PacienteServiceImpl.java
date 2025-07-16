@@ -29,12 +29,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.DuplicateFormatFlagsException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Slf4j
@@ -93,7 +93,6 @@ public class PacienteServiceImpl implements PacienteService {
         filtroEstado.activarFiltroEstado(true);
         return pacienteRepository.findByIdAndEstadoIsTrue(id)
                 .map(pacienteMapper::mapToPacienteDTO);
-
     }
 
     @Transactional(readOnly = true)
@@ -117,7 +116,7 @@ public class PacienteServiceImpl implements PacienteService {
     @Transactional
     @Override
     public PacienteSinUserDTO crearPacienteSimple(PacienteSinUserDTO pacienteSimpleDTO) {
-        
+
         filtroEstado.activarFiltroEstado(true);
 
         // Validación de duplicados
@@ -242,6 +241,7 @@ public class PacienteServiceImpl implements PacienteService {
         }
     }
 
+
     @Override
     public PagedResponse<PacienteConUserDTO> listarPacientesPaginado(Pageable pageable) {
         filtroEstado.activarFiltroEstado(true);
@@ -267,4 +267,5 @@ public class PacienteServiceImpl implements PacienteService {
         return pacienteRepository.findByEmail(email)
                 .map(pacienteMapper::mapToPacienteDTO);
     }
+
 }

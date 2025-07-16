@@ -1,6 +1,8 @@
 package com.clinicaregional.clinica.service.impl;
 
+
 import com.clinicaregional.clinica.dto.PacienteConUserDTO;
+
 import com.clinicaregional.clinica.dto.request.RegisterRequest;
 import com.clinicaregional.clinica.entity.*;
 import com.clinicaregional.clinica.exception.*;
@@ -141,6 +143,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             // Obtener entidades relacionadas
             Rol rolPaciente = rolRepository.findByNombreAndEstadoTrue("PACIENTE")
                     .orElseThrow(() -> new ResourceNotFoundException("Rol PACIENTE no encontrado"));
+
 
             TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(request.getTipoDocumentoId())
                     .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado"));

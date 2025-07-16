@@ -15,7 +15,7 @@ public interface SeguroService {
 
     SeguroDTO createSeguro(SeguroDTO seguroDTO);
 
-    SeguroDTO updateSeguro(Long id,SeguroDTO seguroDTO);
+    SeguroDTO updateSeguro(Long id, SeguroDTO seguroDTO);
 
     SeguroDTO updateEstadoSeguro(Long id, EstadoSeguro estadoSeguro);
 

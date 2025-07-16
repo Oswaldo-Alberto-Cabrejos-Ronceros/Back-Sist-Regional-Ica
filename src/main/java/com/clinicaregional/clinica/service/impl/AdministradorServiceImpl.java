@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.service.impl;
 
 import com.clinicaregional.clinica.dto.AdministradorDTO;
 import com.clinicaregional.clinica.dto.RolDTO;
+import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
 import com.clinicaregional.clinica.dto.response.MyInfoAdministrador;
@@ -13,12 +14,14 @@ import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.AdministradorMapper;
 import com.clinicaregional.clinica.repository.AdministradorRepository;
 import com.clinicaregional.clinica.service.AdministradorService;
+
 import com.clinicaregional.clinica.service.RolService;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +40,7 @@ public class AdministradorServiceImpl implements AdministradorService {
     public AdministradorServiceImpl(AdministradorRepository administradorRepository,
             AdministradorMapper administradorMapper, UsuarioService usuarioService, RolService rolService,
             FiltroEstado filtroEstado) {
+
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
         this.usuarioService = usuarioService;
@@ -64,7 +68,7 @@ public class AdministradorServiceImpl implements AdministradorService {
     public MyInfoAdministrador getMyInfoAdministrador(Long id) {
         filtroEstado.activarFiltroEstado(true);
         Administrador administrador = administradorRepository.findByIdAndEstadoIsTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No se encontro Administrador con el id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró Administrador con el id: " + id));
         return administradorMapper.mapToMyInfoAdministrador(administrador);
     }
 
@@ -134,4 +138,5 @@ public class AdministradorServiceImpl implements AdministradorService {
         findAdministrador.setUsuario(null);
         administradorRepository.save(findAdministrador);
     }
+
 }

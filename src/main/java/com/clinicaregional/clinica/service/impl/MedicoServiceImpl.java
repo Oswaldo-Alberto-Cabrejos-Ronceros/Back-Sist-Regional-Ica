@@ -3,6 +3,7 @@ package com.clinicaregional.clinica.service.impl;
 import java.util.stream.Collectors;
 import java.util.List;
 
+import com.clinicaregional.clinica.dto.AdministradorDTO;
 import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoMedico;
 import com.clinicaregional.clinica.entity.TipoDocumento;
@@ -52,6 +53,7 @@ public class MedicoServiceImpl implements MedicoService {
             TipoDocumentoService tipoDocumentoService,
             RolService rolService,
             FiltroEstado filtroEstado) {
+
         this.medicoRepository = medicoRepository;
         this.medicoMapper = medicoMapper;
         this.usuarioRepository = usuarioRepository;
@@ -262,5 +264,4 @@ public class MedicoServiceImpl implements MedicoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Médico no encontrado con usuario ID: " + usuarioId));
         return medicoMapper.mapToMedicoResponseDTO(medico);
     }
-
 }

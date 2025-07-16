@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,9 +30,9 @@ public class MedicoController {
         return ResponseEntity.ok(medicoService.obtenerMedicos());
     }
 
-    //para obtener datos publicos de los medicos
+    // para obtener datos publicos de los medicos
     @GetMapping("/public")
-    public ResponseEntity<List<MedicoResponsePublicDTO>> obtenerTodosPublico(){
+    public ResponseEntity<List<MedicoResponsePublicDTO>> obtenerTodosPublico() {
         return ResponseEntity.ok(medicoService.obtenerMedicosPublic());
     }
 
@@ -40,9 +41,9 @@ public class MedicoController {
         return ResponseEntity.ok(medicoService.obtenerMedicoPorId(id));
     }
 
-    //para obtener myInfo
+    // para obtener myInfo
     @GetMapping("/my-info/{id}")
-    public ResponseEntity<MyInfoMedico> obtenerMyInfo(@PathVariable Long id){
+    public ResponseEntity<MyInfoMedico> obtenerMyInfo(@PathVariable Long id) {
         return ResponseEntity.ok(medicoService.obtenerMyInfoMedico(id));
     }
 
@@ -58,7 +59,7 @@ public class MedicoController {
         MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto);
         return ResponseEntity.ok(actualizado);
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         medicoService.eliminarMedico(id);

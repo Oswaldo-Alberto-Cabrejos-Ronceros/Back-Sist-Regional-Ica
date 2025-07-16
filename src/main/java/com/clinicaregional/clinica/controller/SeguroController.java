@@ -6,8 +6,10 @@ import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.service.SeguroService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class SeguroController {
         return seguroService.getSeguroByNombre(nombre).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+     @PostMapping
     public ResponseEntity<SeguroDTO> createSeguro(@RequestBody @Valid SeguroDTO seguroDTO) {
         SeguroDTO savedSeguro = seguroService.createSeguro(seguroDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSeguro);

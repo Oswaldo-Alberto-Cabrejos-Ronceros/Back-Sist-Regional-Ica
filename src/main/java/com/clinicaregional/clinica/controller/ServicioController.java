@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.clinicaregional.clinica.service.ServicioService;
@@ -14,6 +15,7 @@ import com.clinicaregional.clinica.dto.response.ServicioResponse;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -46,7 +48,7 @@ public class ServicioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarServicio(@PathVariable Long id,
-                                                @RequestBody @Valid ServicioRequest servicioRequest) {
+            @RequestBody @Valid ServicioRequest servicioRequest) {
         try {
             ServicioResponse servicioResponse = servicioService.actualizarServicio(id, servicioRequest);
             return ResponseEntity.ok(servicioResponse);
@@ -75,8 +77,7 @@ public class ServicioController {
     @GetMapping("/paginado")
     public ResponseEntity<PagedResponse<ServicioResponse>> listarServiciosPaginado(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(servicioService.obtenerServiciosPaginado(pageable));
     }

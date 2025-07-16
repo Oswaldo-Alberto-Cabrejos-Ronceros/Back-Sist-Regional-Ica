@@ -13,6 +13,7 @@ import com.clinicaregional.clinica.util.FiltroEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class SeguroServiceImpl implements SeguroService {
     private final FiltroEstado filtroEstado;
 
     @Autowired
-    public SeguroServiceImpl(SeguroRepository seguroRepository, SeguroMapper seguroMapper,FiltroEstado filtroEstado) {
+    public SeguroServiceImpl(SeguroRepository seguroRepository, SeguroMapper seguroMapper, FiltroEstado filtroEstado) {
         this.seguroRepository = seguroRepository;
         this.seguroMapper = seguroMapper;
         this.filtroEstado = filtroEstado;
@@ -93,7 +94,8 @@ public class SeguroServiceImpl implements SeguroService {
     @Override
     public SeguroDTO updateEstadoSeguro(Long id, EstadoSeguro estadoSeguro) {
         filtroEstado.activarFiltroEstado(true);
-        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro el seguro con el id: " + id));
+        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontro el seguro con el id: " + id));
         if (estadoSeguro.equals(findSeguro.getEstadoSeguro())) {
             throw new BadRequestException("El estado seguro es el mismo");
         }
@@ -106,9 +108,9 @@ public class SeguroServiceImpl implements SeguroService {
     @Override
     public void deleteSeguro(Long id) {
         filtroEstado.activarFiltroEstado(true);
-        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id).orElseThrow(() -> new ResourceNotFoundException("No se encontro el seguro con el id: " + id));
+        Seguro findSeguro = seguroRepository.findByIdAndEstadoIsTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontro el seguro con el id: " + id));
         findSeguro.setEstado(false);
         seguroRepository.save(findSeguro);
     }
-
 }

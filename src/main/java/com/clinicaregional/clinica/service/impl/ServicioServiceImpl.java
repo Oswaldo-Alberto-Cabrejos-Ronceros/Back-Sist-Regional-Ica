@@ -18,6 +18,7 @@ import jakarta.persistence.EntityNotFoundException;
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class ServicioServiceImpl implements ServicioService {
     private final EspecialidadService especialidadService;
 
     public ServicioServiceImpl(ServicioRepository servicioRepository, ServicioMapper servicioMapper,
-                               FiltroEstado filtroEstado, EspecialidadService especialidadService) {
+            FiltroEstado filtroEstado, EspecialidadService especialidadService) {
         this.servicioRepository = servicioRepository;
         this.servicioMapper = servicioMapper;
         this.filtroEstado = filtroEstado;
@@ -51,7 +52,8 @@ public class ServicioServiceImpl implements ServicioService {
     @Override
     public List<ServicioResponse> obtenerServiciosPorEspecialidadId(Long especialidadId) {
         filtroEstado.activarFiltroEstado(true);
-        especialidadService.getEspecialidadById(especialidadId).orElseThrow(() -> new ResourceNotFoundException("No se encontro especialidad con el id:" + especialidadId));
+        especialidadService.getEspecialidadById(especialidadId).orElseThrow(
+                () -> new ResourceNotFoundException("No se encontro especialidad con el id:" + especialidadId));
         return servicioRepository.findAllByEspecialidad_Id(especialidadId).stream()
                 .map(servicioMapper::mapToServicioResponse)
                 .collect(Collectors.toList());
@@ -64,7 +66,9 @@ public class ServicioServiceImpl implements ServicioService {
         if (servicioRepository.existsByNombre(servicioRequest.getNombre())) {
             throw new DuplicateResourceException("Ya existe un servicio con el nombre ingresado");
         }
-        especialidadService.getEspecialidadById(servicioRequest.getEspecialidadId()).orElseThrow(() -> new ResourceNotFoundException("No se encontro especialidad con el id:" + servicioRequest.getEspecialidadId()));
+        especialidadService.getEspecialidadById(servicioRequest.getEspecialidadId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No se encontro especialidad con el id:" + servicioRequest.getEspecialidadId()));
         Servicio servicio = servicioMapper.mapToServicio(servicioRequest);
         Servicio savedServicio = servicioRepository.save(servicio);
         return servicioMapper.mapToServicioResponse(savedServicio);
@@ -80,6 +84,7 @@ public class ServicioServiceImpl implements ServicioService {
         servicioRepository.save(servicio);
     }
 
+    
     @Transactional
     @Override
     public ServicioResponse actualizarServicio(Long id, ServicioRequest servicioRequest) {
@@ -100,6 +105,7 @@ public class ServicioServiceImpl implements ServicioService {
         return servicioMapper.mapToServicioResponse(updatedServicio);
     }
 
+   
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<ServicioResponse> obtenerServiciosPaginado(Pageable pageable) {

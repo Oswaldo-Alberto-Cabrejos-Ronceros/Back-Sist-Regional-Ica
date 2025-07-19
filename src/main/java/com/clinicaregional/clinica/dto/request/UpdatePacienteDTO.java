@@ -18,4 +18,9 @@ public class UpdatePacienteDTO {
     private String imagenUrl;
 
     private String antecedentes;
+
+    private String contactoDeEmergenciaNombre;
+
+    private String contactoDeEmergenciaTelefono;
+
 }

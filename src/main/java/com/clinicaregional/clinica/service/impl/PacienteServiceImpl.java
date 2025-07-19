@@ -206,6 +206,14 @@ public class PacienteServiceImpl implements PacienteService {
             paciente.setAntecedentes(updatePacienteDTO.getAntecedentes());
         }
 
+        if (updatePacienteDTO.getContactoDeEmergenciaNombre() != null){
+            paciente.setContactoDeEmergenciaNombre(updatePacienteDTO.getContactoDeEmergenciaNombre());
+        }
+
+        if (updatePacienteDTO.getContactoDeEmergenciaTelefono() != null) {
+            paciente.setContactoDeEmergenciaTelefono(updatePacienteDTO.getContactoDeEmergenciaTelefono());
+        }
+
         Paciente updatedPaciente = pacienteRepository.save(paciente);
         return pacienteMapper.mapToPacienteDTO(updatedPaciente);
     }

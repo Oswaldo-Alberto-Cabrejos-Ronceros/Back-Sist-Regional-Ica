@@ -72,7 +72,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             return new org.springframework.security.core.userdetails.User(
                     usuario.getCorreo(),
                     usuario.getPassword(),
-                    List.of(new SimpleGrantedAuthority("ROLE_" + rol)));
+                    List.of(new SimpleGrantedAuthority(rol)));
         } catch (Exception e) {
             log.error("Error en loadUserByUsername para usuario: " + username, e);
             throw e;

@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     // inyectamos por constructor
@@ -32,6 +35,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     // el filterInternal
     @Override
     public boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        System.out.println("JwtAuthFilter ejecutado");
+
         String path = request.getRequestURI();
         return path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register")
                 || path.startsWith("/api/auth/refresh");
@@ -44,28 +49,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
         try {
             Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                Optional<Cookie> jwtToken = Arrays.stream(cookies)
-                        .filter(c -> c.getName().equals("jwtToken"))
-                        .findFirst();
+            if (cookies == null) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No authentication token found");
+                return;
+            }
 
-                if (jwtToken.isPresent()) {
-                    String token = jwtToken.get().getValue();
+            Optional<Cookie> jwtToken = Arrays.stream(cookies)
+                    .filter(c -> c.getName().equals("jwtToken"))
+                    .findFirst();
 
-                    // 🔐 Validar solo si es válido, atrapar cualquier excepción del util
-                    if (jwtUtil.validateToken(token)) {
-                        String email = jwtUtil.getEmailFromJwt(token);
-                        List<GrantedAuthority> authorities = jwtUtil.getAuthoritiesFromJwt(token);
+            if (jwtToken.isEmpty()) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT token not found");
+                return;
+            }
 
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email,
-                                null, authorities);
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    }
-                }
+            String token = jwtToken.get().getValue();
+
+            if (jwtUtil.validateToken(token)) {
+                String email = jwtUtil.getEmailFromJwt(token);
+                List<GrantedAuthority> authorities = jwtUtil.getAuthoritiesFromJwt(token);
+
+                log.debug("Authenticating user: {} with authorities: {}", email, authorities);
+
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, null,
+                        authorities);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e) {
-            // Evita que excepciones internas del filtro bloqueen rutas públicas
+            log.error("Error in JWT filter", e);
             SecurityContextHolder.clearContext();
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid authentication");
+            return;
         }
 
         filterChain.doFilter(request, response);

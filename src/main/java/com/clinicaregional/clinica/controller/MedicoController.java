@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.request.MedicoRequestDTO;
+import com.clinicaregional.clinica.dto.request.MedicoUpdateDTO;
 import com.clinicaregional.clinica.dto.response.MedicoResponseDTO;
 import com.clinicaregional.clinica.dto.response.MedicoResponsePublicDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoMedico;
@@ -55,7 +56,7 @@ public class MedicoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<MedicoResponseDTO> actualizar(@PathVariable Long id,
-            @RequestBody @Valid MedicoRequestDTO dto) {
+            @RequestBody @Valid MedicoUpdateDTO dto) {
         MedicoResponseDTO actualizado = medicoService.actualizarMedico(id, dto);
         return ResponseEntity.ok(actualizado);
     }

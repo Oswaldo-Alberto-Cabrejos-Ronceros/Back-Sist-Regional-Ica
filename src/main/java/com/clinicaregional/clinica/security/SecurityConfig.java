@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -44,19 +45,62 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(httpRequest -> {
-                    httpRequest.requestMatchers(
-                            "/api/auth/**",
-                            "/api/**",
-                            "/swagger-ui/**",
-                            "/v3/api-docs/**",
-                            "/api-docs/**",
-                            "/swagger-resources/**",
-                            "/webjars/**").permitAll();
-                    httpRequest.anyRequest().authenticated(); // importante si quieres proteger el resto
+                    httpRequest
+                            .requestMatchers(
+                                    "/api/auth/**",
+                                    "/swagger-ui/**",
+                                    "/v3/api-docs/**",
+                                    "/api-docs/**",
+                                    "/swagger-resources/**",
+                                    "/webjars/**")
+                            .permitAll()
+
+                            .requestMatchers("/api/administradores/**").hasAuthority("ADMIN")
+                            .requestMatchers("/api/alergias/**").hasAnyAuthority("ADMIN", "MEDICO", "RECEPCIONISTA")
+
+                            .requestMatchers(HttpMethod.POST, "/api/citas").hasAnyAuthority("PACIENTE", "RECEPCIONISTA")
+                            .requestMatchers(HttpMethod.GET, "/api/citas").hasAnyAuthority("MEDICO", "RECEPCIONISTA")
+                            .requestMatchers(HttpMethod.GET, "/api/citas/citas-medico/**")
+                            .hasAnyAuthority("MEDICO", "RECEPCIONISTA")
+                            .requestMatchers(HttpMethod.PUT, "/api/citas/confirmar/**").hasAuthority("MEDICO")
+                            .requestMatchers(HttpMethod.PUT, "/api/citas/atender/**").hasAuthority("MEDICO")
+                            .requestMatchers(HttpMethod.PUT, "/api/citas/reprogramar/**")
+                            .hasAnyAuthority("MEDICO", "RECEPCIONISTA")
+                            .requestMatchers(HttpMethod.GET, "/api/citas/medico/*/pacientes")
+                            .hasAnyAuthority("MEDICO", "RECEPCIONISTA", "ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/api/citas/paciente/*/citas-futuras")
+                            .hasAuthority("PACIENTE")
+                            .requestMatchers(HttpMethod.PUT, "/api/citas/*")
+                            .hasAnyAuthority("PACIENTE", "MEDICO", "RECEPCIONISTA")
+                            .requestMatchers(HttpMethod.DELETE, "/api/citas/*")
+                            .hasAnyAuthority("PACIENTE", "MEDICO", "RECEPCIONISTA")
+
+                            .requestMatchers("/api/coberturas/**").hasAuthority("ADMIN")
+                            .requestMatchers("/api/disponibilidad/**")
+                            .hasAnyAuthority("ADMIN", "MEDICO", "RECEPCIONISTA")
+                            .requestMatchers("/api/especialidades/**").hasAuthority("ADMIN")
+                            .requestMatchers("/api/horario-bloques/**")
+                            .hasAnyAuthority("ADMIN", "MEDICO", "RECEPCIONISTA")
+
+                            .requestMatchers("/api/medicos/**").authenticated()
+
+                            .requestMatchers("/api/medico-especialidad/**").authenticated()
+                            .requestMatchers("/api/paciente-alergia/**").authenticated()
+                            .requestMatchers("/api/pacientes/**").authenticated()
+                            .requestMatchers("/api/recepcionistas/**").hasAuthority("ADMIN")
+                            .requestMatchers("/api/roles/**").hasAuthority("ADMIN")
+                            .requestMatchers("/api/seguro-coberturas/**").authenticated()
+                            .requestMatchers("/api/seguros/**").hasAuthority("ADMIN")
+                            .requestMatchers("/api/servicios/**").authenticated()
+                            .requestMatchers("/api/servicios-seguros/**").authenticated()
+                            .requestMatchers("/api/tipos-documentos/**").authenticated()
+                            .requestMatchers("/api/usuarios/**").hasAuthority("ADMIN")
+
+                            .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.setContentType("application/json"); // corregido: era aplication/json
+                            response.setContentType("application/json");
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.getWriter().write("{\"error\": \"UNAUTHORIZED\"}");
                         })
@@ -109,5 +153,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

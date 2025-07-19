@@ -49,15 +49,14 @@ public class SecurityConfig {
                             .requestMatchers(
                                     "/api/auth/**",
                                     "/swagger-ui/**",
+                                    "/api/**", //quitar en produccion
                                     "/v3/api-docs/**",
                                     "/api-docs/**",
                                     "/swagger-resources/**",
                                     "/webjars/**")
                             .permitAll()
-
                             .requestMatchers("/api/administradores/**").hasAuthority("ADMIN")
                             .requestMatchers("/api/alergias/**").hasAnyAuthority("ADMIN", "MEDICO", "RECEPCIONISTA")
-
                             .requestMatchers(HttpMethod.POST, "/api/citas").hasAnyAuthority("PACIENTE", "RECEPCIONISTA")
                             .requestMatchers(HttpMethod.GET, "/api/citas").hasAnyAuthority("MEDICO", "RECEPCIONISTA")
                             .requestMatchers(HttpMethod.GET, "/api/citas/citas-medico/**")

@@ -5,6 +5,7 @@ import com.clinicaregional.clinica.dto.RolDTO;
 import com.clinicaregional.clinica.dto.SeguroDTO;
 import com.clinicaregional.clinica.dto.UsuarioDTO;
 import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
+import com.clinicaregional.clinica.dto.response.AdmnistradorStatsResponse;
 import com.clinicaregional.clinica.dto.response.MyInfoAdministrador;
 import com.clinicaregional.clinica.entity.Administrador;
 import com.clinicaregional.clinica.entity.TipoDocumento;
@@ -13,6 +14,8 @@ import com.clinicaregional.clinica.exception.DuplicateResourceException;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.AdministradorMapper;
 import com.clinicaregional.clinica.repository.AdministradorRepository;
+import com.clinicaregional.clinica.repository.CitaRepository;
+import com.clinicaregional.clinica.repository.PacienteRepository;
 import com.clinicaregional.clinica.service.AdministradorService;
 
 import com.clinicaregional.clinica.service.RolService;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,17 +39,21 @@ public class AdministradorServiceImpl implements AdministradorService {
     private final UsuarioService usuarioService;
     private final RolService rolService;
     private final FiltroEstado filtroEstado;
+    private final CitaRepository citaRepository;
+    private final PacienteRepository pacienteRepository;
 
     @Autowired
     public AdministradorServiceImpl(AdministradorRepository administradorRepository,
-            AdministradorMapper administradorMapper, UsuarioService usuarioService, RolService rolService,
-            FiltroEstado filtroEstado) {
+                                    AdministradorMapper administradorMapper, UsuarioService usuarioService, RolService rolService,
+                                    FiltroEstado filtroEstado, CitaRepository citaRepository, PacienteRepository pacienteRepository) {
 
         this.administradorRepository = administradorRepository;
         this.administradorMapper = administradorMapper;
         this.usuarioService = usuarioService;
         this.rolService = rolService;
         this.filtroEstado = filtroEstado;
+        this.citaRepository = citaRepository;
+        this.pacienteRepository = pacienteRepository;
     }
 
     @Transactional(readOnly = true)
@@ -137,6 +145,23 @@ public class AdministradorServiceImpl implements AdministradorService {
         usuarioService.eliminar(findAdministrador.getUsuario().getId());
         findAdministrador.setUsuario(null);
         administradorRepository.save(findAdministrador);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public AdmnistradorStatsResponse getStatsForPanel() {
+        //pacientes totales
+        Long totalPacientes = pacienteRepository.countByEstadoIsTrue();
+
+        //citas hoy conteo
+
+        LocalDate today = LocalDate.now();
+
+        Long citasHoy = citaRepository.countByFecha(today);
+
+        Double ingresosMes = citaRepository.sumarMontoServicioPorMes(today.getMonth().getValue(), today.getYear());
+
+        return new AdmnistradorStatsResponse(totalPacientes, citasHoy, ingresosMes);
     }
 
 }

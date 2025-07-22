@@ -116,4 +116,11 @@ public class CitaController {
     public ResponseEntity<List<CitaResponse>> obtenerTodasLasCitasPorPaciente(@PathVariable Long pacienteId) {
         return ResponseEntity.ok(citaService.obtenerTodasPorPaciente(pacienteId));
     }
+
+    //listar citas hoy
+
+    @GetMapping("/todas/hoy")
+    public ResponseEntity<List<CitaResponse>> obtenerCitasHoy(){
+        return ResponseEntity.ok(citaService.obtenerCitasHoy());
+    }
 }

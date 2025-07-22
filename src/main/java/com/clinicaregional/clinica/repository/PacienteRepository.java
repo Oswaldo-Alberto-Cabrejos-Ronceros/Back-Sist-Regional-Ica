@@ -15,4 +15,5 @@ public interface PacienteRepository extends JpaRepository<Paciente, Long> {
     Optional<Paciente> findByEmail(String email);
     Page<Paciente> findAllByEstadoIsTrue(Pageable pageable);
     boolean existsByNumeroIdentificacion(String numeroIdentificacion);
+    long countByEstadoIsTrue();
 }

@@ -41,4 +41,6 @@ public interface CitaService {
 
     List<CitaResponse> obtenerTodasPorPaciente(Long pacienteId);
 
+    List<CitaResponse> obtenerCitasHoy();
+
 }

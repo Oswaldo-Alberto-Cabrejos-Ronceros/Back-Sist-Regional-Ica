@@ -371,4 +371,11 @@ public class CitaServiceImpl implements CitaService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<CitaResponse> obtenerCitasHoy() {
+        List<Cita> citasHoy = citaRepository.findAllByFecha(LocalDate.now());
+        return citasHoy.stream().map(citaMapper::toResponse).collect(Collectors.toList());
+
+    }
+
 }

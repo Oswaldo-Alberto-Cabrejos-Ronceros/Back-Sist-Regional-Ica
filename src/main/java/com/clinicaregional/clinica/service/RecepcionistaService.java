@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.request.RecepcionistaUpdateDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoRecepcionista;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 
@@ -16,7 +17,7 @@ public interface RecepcionistaService {
 
     RecepcionistaResponse guardar(RecepcionistaRequest recepcionistaRequest);
 
-    RecepcionistaResponse actualizar(Long id, RecepcionistaRequest recepcionistaRequest);
+    RecepcionistaResponse actualizar(Long id, RecepcionistaUpdateDTO recepcionistaRequest);
 
     void eliminar(Long id);
 }

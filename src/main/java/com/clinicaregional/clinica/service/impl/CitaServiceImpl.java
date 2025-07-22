@@ -20,9 +20,9 @@ import com.clinicaregional.clinica.repository.MedicoRepository;
 import com.clinicaregional.clinica.repository.PacienteRepository;
 import com.clinicaregional.clinica.repository.ServicioRepository;
 import com.clinicaregional.clinica.service.CitaService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -361,4 +361,14 @@ public class CitaServiceImpl implements CitaService {
                         cita.getEstadoCita()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CitaResponse> obtenerTodasPorPaciente(Long pacienteId) {
+        List<Cita> citas = citaRepository.findAllByPaciente_Id(pacienteId);
+        return citas.stream()
+                .map(citaMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
 }

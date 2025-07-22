@@ -1,7 +1,6 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.RolDTO;
-import com.clinicaregional.clinica.entity.Rol;
 import com.clinicaregional.clinica.service.RolService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

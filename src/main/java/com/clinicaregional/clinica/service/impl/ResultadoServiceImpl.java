@@ -131,4 +131,25 @@ public class ResultadoServiceImpl implements ResultadoService {
         resultado.setEstado(false);
         resultadoRepository.save(resultado);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResultadoResponse> listarPorHistorialClinico(Long historialClinicoId) {
+        filtroEstado.activarFiltroEstado(true);
+        return resultadoRepository.findAllByHistorialClinico_Id(historialClinicoId)
+                .stream()
+                .map(resultadoMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResultadoResponse> listarResultadosPorPacienteId(Long pacienteId) {
+        filtroEstado.activarFiltroEstado(true);
+        return resultadoRepository.findAllByHistorialClinico_Paciente_Id(pacienteId)
+                .stream()
+                .map(resultadoMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
 }

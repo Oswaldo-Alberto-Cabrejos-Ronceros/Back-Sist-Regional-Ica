@@ -1,6 +1,7 @@
 package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.request.RecepcionistaRequest;
+import com.clinicaregional.clinica.dto.request.RecepcionistaUpdateDTO;
 import com.clinicaregional.clinica.dto.response.MyInfoRecepcionista;
 import com.clinicaregional.clinica.dto.response.RecepcionistaResponse;
 import com.clinicaregional.clinica.service.RecepcionistaService;
@@ -11,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class RecepcionistaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<RecepcionistaResponse> actualizar(@PathVariable Long id,
-            @RequestBody RecepcionistaRequest recepcionistaRequest) {
+            @RequestBody RecepcionistaUpdateDTO recepcionistaRequest) {
         return ResponseEntity.ok(recepcionistaService.actualizar(id, recepcionistaRequest));
     }
 

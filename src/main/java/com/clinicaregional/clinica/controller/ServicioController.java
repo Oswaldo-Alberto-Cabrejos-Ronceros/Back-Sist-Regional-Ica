@@ -2,7 +2,6 @@ package com.clinicaregional.clinica.controller;
 
 import com.clinicaregional.clinica.dto.response.PagedResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.clinicaregional.clinica.service.ServicioService;
@@ -15,7 +14,6 @@ import com.clinicaregional.clinica.dto.response.ServicioResponse;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

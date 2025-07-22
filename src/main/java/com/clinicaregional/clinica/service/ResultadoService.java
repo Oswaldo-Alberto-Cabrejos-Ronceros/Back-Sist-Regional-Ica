@@ -16,4 +16,9 @@ public interface ResultadoService {
     ResultadoResponse actualizar(Long id, ResultadoRequest resultadoRequest);
 
     void eliminar(Long id);
+
+    List<ResultadoResponse> listarPorHistorialClinico(Long historialClinicoId);
+
+    List<ResultadoResponse> listarResultadosPorPacienteId(Long pacienteId);
+
 }

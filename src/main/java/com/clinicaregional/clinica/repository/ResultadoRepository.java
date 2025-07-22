@@ -17,4 +17,5 @@ public interface ResultadoRepository extends JpaRepository<Resultado, Long> {
 
     //obtener resultados de un paciente mediante su historial clinico
     List<Resultado> findAllByHistorialClinico_Paciente_Id(Long pacienteId);
+
 }

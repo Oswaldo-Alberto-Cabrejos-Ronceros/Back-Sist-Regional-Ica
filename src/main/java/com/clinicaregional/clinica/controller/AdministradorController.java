@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.clinicaregional.clinica.dto.response.AdmnistradorStatsResponse;
 
 import java.util.List;
 
@@ -55,5 +56,10 @@ public class AdministradorController {
     public ResponseEntity<AdministradorDTO> deleteAdministrador(@PathVariable Long id) {
         administradorService.deleteAdministrador(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/panel/stats")
+    public ResponseEntity<AdmnistradorStatsResponse> getStatsForPanel(){
+        return ResponseEntity.ok(administradorService.getStatsForPanel());
     }
 }

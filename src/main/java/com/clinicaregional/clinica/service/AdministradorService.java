@@ -2,6 +2,7 @@ package com.clinicaregional.clinica.service;
 
 import com.clinicaregional.clinica.dto.AdministradorDTO;
 import com.clinicaregional.clinica.dto.request.RegisterAdministradorRequest;
+import com.clinicaregional.clinica.dto.response.AdmnistradorStatsResponse;
 import com.clinicaregional.clinica.dto.response.MyInfoAdministrador;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface AdministradorService {
     AdministradorDTO updateAdministrador(Long id, AdministradorDTO administradorDTO);
 
     void deleteAdministrador(Long id);
+
+    AdmnistradorStatsResponse getStatsForPanel();
 }

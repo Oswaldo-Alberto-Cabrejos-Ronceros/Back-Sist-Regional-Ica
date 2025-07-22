@@ -66,5 +66,5 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     @Query("SELECT SUM(c.servicio.price) FROM Cita c WHERE MONTH(c.fecha) = :mes AND YEAR(c.fecha)= :year AND c.estadoCita = com.clinicaregional.clinica.enums.EstadoCita.ATENDIDA")
     Double sumarMontoServicioPorMes(@Param("mes") int mes, @Param("year") int year);
 
-    List<Cita> findAllByFecha(LocalDate fecha);
+    List<Cita> findAllByFechaAndEstadoCita(LocalDate fecha,EstadoCita estadoCita);
 }

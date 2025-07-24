@@ -43,15 +43,11 @@ public class UsuarioMapper {
     }
 
     public Usuario mapFromUsuarioRequestDTOToUsuario(UsuarioRequestDTO usuarioRequestDTO) {
-        // Codificar la contraseña aquí
-        String encodedPassword = usuarioRequestDTO.getPassword() != null
-                ? passwordEncoder.encode(usuarioRequestDTO.getPassword())
-                : null;
-
         return new Usuario(
                 null,
                 usuarioRequestDTO.getCorreo(),
-                encodedPassword, // Usar la contraseña codificada
+                usuarioRequestDTO.getPassword(),
                 usuarioRequestDTO.getRol() != null ? rolMapper.mapToRol(usuarioRequestDTO.getRol()) : null);
     }
+
 }

@@ -1,6 +1,5 @@
 package com.clinicaregional.clinica.service.impl;
 
-
 import com.clinicaregional.clinica.dto.PacienteConUserDTO;
 
 import com.clinicaregional.clinica.dto.request.RegisterRequest;
@@ -80,6 +79,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponseDTO authenticateUser(LoginRequestDTO loginRequestDTO) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequestDTO.getCorreo());
+        log.debug("Contraseña ingresada (plaintext): '{}'", loginRequestDTO.getPassword());
+        log.debug("Contraseña de la BD (hashed): '{}'", userDetails.getPassword());
+        log.debug("¿Coincide?: {}", passwordEncoder.matches(loginRequestDTO.getPassword(), userDetails.getPassword()));
 
         if (passwordEncoder.matches(loginRequestDTO.getPassword(), userDetails.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -90,8 +92,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             String jwtToken = jwtUtil.generateAccessToken(authentication);
             String refreshToken = jwtUtil.generateRefreshToken(authentication);
 
-            Usuario usuario = usuarioRepository.findByCorreo(userDetails.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+            Usuario usuario = usuarioRepository.findByCorreoAndEstadoIsTrue(userDetails.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado o inactivo"));
 
             return new AuthenticationResponseDTO(
                     usuario.getId(),
@@ -143,7 +145,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             // Obtener entidades relacionadas
             Rol rolPaciente = rolRepository.findByNombreAndEstadoTrue("PACIENTE")
                     .orElseThrow(() -> new ResourceNotFoundException("Rol PACIENTE no encontrado"));
-
 
             TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(request.getTipoDocumentoId())
                     .orElseThrow(() -> new ResourceNotFoundException("Tipo de documento no encontrado"));

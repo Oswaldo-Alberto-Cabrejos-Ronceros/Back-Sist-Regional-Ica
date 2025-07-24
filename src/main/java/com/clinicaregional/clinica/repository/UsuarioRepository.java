@@ -12,7 +12,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     List<Usuario> findByRol_Id(Long rolId);
 
     // para obtener usuario por correo
-    Optional<Usuario> findByCorreo(String correo);
+    Optional<Usuario> findByCorreoAndEstadoIsTrue(String correo);
 
     // si existe por correo
     boolean existsByCorreo(String correo);

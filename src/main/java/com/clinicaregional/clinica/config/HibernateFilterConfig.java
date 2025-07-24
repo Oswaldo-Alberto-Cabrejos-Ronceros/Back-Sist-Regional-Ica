@@ -12,3 +12,4 @@ public class HibernateFilterConfig {
         return new FiltroEstado() {}; // clase anónima porque FiltroEstado es abstract
     }
 }
+

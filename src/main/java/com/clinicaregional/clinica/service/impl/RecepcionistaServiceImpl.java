@@ -105,8 +105,8 @@ public class RecepcionistaServiceImpl implements RecepcionistaService {
 
                 UsuarioDTO usuarioDTO = usuarioService.guardar(newUsuario);
 
-                Usuario usuario = new Usuario();
-                usuario.setId(usuarioDTO.getId());
+                Usuario usuario = usuarioRepository.findById(usuarioDTO.getId())
+                                .orElseThrow(() -> new RuntimeException("Usuario recién creado no encontrado"));
 
                 TipoDocumento tipoDocumento = tipoDocumentoRepository
                                 .findByIdAndEstadoIsTrue(request.getTipoDocumentoId())

@@ -11,6 +11,7 @@ import com.clinicaregional.clinica.repository.*;
 import com.clinicaregional.clinica.service.UsuarioService;
 import com.clinicaregional.clinica.util.FiltroEstado;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +85,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         log.debug("Buscando usuario por correo: {}", correo);
 
         // Asegúrate de que esta consulta incluya la contraseña
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreoWithRol(correo);
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreoAndEstadoIsTrue(correo);
 
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();

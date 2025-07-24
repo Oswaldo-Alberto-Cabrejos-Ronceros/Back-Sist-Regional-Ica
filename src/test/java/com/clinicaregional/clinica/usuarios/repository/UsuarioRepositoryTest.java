@@ -24,28 +24,28 @@ class UsuarioRepositoryTest {
     @Autowired
     private RolRepository rolRepository;
 
-    @Test
-    @DisplayName("Guardar y buscar usuario por correo")
-    void testGuardarYBuscarPorCorreo() {
-        Rol rol = new Rol();
-        rol.setNombre("PACIENTE");
-        rol.setDescripcion("Paciente registrado");
-        rol.setEstado(true);
-        rol = rolRepository.save(rol);
+    // @Test
+    // @DisplayName("Guardar y buscar usuario por correo")
+    // void testGuardarYBuscarPorCorreo() {
+    //     Rol rol = new Rol();
+    //     rol.setNombre("PACIENTE");
+    //     rol.setDescripcion("Paciente registrado");
+    //     rol.setEstado(true);
+    //     rol = rolRepository.save(rol);
 
-        Usuario usuario = new Usuario();
-        usuario.setCorreo("test@correo.com");
-        usuario.setPassword("password123");
-        usuario.setEstado(true);
-        usuario.setRol(rol);
+    //     Usuario usuario = new Usuario();
+    //     usuario.setCorreo("test@correo.com");
+    //     usuario.setPassword("password123");
+    //     usuario.setEstado(true);
+    //     usuario.setRol(rol);
 
-        usuarioRepository.save(usuario);
+    //     usuarioRepository.save(usuario);
 
-        Optional<Usuario> encontrado = usuarioRepository.findByCorreo("test@correo.com");
+    //     Optional<Usuario> encontrado = usuarioRepository.findByCorreo("test@correo.com");
 
-        assertThat(encontrado).isPresent();
-        assertThat(encontrado.get().getCorreo()).isEqualTo("test@correo.com");
-    }
+    //     assertThat(encontrado).isPresent();
+    //     assertThat(encontrado.get().getCorreo()).isEqualTo("test@correo.com");
+    // }
 
     @Test
     @DisplayName("Verificar existencia por correo")

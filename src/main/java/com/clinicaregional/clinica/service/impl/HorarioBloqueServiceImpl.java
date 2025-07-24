@@ -45,10 +45,14 @@ public class HorarioBloqueServiceImpl implements HorarioBloqueService {
     @Transactional(readOnly = true)
     @Override
     public List<HorarioBloqueResponse> listarPorDisponibilidad(Long disponibilidadId) {
+        Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(disponibilidadId)
+                .orElseThrow(() -> new ResourceNotFoundException("La disponibilidad no existe o ya fue eliminada."));
+
         LocalDate hoy = LocalDate.now();
+
         return horarioBloqueRepository.findByDisponibilidadIdAndFechaGreaterThanEqual(disponibilidadId, hoy)
                 .stream()
-                .filter(b -> !b.getFecha().isEqual(hoy) || b.getHoraFin().isAfter(LocalTime.now())) 
+                .filter(b -> !b.getFecha().isEqual(hoy) || b.getHoraFin().isAfter(LocalTime.now()))
                 .map(horarioBloqueMapper::mapToHorarioBloqueResponse)
                 .collect(Collectors.toList());
     }

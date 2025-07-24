@@ -5,6 +5,7 @@ import com.clinicaregional.clinica.dto.response.DisponibilidadResponse;
 import com.clinicaregional.clinica.entity.Disponibilidad;
 import com.clinicaregional.clinica.entity.HorarioBloque;
 import com.clinicaregional.clinica.entity.Medico;
+import com.clinicaregional.clinica.enums.EstadoBloque;
 import com.clinicaregional.clinica.exception.ResourceNotFoundException;
 import com.clinicaregional.clinica.mapper.DisponibilidadMapper;
 import com.clinicaregional.clinica.repository.DisponibilidadRepository;
@@ -51,6 +52,15 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
                                 request.getHoraFin())) {
                         throw new IllegalArgumentException(
                                         "Ya existe una disponibilidad para ese médico en el mismo horario y día.");
+                }
+
+                if (!disponibilidadRepository.findInterpuestas(
+                                request.getMedicoId(),
+                                request.getDiaSemana(),
+                                request.getHoraInicio(),
+                                request.getHoraFin()).isEmpty()) {
+                        throw new IllegalArgumentException(
+                                        "Ya existe una disponibilidad que se solapa en ese horario.");
                 }
 
                 Disponibilidad disponibilidad = disponibilidadMapper.toEntity(request);
@@ -131,17 +141,20 @@ public class DisponibilidadServiceImpl implements DisponibilidadService {
         }
 
         @Transactional
-        @Override
-        public void eliminar(Long id) {
-                filtroEstado.activarFiltroEstado(true);
-                Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(id)
+        public void eliminar(Long disponibilidadId) {
+                Disponibilidad disponibilidad = disponibilidadRepository.findByIdAndEstadoIsTrue(disponibilidadId)
                                 .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Disponibilidad no encontrada con ID: " + id));
+                                                "No existe la disponibilidad activa con ID: " + disponibilidadId));
 
-                // Desactivar también los bloques asociados
-                if (disponibilidad.getBloques() != null) {
-                        disponibilidad.getBloques().forEach(b -> b.setEstado(false));
+                List<HorarioBloque> bloques = horarioBloqueRepository.findByDisponibilidadId(disponibilidadId);
+
+                for (HorarioBloque bloque : bloques) {
+                        if (bloque.getEstadoBloque() == EstadoBloque.DISPONIBLE) {
+                                bloque.setEstadoBloque(EstadoBloque.EXPIRADO);
+                        }
                 }
+
+                horarioBloqueRepository.saveAll(bloques);
 
                 disponibilidad.setEstado(false);
                 disponibilidadRepository.save(disponibilidad);
